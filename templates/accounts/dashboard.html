@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dashboard</title>
+</head>
+<body style="font-family: Arial, sans-serif; padding: 1.5rem;">
+  <h1>Welcome, {{ user.get_full_name|default:user.username }}</h1>
+  <p>ID: {{ user.login_id }}<br>Role: {{ user.get_role_display }}</p>
+  <form method="post" action="{% url 'accounts:logout' %}">
+    {% csrf_token %}
+    <button type="submit">Log out</button>
+  </form>
+</body>
+</html>

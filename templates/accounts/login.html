@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Hospital Portal Login</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f2f6fa; display: flex;
+           justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+    .card { background: #fff; padding: 2rem; border-radius: 8px; width: 100%;
+            max-width: 360px; box-shadow: 0 2px 10px rgba(0,0,0,.1); }
+    h1 { margin-top: 0; font-size: 1.4rem; }
+    input { width: 100%; padding: .6rem; margin: .3rem 0 1rem; box-sizing: border-box; }
+    button { width: 100%; padding: .7rem; background: #0b6e99; color: #fff;
+             border: 0; border-radius: 4px; cursor: pointer; }
+    .error { color: #b00020; font-size: .9rem; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Hospital Portal</h1>
+    <form method="post">
+      {% csrf_token %}
+      {% if form.non_field_errors %}
+        <p class="error">{{ form.non_field_errors.0 }}</p>
+      {% endif %}
+      <label for="{{ form.username.id_for_label }}">{{ form.username.label }}</label>
+      {{ form.username }}
+      <label for="{{ form.password.id_for_label }}">Password</label>
+      {{ form.password }}
+      <input type="hidden" name="next" value="{{ next }}">
+      <button type="submit">Log in</button>
+    </form>
+  </div>
+</body>
+</html>
