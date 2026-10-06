@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Facilities{% endblock %}
+{% block content %}
+  <div class="bar">
+    <h1>Facilities</h1>
+    <span>
+      <a class="btn" href="{% url 'facilities:building_create' %}">New building</a>
+      <a class="btn" href="{% url 'facilities:ward_create' %}">New ward</a>
+    </span>
+  </div>
+
+  {% for building in buildings %}
+    <div class="card">
+      <div class="bar">
+        <h2>{{ building.name }}</h2>
+        <a href="{% url 'facilities:building_update' building.pk %}">Edit building</a>
+      </div>
+      {% if building.description %}<p class="muted">{{ building.description }}</p>{% endif %}
+      <div class="wrap">
+        <table>
+          <thead>
+            <tr><th>Ward</th><th>Type</th><th>Floor</th><th>Department</th><th>Beds</th><th>Occupied</th><th>Free</th></tr>
+          </thead>
+          <tbody>
+            {% for ward in building.wards.all %}
+              <tr>
+                <td><a href="{% url 'facilities:ward_detail' ward.pk %}">{{ ward.name }}</a></td>
+                <td>{{ ward.get_ward_type_display }}</td>
+                <td>{{ ward.floor|default:"-" }}</td>
+                <td>{{ ward.department|default:"Shared" }}</td>
+                <td>{{ ward.total_beds }}</td>
+                <td>{{ ward.occupied_beds }}</td>
+                <td>{{ ward.free_beds }}</td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="7" class="muted">No wards in this building yet.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  {% empty %}
+    <p class="muted">No buildings yet. Start by adding one.</p>
+  {% endfor %}
+{% endblock %}

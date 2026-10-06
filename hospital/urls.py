@@ -8,6 +8,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("accounts/", include("accounts.urls")),
     path("departments/", include("departments.urls")),
+    path("facilities/", include("facilities.urls")),
     # Temporary: send the home page to login until the public website app is built
     path("", RedirectView.as_view(pattern_name="accounts:login", permanent=False)),
 ]

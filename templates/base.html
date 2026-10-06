@@ -30,6 +30,9 @@
   <nav>
     <a href="{% url 'accounts:dashboard' %}">Dashboard</a>
     <a href="{% url 'departments:list' %}">Departments</a>
+    {% if user.role == "main_admin" or user.role == "sub_admin" %}
+      <a href="{% url 'facilities:overview' %}">Facilities</a>
+    {% endif %}
     <form method="post" action="{% url 'accounts:logout' %}">
       {% csrf_token %}
       <button type="submit">Log out</button>

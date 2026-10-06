@@ -1,3 +1,61 @@
 from django.contrib import admin
+from django.db.models import Count, Q
 
-# Register your models here.
+from .models import Bed, Building, Ward
+
+
+class BedInline(admin.TabularInline):
+    model = Bed
+    extra = 0
+
+
+@admin.register(Building)
+class BuildingAdmin(admin.ModelAdmin):
+    list_display = ("name", "ward_count")
+    search_fields = ("name", "description")
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).annotate(_ward_count=Count("wards"))
+
+    @admin.display(description="Wards", ordering="_ward_count")
+    def ward_count(self, obj):
+        return obj._ward_count
+
+
+@admin.register(Ward)
+class WardAdmin(admin.ModelAdmin):
+    list_display = (
+        "name",
+        "building",
+        "ward_type",
+        "floor",
+        "department",
+        "total_beds",
+        "occupied_beds",
+    )
+    list_filter = ("ward_type", "building", "department")
+    search_fields = ("name", "building__name")
+    list_select_related = ("building", "department")
+    inlines = [BedInline]
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).annotate(
+            _total=Count("beds"),
+            _occupied=Count("beds", filter=Q(beds__is_occupied=True)),
+        )
+
+    @admin.display(description="Beds", ordering="_total")
+    def total_beds(self, obj):
+        return obj._total
+
+    @admin.display(description="Occupied", ordering="_occupied")
+    def occupied_beds(self, obj):
+        return obj._occupied
+
+
+@admin.register(Bed)
+class BedAdmin(admin.ModelAdmin):
+    list_display = ("ward", "number", "is_occupied")
+    list_filter = ("is_occupied", "ward__building", "ward")
+    search_fields = ("number", "ward__name", "ward__building__name")
+    list_select_related = ("ward", "ward__building")
