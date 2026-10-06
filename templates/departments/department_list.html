@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Departments{% endblock %}
+{% block content %}
+  <div class="bar">
+    <h1>Departments</h1>
+    {% if can_manage %}
+      <span>
+        <a class="btn" href="{% url 'departments:create' %}">New department</a>
+        <a class="btn" href="{% url 'departments:staff_create' %}">Add staff profile</a>
+      </span>
+    {% endif %}
+  </div>
+  <div class="wrap">
+    <table>
+      <thead>
+        <tr><th>Name</th><th>Head</th><th>Staff</th><th>Type</th><th>Status</th></tr>
+      </thead>
+      <tbody>
+        {% for department in departments %}
+          <tr>
+            <td><a href="{% url 'departments:detail' department.pk %}">{{ department.name }}</a></td>
+            <td>{{ department.head|default:"-" }}</td>
+            <td>{{ department.staff_count }}</td>
+            <td>{% if department.is_general %}General{% else %}Specialty{% endif %}</td>
+            <td>{% if department.is_active %}Active{% else %}Inactive{% endif %}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="5" class="muted">No departments to show.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}

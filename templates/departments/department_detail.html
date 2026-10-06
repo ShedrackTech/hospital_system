@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}{{ department.name }}{% endblock %}
+{% block content %}
+  <div class="bar">
+    <h1>{{ department.name }}</h1>
+    {% if can_manage %}
+      <a class="btn" href="{% url 'departments:update' department.pk %}">Edit department</a>
+    {% endif %}
+  </div>
+
+  <div class="card">
+    <p>{{ department.description|default:"No description." }}</p>
+    <p><strong>Head:</strong> {{ department.head|default:"Not assigned" }}</p>
+    <p><strong>Type:</strong> {% if department.is_general %}General (triage){% else %}Specialty{% endif %}
+       &middot; {% if department.is_active %}Active{% else %}Inactive{% endif %}</p>
+  </div>
+
+  <div class="bar">
+    <h2>Staff</h2>
+    {% if can_manage %}
+      <a class="btn" href="{% url 'departments:staff_create' %}">Add staff profile</a>
+    {% endif %}
+  </div>
+  <div class="wrap">
+    <table>
+      <thead>
+        <tr><th>ID</th><th>Name</th><th>Job title</th><th>Category</th><th>Grade</th>{% if can_manage %}<th></th>{% endif %}</tr>
+      </thead>
+      <tbody>
+        {% for profile in staff_profiles %}
+          <tr>
+            <td>{{ profile.user.login_id }}</td>
+            <td>{{ profile.user.get_full_name|default:profile.user.username }}</td>
+            <td>{{ profile.job_title }}</td>
+            <td>{{ profile.get_category_display }}</td>
+            <td>{{ profile.get_grade_display }}</td>
+            {% if can_manage %}<td><a href="{% url 'departments:staff_update' profile.pk %}">Edit</a></td>{% endif %}
+          </tr>
+        {% empty %}
+          <tr><td colspan="6" class="muted">No staff in this department yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <p><a href="{% url 'departments:list' %}">&larr; All departments</a></p>
+{% endblock %}

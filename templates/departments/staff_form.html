@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}{% if object %}Edit staff profile{% else %}Add staff profile{% endif %}{% endblock %}
+{% block content %}
+  <h1>{% if object %}Edit staff profile{% else %}Add staff profile{% endif %}</h1>
+  <div class="card">
+    <form method="post">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <button class="btn" type="submit">Save</button>
+      <a href="{% url 'departments:list' %}">Cancel</a>
+    </form>
+  </div>
+{% endblock %}
