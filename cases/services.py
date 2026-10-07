@@ -52,8 +52,8 @@ def assign_case(case, assignee, actor, note=""):
         User = get_user_model()
         valid = User.objects.filter(
             pk=assignee.pk, is_active=True,
-            staffprofile__category="medical",
-            staffprofile__department=case.department,
+            staff_profile__category="medical",
+            staff_profile__department=case.department,
         ).exists()
         if not valid:
             raise ValidationError("Assignee must be active medical staff in this department.")

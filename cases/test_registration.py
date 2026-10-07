@@ -1,4 +1,4 @@
-from django.test import TestCase
+from django.test import TestCase, override_settings
 
 from departments.models import Department
 from patients.forms import PatientRegistrationForm
@@ -6,6 +6,7 @@ from patients.models import Patient
 from .models import Case
 
 
+@override_settings(PASSWORD_HASHERS=["django.contrib.auth.hashers.MD5PasswordHasher"])
 class RegistrationCreatesCaseTests(TestCase):
     def data(self, **extra):
         d = {

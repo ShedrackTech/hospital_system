@@ -7,7 +7,7 @@ from .models import Case
 
 
 def _profile(user):
-    return getattr(user, "staffprofile", None)
+    return getattr(user, "staff_profile", None)
 
 
 def is_admin(user):

@@ -30,8 +30,8 @@ class AssignForm(forms.Form):
         User = get_user_model()
         self.fields["assignee"].queryset = User.objects.filter(
             is_active=True,
-            staffprofile__category="medical",
-            staffprofile__department=case.department,
+            staff_profile__category="medical",
+            staff_profile__department=case.department,
         ).order_by("first_name", "username")
         self.fields["assignee"].label_from_instance = (
             lambda u: u.get_full_name() or u.username

@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Case #{{ case.pk }}</h1>
+{% for m in messages %}<p>{{ m }}</p>{% endfor %}
+<p><strong>Status:</strong> {{ case.get_status_display }}</p>
+<p><strong>Patient:</strong> {{ case.patient }}</p>
+<p><strong>Department:</strong> {{ case.department|default:"Not yet routed" }}</p>
+<p><strong>Assigned to:</strong> {{ case.assigned_to|default:"-" }}</p>
+<h3>Complaint</h3>
+<p>{{ case.complaint|linebreaksbr }}</p>
+
+{% if route_form %}
+<h3>Route to department</h3>
+<form method="post" action="{% url 'cases:route' case.pk %}">
+  {% csrf_token %}{{ route_form.as_p }}
+  <button type="submit">Route</button>
+</form>
+{% endif %}
+
+{% if assign_form %}
+<h3>Assign staff</h3>
+<form method="post" action="{% url 'cases:assign' case.pk %}">
+  {% csrf_token %}{{ assign_form.as_p }}
+  <button type="submit">Assign</button>
+</form>
+{% endif %}
+
+{% if status_form %}
+<h3>Update status</h3>
+<form method="post" action="{% url 'cases:status' case.pk %}">
+  {% csrf_token %}{{ status_form.as_p }}
+  <button type="submit">Update</button>
+</form>
+{% endif %}
+
+<h3>History</h3>
+<ul>
+  {% for e in events %}
+  <li>{{ e.created_at|date:"d M Y H:i" }} - {{ e.get_action_display }}
+      ({{ e.actor|default:"system" }}){% if e.note %}: {{ e.note }}{% endif %}</li>
+  {% endfor %}
+</ul>
+<p><a href="{% url 'cases:home' %}">Back</a></p>
+{% endblock %}

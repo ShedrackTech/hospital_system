@@ -12,6 +12,7 @@ urlpatterns = [
     path("patients/", include("patients.urls")),
     # Temporary: send the home page to login until the public website app is built
     path("", RedirectView.as_view(pattern_name="accounts:login", permanent=False)),
+    path("cases/", include("cases.urls")),
 ]
 
 if settings.DEBUG:

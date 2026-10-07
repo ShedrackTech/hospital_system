@@ -27,6 +27,7 @@ def registration_data(**overrides):
         "date_of_birth": "1990-05-01",
         "gender": "female",
         "address": "Nsukka",
+        "complaint": "Headache",
         "blood_group": "",
         "emergency_contact_name": "",
         "emergency_contact_phone": "",
