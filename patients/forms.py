@@ -8,6 +8,8 @@ from django.forms import BaseModelFormSet, modelformset_factory
 from django.utils import timezone
 
 from accounts.models import User
+from cases.services import create_case
+from departments.models import Department
 
 from .cards import issue_card
 from .models import CardType, Family, Patient
@@ -48,6 +50,21 @@ class PatientRegistrationForm(forms.Form):
     emergency_contact_phone = forms.CharField(
         max_length=20, required=False, validators=[phone_validator]
     )
+    # Opens a Pending case when filled in. Required on the public form,
+    # optional at the front desk (e.g. when only issuing a card).
+    complaint = forms.CharField(
+        label="What is the problem?",
+        widget=forms.Textarea(attrs={"rows": 3}),
+        required=False,
+        help_text="Describe the sickness or problem you came for.",
+    )
+    department = forms.ModelChoiceField(
+        label="Department (optional)",
+        queryset=Department.objects.filter(is_general=False).order_by("name"),
+        required=False,
+        empty_label="Not sure (the hospital will decide)",
+        help_text="Choose one only if you already know, e.g. Physiotherapy.",
+    )
     password1 = forms.CharField(label="Password", widget=forms.PasswordInput)
     password2 = forms.CharField(label="Confirm password", widget=forms.PasswordInput)
 
@@ -79,6 +96,8 @@ class PatientRegistrationForm(forms.Form):
                     validate_password(password1)
                 except forms.ValidationError as error:
                     self.add_error("password1", error)
+        if cleaned.get("department") and not (cleaned.get("complaint") or "").strip():
+            self.add_error("complaint", "Describe the problem if you choose a department.")
         return cleaned
 
     @transaction.atomic
@@ -96,7 +115,7 @@ class PatientRegistrationForm(forms.Form):
         user.set_password(data["password1"])
         user.save()  # also generates the card number (login_id)
 
-        return Patient.objects.create(
+        patient = Patient.objects.create(
             user=user,
             date_of_birth=data["date_of_birth"],
             gender=data["gender"],
@@ -105,6 +124,15 @@ class PatientRegistrationForm(forms.Form):
             emergency_contact_name=data["emergency_contact_name"],
             emergency_contact_phone=data["emergency_contact_phone"],
         )
+
+        complaint = (data.get("complaint") or "").strip()
+        if complaint:
+            # Front desk staff are recorded as the actor; self-registering patients are not staff
+            actor = getattr(self, "registered_by", None) or user
+            self.case = create_case(
+                patient, complaint, data.get("department"), actor=actor
+            )
+        return patient
 
 
 class PublicRegistrationForm(PatientRegistrationForm):
@@ -123,6 +151,7 @@ class PublicRegistrationForm(PatientRegistrationForm):
     def __init__(self, *args, request, **kwargs):
         super().__init__(*args, **kwargs)
         self.request = request
+        self.fields["complaint"].required = True
         if self.is_bound:
             # The answer can only be used once
             self._expected_answer = request.session.pop(CAPTCHA_SESSION_KEY, None)
