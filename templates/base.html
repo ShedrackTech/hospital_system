@@ -29,8 +29,15 @@
 <body>
   <nav>
     <a href="{% url 'accounts:dashboard' %}">Dashboard</a>
-    <a href="{% url 'departments:list' %}">Departments</a>
+    {% if user.role == "patient" %}
+      <a href="{% url 'patients:my_profile' %}">My profile</a>
+    {% else %}
+      <a href="{% url 'departments:list' %}">Departments</a>
+      <a href="{% url 'patients:staff_register' %}">Register patient</a>
+    {% endif %}
     {% if user.role == "main_admin" or user.role == "sub_admin" %}
+      <a href="{% url 'patients:list' %}">Patients</a>
+      <a href="{% url 'patients:family_list' %}">Families</a>
       <a href="{% url 'facilities:overview' %}">Facilities</a>
     {% endif %}
     <form method="post" action="{% url 'accounts:logout' %}">

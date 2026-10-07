@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Card desk{% endblock %}
+{% block content %}
+  <div class="bar">
+    <h1>Card desk</h1>
+    {% if is_admin %}<a class="btn" href="{% url 'patients:card_prices' %}">Card prices</a>{% endif %}
+  </div>
+  <p class="muted">Find a patient or a family card by its number (PAT000001 or FAM000001), then issue or renew the card.</p>
+
+  <form method="get" style="margin-top:1rem;">
+    <input type="text" name="number" value="{{ number }}" placeholder="Card number, e.g. PAT000001 or FAM000001"
+           style="width:100%;padding:.55rem;box-sizing:border-box;">
+  </form>
+
+  {% if searched and not holder %}
+    <div class="card"><p>No patient or family card found for <strong>{{ number }}</strong>.</p></div>
+  {% endif %}
+
+  {% if holder %}
+    <div class="card">
+      {% if family %}
+        <h2>{{ family.name }} &middot; {{ family.family_number }}</h2>
+        <p>Family card covering {{ family.members.count }} member(s).</p>
+        {% if patient %}<p>{{ patient.user.get_full_name }} ({{ patient.card_number }}) is covered by this family card.</p>{% endif %}
+      {% else %}
+        <h2>{{ patient.user.get_full_name }} &middot; {{ patient.card_number }}</h2>
+        <p>Single card. It covers only this patient.</p>
+      {% endif %}
+
+      <p><strong>Status:</strong>
+        {% if status == "valid" %}Valid until {{ expires_on|date:"d M Y" }}
+        {% elif status == "expired" %}<strong style="color:#b00020;">EXPIRED on {{ expires_on|date:"d M Y" }}</strong>
+        {% else %}<strong style="color:#b00020;">Not active</strong>{% endif %}
+      </p>
+
+      <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="number" value="{{ number }}">
+        <input type="hidden" name="action" value="renew">
+        <p>{% if status == "none" %}Issue{% else %}Renew{% endif %} the {{ card_type.name|lower }}:
+           <strong>&#8358;{{ card_type.fee|floatformat:2 }}</strong> for {{ card_type.validity_months }} months,
+           valid until <strong>{{ new_expiry|date:"d M Y" }}</strong>.</p>
+        {% if card_type.fee > 0 %}
+          <p><label><input type="checkbox" name="fee_received"> I have received the card fee</label></p>
+        {% endif %}
+        <button class="btn" type="submit">{% if status == "none" %}Issue card{% else %}Renew card{% endif %}</button>
+      </form>
+    </div>
+
+    {% if family_type %}
+      <div class="card">
+        <h2>Move to a family card</h2>
+        <p>A family card covers every family member. The patient becomes the head of a new family:
+           <strong>&#8358;{{ family_type.fee|floatformat:2 }}</strong> for {{ family_type.validity_months }} months,
+           valid until <strong>{{ upgrade_expiry|date:"d M Y" }}</strong>.</p>
+        <form method="post">
+          {% csrf_token %}
+          <input type="hidden" name="number" value="{{ number }}">
+          <input type="hidden" name="action" value="upgrade">
+          {% if family_type.fee > 0 %}
+            <p><label><input type="checkbox" name="fee_received"> I have received the card fee</label></p>
+          {% endif %}
+          <button class="btn" type="submit">Issue family card</button>
+        </form>
+      </div>
+    {% endif %}
+  {% endif %}
+{% endblock %}

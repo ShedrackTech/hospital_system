@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Families{% endblock %}
+{% block content %}
+  <div class="bar">
+    <h1>Family cards</h1>
+    <a class="btn" href="{% url 'patients:staff_register' %}">Register patient</a>
+  </div>
+  <form method="get" style="margin-top:1rem;">
+    <input type="text" name="q" value="{{ query }}" placeholder="Search family number, family name, member name or card number"
+           style="width:100%;padding:.55rem;box-sizing:border-box;">
+  </form>
+  <div class="wrap">
+    <table>
+      <thead><tr><th>Family card</th><th>Name</th><th>Members</th><th>Address</th></tr></thead>
+      <tbody>
+        {% for family in families %}
+          <tr>
+            <td><a href="{% url 'patients:family_detail' family.pk %}">{{ family.family_number }}</a></td>
+            <td>{{ family.name }}</td>
+            <td>{{ family.member_count }}</td>
+            <td>{{ family.address|default:"-" }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="4" class="muted">No family cards found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% if is_paginated %}
+    <p>
+      {% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query|urlencode }}{% endif %}">&larr; Previous</a>{% endif %}
+      Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+      {% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query|urlencode }}{% endif %}">Next &rarr;</a>{% endif %}
+    </p>
+  {% endif %}
+{% endblock %}

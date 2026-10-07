@@ -1,0 +1,8 @@
+{% extends "patients/public_base.html" %}
+{% block title %}Too many attempts{% endblock %}
+{% block content %}
+  <h1>Too many attempts</h1>
+  <p>Too many registration attempts were made from your network.
+     Please wait a while and try again, or register at the hospital front desk.</p>
+  <p><a href="{% url 'accounts:login' %}">Back to login</a></p>
+{% endblock %}

@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}{{ patient.user.get_full_name }}{% endblock %}
+{% block content %}
+  <h1>{{ patient.user.get_full_name }}</h1>
+  {% include "patients/_record.html" %}
+  {% if patient.family %}
+    <p><a href="{% url 'patients:family_detail' patient.family.pk %}">View family card {{ patient.family.family_number }}</a></p>
+  {% endif %}
+  <p><a href="{% url 'patients:list' %}">&larr; All patients</a></p>
+{% endblock %}

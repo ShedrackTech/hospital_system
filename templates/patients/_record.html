@@ -1,0 +1,50 @@
+<div class="card">
+  <p><strong>Card number:</strong> {{ patient.card_number }}</p>
+  <p><strong>Name:</strong> {{ patient.user.get_full_name }}</p>
+  <p><strong>Gender:</strong> {{ patient.get_gender_display }} &middot;
+     <strong>Age:</strong> {{ patient.age }} &middot;
+     <strong>Born:</strong> {{ patient.date_of_birth }}</p>
+  <p><strong>Phone:</strong> {{ patient.user.phone }}
+     {% if patient.user.email %}&middot; <strong>Email:</strong> {{ patient.user.email }}{% endif %}</p>
+  <p><strong>Address:</strong> {{ patient.address|default:"-" }}</p>
+  <p><strong>Blood group:</strong> {{ patient.blood_group|default:"Not recorded" }}</p>
+  <p><strong>Emergency contact:</strong>
+     {% if patient.emergency_contact_name %}{{ patient.emergency_contact_name }} ({{ patient.emergency_contact_phone|default:"no phone" }}){% else %}Not recorded{% endif %}</p>
+  <p><strong>Family card:</strong>
+     {% if patient.family %}{{ patient.family.family_number }}{% if patient.relationship %} ({{ patient.get_relationship_display }}){% endif %}{% else %}None{% endif %}</p>
+  <p><strong>Hospital card:</strong>
+     {% if patient.family %}Family card{% else %}Single card{% endif %} &middot;
+     {% with status=patient.card_status %}
+       {% if status == "valid" %}Valid until {{ patient.card_expires_on|date:"d M Y" }}
+       {% elif status == "expired" %}<strong style="color:#b00020;">EXPIRED on {{ patient.card_expires_on|date:"d M Y" }}</strong>
+       {% else %}<strong style="color:#b00020;">Not active</strong>{% endif %}
+     {% endwith %}</p>
+</div>
+
+<h2>Allergies</h2>
+<div class="wrap">
+  <table>
+    <thead><tr><th>Allergy</th><th>Reaction</th><th>Severity</th></tr></thead>
+    <tbody>
+      {% for allergy in patient.allergies.all %}
+        <tr><td>{{ allergy.name }}</td><td>{{ allergy.reaction|default:"-" }}</td><td>{{ allergy.get_severity_display }}</td></tr>
+      {% empty %}
+        <tr><td colspan="3" class="muted">None recorded.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<h2>Medical history</h2>
+<div class="wrap">
+  <table>
+    <thead><tr><th>Condition</th><th>Diagnosed</th><th>Notes</th></tr></thead>
+    <tbody>
+      {% for item in patient.history.all %}
+        <tr><td>{{ item.condition }}</td><td>{{ item.date_diagnosed|default:"-" }}</td><td>{{ item.notes|default:"-" }}</td></tr>
+      {% empty %}
+        <tr><td colspan="3" class="muted">None recorded.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>

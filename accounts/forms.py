@@ -30,8 +30,8 @@ class CustomUserChangeForm(UserChangeForm):
 
 class LoginForm(AuthenticationForm):
     username = forms.CharField(
-        label="Card number / Staff ID",
+        label="Username, card number or staff ID",
         widget=forms.TextInput(
-            attrs={"autofocus": True, "placeholder": "e.g. PAT000001 or STF000001"}
+            attrs={"autofocus": True, "placeholder": "e.g. ada, PAT000001 or STF000001"}
         ),
     )

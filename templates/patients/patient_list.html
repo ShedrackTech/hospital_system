@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Patients{% endblock %}
+{% block content %}
+  <div class="bar">
+    <h1>Patients</h1>
+    <a class="btn" href="{% url 'patients:staff_register' %}">Register patient</a>
+  </div>
+  <form method="get" style="margin-top:1rem;">
+    <input type="text" name="q" value="{{ query }}" placeholder="Search card number, name, phone or family number"
+           style="width:100%;padding:.55rem;box-sizing:border-box;">
+  </form>
+  <div class="wrap">
+    <table>
+      <thead><tr><th>Card number</th><th>Name</th><th>Gender</th><th>Age</th><th>Phone</th><th>Family</th></tr></thead>
+      <tbody>
+        {% for patient in patients %}
+          <tr>
+            <td><a href="{% url 'patients:detail' patient.pk %}">{{ patient.card_number }}</a></td>
+            <td>{{ patient.user.get_full_name }}</td>
+            <td>{{ patient.get_gender_display }}</td>
+            <td>{{ patient.age }}</td>
+            <td>{{ patient.user.phone }}</td>
+            <td>{{ patient.family.family_number|default:"-" }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="6" class="muted">No patients found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% if is_paginated %}
+    <p>
+      {% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query|urlencode }}{% endif %}">&larr; Previous</a>{% endif %}
+      Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+      {% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query|urlencode }}{% endif %}">Next &rarr;</a>{% endif %}
+    </p>
+  {% endif %}
+{% endblock %}

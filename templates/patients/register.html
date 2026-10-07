@@ -1,0 +1,12 @@
+{% extends "patients/public_base.html" %}
+{% block title %}Patient registration{% endblock %}
+{% block content %}
+  <h1>Patient registration</h1>
+  <form method="post">
+    {% csrf_token %}
+    {% include "patients/_form_errors.html" %}
+    {{ form.as_p }}
+    <button type="submit">Register</button>
+  </form>
+  <p>Already registered? <a href="{% url 'accounts:login' %}">Log in</a></p>
+{% endblock %}

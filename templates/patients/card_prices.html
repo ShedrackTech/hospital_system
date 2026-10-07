@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Card prices{% endblock %}
+{% block content %}
+  <h1>Card prices</h1>
+  <p class="muted">The fee is charged each time a card is issued or renewed. The family card must cost at least as much as the single card.</p>
+  <form method="post">
+    {% csrf_token %}
+    {{ formset.management_form }}
+    {% if formset.non_form_errors %}
+      <div role="alert" style="background:#fdecea;border-left:4px solid #b00020;padding:.8rem 1rem;border-radius:4px;margin-bottom:1rem;">
+        {% for error in formset.non_form_errors %}<div>{{ error }}</div>{% endfor %}
+      </div>
+    {% endif %}
+    {% for form in formset %}
+      <div class="card">
+        <h2>{{ form.instance.name }}</h2>
+        {{ form.as_p }}
+      </div>
+    {% endfor %}
+    <p><button class="btn" type="submit">Save prices</button>
+       <a href="{% url 'patients:card_desk' %}">Back to the card desk</a></p>
+  </form>
+{% endblock %}

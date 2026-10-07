@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}{{ family.name }}{% endblock %}
+{% block content %}
+  <div class="bar">
+    <h1>{{ family.name }}</h1>
+    <a class="btn" href="{% url 'patients:staff_register' %}?family={{ family.family_number|urlencode }}">Add family member</a>
+  </div>
+  <div class="card">
+    <p><strong>Family card:</strong> {{ family.family_number }}</p>
+    <p><strong>Address:</strong> {{ family.address|default:"-" }}</p>
+    <p><strong>Card:</strong>
+       {% with status=family.card_status %}
+         {% if status == "valid" %}Valid until {{ family.card_expires_on|date:"d M Y" }}
+         {% elif status == "expired" %}<strong style="color:#b00020;">EXPIRED on {{ family.card_expires_on|date:"d M Y" }}</strong>
+         {% else %}<strong style="color:#b00020;">Not active</strong>{% endif %}
+       {% endwith %}
+       &middot; <a href="{% url 'patients:card_desk' %}?number={{ family.family_number|urlencode }}">Renew at the card desk</a></p>
+    <p class="muted">The family card covers every member and only groups them. Each member has their own card number, login and private record.</p>
+  </div>
+
+  <h2>Members</h2>
+  <div class="wrap">
+    <table>
+      <thead><tr><th>Card number</th><th>Name</th><th>Relationship</th><th>Age</th></tr></thead>
+      <tbody>
+        {% for member in members %}
+          <tr>
+            <td><a href="{% url 'patients:detail' member.pk %}">{{ member.card_number }}</a></td>
+            <td>{{ member.user.get_full_name }}</td>
+            <td>{{ member.get_relationship_display|default:"-" }}</td>
+            <td>{{ member.age }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="4" class="muted">No members yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <p><a href="{% url 'patients:family_list' %}">&larr; All family cards</a></p>
+{% endblock %}

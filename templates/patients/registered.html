@@ -1,0 +1,50 @@
+{% extends base_template %}
+{% block title %}Registration successful{% endblock %}
+{% block content %}
+  {% if staff_view %}<div class="card">{% endif %}
+
+  <div style="background:#e6f4ea;border-left:4px solid #2e7d32;padding:.8rem 1rem;border-radius:4px;margin-bottom:1rem;">
+    {% if staff_view %}
+      <strong>Patient registered successfully.</strong>
+    {% else %}
+      <strong>Registration successful. Welcome, {{ patient_name }}.</strong>
+    {% endif %}
+  </div>
+
+  {% if staff_view %}
+    <p><strong>{{ patient_name }}</strong> can log in with either of these and the password you set:</p>
+  {% else %}
+    <p>You can log in with either of these and your password:</p>
+  {% endif %}
+
+  <p><strong>Username:</strong> {{ username }}</p>
+  {% if family_number %}<p><strong>Family card:</strong> {{ family_number }}</p>{% endif %}
+  <p><strong>Card number:</strong></p>
+  <p style="font-size:2rem;letter-spacing:2px;font-weight:bold;text-align:center;background:#e6f4ea;padding:1rem;border-radius:6px;">{{ card_number }}</p>
+  {% if card_status == "valid" or card_status == "expired" %}
+    <p><strong>Hospital card:</strong> {{ card_label }},
+       {% if card_status == "valid" %}valid until {{ card_expires_on }}.
+       {% else %}<strong style="color:#b00020;">expired on {{ card_expires_on }}</strong>. Renew it at the card desk.{% endif %}</p>
+    {% if charged %}<p><strong>Fee charged:</strong> &#8358;{{ charged|floatformat:2 }}</p>{% endif %}
+  {% else %}
+    <p><strong>Hospital card:</strong> not active yet. Please visit the front desk to choose a
+       single card or a family card and pay the card fee.</p>
+  {% endif %}
+  <p>Write them down. This page is only shown once.</p>
+
+  <p>
+    {% if staff_view %}
+      <a class="btn" href="{% url 'patients:staff_register' %}">Register another patient</a>
+      {% if family_number %}
+        <a href="{% url 'patients:staff_register' %}?family={{ family_number|urlencode }}">Add another family member</a>
+      {% endif %}
+      {% if user.role == "main_admin" or user.role == "sub_admin" %}
+        <a href="{% url 'patients:list' %}">View all patients</a>
+      {% endif %}
+    {% else %}
+      <a class="btn" href="{% url 'accounts:login' %}">Go to login</a>
+    {% endif %}
+  </p>
+
+  {% if staff_view %}</div>{% endif %}
+{% endblock %}
