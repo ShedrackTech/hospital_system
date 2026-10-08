@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.db.models import Count, Q
 
-from .models import Bed, Building, Ward
+from .models import Admission, Bed, Building, Ward
 
 
 class BedInline(admin.TabularInline):
@@ -59,3 +59,22 @@ class BedAdmin(admin.ModelAdmin):
     list_filter = ("is_occupied", "ward__building", "ward")
     search_fields = ("number", "ward__name", "ward__building__name")
     list_select_related = ("ward", "ward__building")
+
+
+@admin.register(Admission)
+class AdmissionAdmin(admin.ModelAdmin):
+    """Read-only history: admit and discharge from the case page so beds stay in sync."""
+
+    list_display = ("case", "bed", "admitted_by", "admitted_at", "discharged_at")
+    list_filter = ("discharged_at", "bed__ward__building", "bed__ward")
+    search_fields = ("case__patient__user__first_name", "case__patient__user__last_name",
+                     "case__patient__user__login_id", "bed__number", "bed__ward__name")
+    list_select_related = ("case", "bed", "bed__ward", "admitted_by")
+    readonly_fields = ("case", "bed", "admitted_by", "admitted_at",
+                       "discharged_by", "discharged_at")
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False

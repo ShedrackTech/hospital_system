@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Admissions{% endblock %}
+{% block content %}
+  <h1>Admissions</h1>
+  <p>
+    {% if show_all %}<a href="?">Show current only</a>{% else %}<a href="?show=all">Include discharged</a>{% endif %}
+    | <a href="{% url 'facilities:overview' %}">Ward occupancy</a>
+  </p>
+  {% if admissions %}
+  <table border="1" cellpadding="6">
+    <tr><th>Case</th><th>Patient</th><th>Department</th><th>Bed</th><th>Building</th>
+        <th>Admitted</th><th>Discharged</th></tr>
+    {% for a in admissions %}
+    <tr>
+      <td><a href="{% url 'cases:detail' a.case_id %}">#{{ a.case_id }}</a></td>
+      <td>{{ a.case.patient }}</td>
+      <td>{{ a.case.department|default:"-" }}</td>
+      <td>{{ a.bed }}</td>
+      <td>{{ a.bed.ward.building }}</td>
+      <td>{{ a.admitted_at|date:"d M Y H:i" }}</td>
+      <td>{% if a.discharged_at %}{{ a.discharged_at|date:"d M Y H:i" }}{% else %}-{% endif %}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% if is_paginated %}
+  <p>
+    {% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}{% if show_all %}&show=all{% endif %}">Previous</a>{% endif %}
+    Page {{ page_obj.number }} of {{ paginator.num_pages }}
+    {% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}{% if show_all %}&show=all{% endif %}">Next</a>{% endif %}
+  </p>
+  {% endif %}
+  {% else %}<p>No admissions.</p>{% endif %}
+{% endblock %}

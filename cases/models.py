@@ -66,6 +66,8 @@ class CaseEvent(models.Model):
         ROUTED = "routed", "Routed to department"
         ASSIGNED = "assigned", "Assigned"
         STATUS = "status", "Status changed"
+        ADMITTED = "admitted", "Admitted to bed"
+        DISCHARGED = "discharged", "Discharged from bed"
 
     case = models.ForeignKey(Case, on_delete=models.CASCADE, related_name="events")
     actor = models.ForeignKey(

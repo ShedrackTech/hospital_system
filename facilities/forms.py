@@ -1,4 +1,5 @@
 from django import forms
+from django.db.models import Q
 
 from departments.models import Department
 
@@ -52,3 +53,23 @@ class BulkBedForm(forms.Form):
         new_beds = [Bed(ward=ward, number=n) for n in numbers if n not in existing]
         Bed.objects.bulk_create(new_beds)
         return len(new_beds), len(existing)
+
+
+class AdmitForm(forms.Form):
+    """Pick a free bed: in a shared ward, or in a ward of the case's department."""
+
+    bed = forms.ModelChoiceField(queryset=Bed.objects.none(), label="Bed")
+    notes = forms.CharField(max_length=300, required=False)
+
+    def __init__(self, *args, case, **kwargs):
+        super().__init__(*args, **kwargs)
+        beds = (
+            Bed.objects.filter(is_occupied=False)
+            .filter(Q(ward__department__isnull=True) | Q(ward__department=case.department))
+            .select_related("ward", "ward__building")
+            .order_by("ward__building__name", "ward__name", "id")
+        )
+        self.fields["bed"].queryset = beds
+        self.fields["bed"].label_from_instance = (
+            lambda b: f"{b.ward.building.name} / {b.ward.name} / Bed {b.number}"
+        )

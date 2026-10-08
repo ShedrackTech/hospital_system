@@ -71,6 +71,9 @@ def change_status(case, new_status, actor, note=""):
             raise ValidationError(
                 f"Cannot move from {case.get_status_display()} to {new_status}."
             )
+        if (new_status == Case.Status.COMPLETED
+                and case.admissions.filter(discharged_at__isnull=True).exists()):
+            raise ValidationError("Discharge the patient from the bed before completing the case.")
         case.status = new_status
         case.save()
         _log(case, actor, CaseEvent.Action.STATUS, note or f"Status: {new_status}")

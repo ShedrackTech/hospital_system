@@ -1,8 +1,12 @@
 from django.contrib import messages
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.db.models import Count, F, Prefetch, Q
+from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse, reverse_lazy
+from django.views import View
 from django.views.generic import (
     CreateView,
     DetailView,
@@ -11,10 +15,13 @@ from django.views.generic import (
     UpdateView,
 )
 
+from cases import permissions as case_perms
+from cases.models import Case
 from core.mixins import AdminRequiredMixin
 
-from .forms import BuildingForm, BulkBedForm, WardForm
-from .models import Building, Ward
+from . import services
+from .forms import AdmitForm, BuildingForm, BulkBedForm, WardForm
+from .models import Admission, Building, Ward
 
 
 class FormPageMixin:
@@ -134,3 +141,90 @@ class BedAddView(AdminRequiredMixin, FormPageMixin, FormView):
             message += f" {skipped} already existed and were skipped."
         messages.success(self.request, message)
         return redirect("facilities:ward_detail", pk=self.ward.pk)
+
+
+# ---- Admissions (assigned doctor or department head) ----
+
+
+def _case_for_admission(user, case):
+    """404 if the user cannot see the case, 403 if they cannot admit/discharge."""
+    if not case_perms.can_view(user, case):
+        raise Http404
+    if not case_perms.can_admit(user, case):
+        raise PermissionDenied
+
+
+class AdmitView(LoginRequiredMixin, FormPageMixin, FormView):
+    form_class = AdmitForm
+
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return self.handle_no_permission()
+        self.case = get_object_or_404(
+            Case.objects.select_related("patient", "department"), pk=kwargs["case_pk"]
+        )
+        _case_for_admission(request.user, self.case)
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_page_title(self):
+        return f"Admit case #{self.case.pk} to a bed"
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["case"] = self.case
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["cancel_url"] = reverse("cases:detail", args=[self.case.pk])
+        return context
+
+    def form_valid(self, form):
+        try:
+            services.admit_patient(
+                self.case, form.cleaned_data["bed"], self.request.user,
+                form.cleaned_data["notes"],
+            )
+        except ValidationError as error:
+            form.add_error(None, error)
+            return self.form_invalid(form)
+        messages.success(self.request, "Patient admitted.")
+        return redirect("cases:detail", pk=self.case.pk)
+
+
+class DischargeView(LoginRequiredMixin, View):
+    http_method_names = ["post"]
+
+    def post(self, request, pk):
+        admission = get_object_or_404(
+            Admission.objects.select_related("case__patient", "case__department"), pk=pk
+        )
+        _case_for_admission(request.user, admission.case)
+        try:
+            services.discharge_patient(admission, request.user)
+            messages.success(request, "Patient discharged and bed freed.")
+        except ValidationError as error:
+            messages.error(request, " ".join(error.messages))
+        return redirect("cases:detail", pk=admission.case_id)
+
+
+class AdmissionListView(AdminRequiredMixin, ListView):
+    """For admins: who is in which bed (add ?show=all to include discharged)."""
+
+    template_name = "facilities/admission_list.html"
+    context_object_name = "admissions"
+    paginate_by = 30
+
+    def get_queryset(self):
+        self.show_all = self.request.GET.get("show") == "all"
+        admissions = Admission.objects.select_related(
+            "case__patient__user", "case__department", "bed__ward__building"
+        )
+        if not self.show_all:
+            admissions = admissions.filter(discharged_at__isnull=True)
+        return admissions
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["show_all"] = self.show_all
+        return context

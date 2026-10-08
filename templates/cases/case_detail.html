@@ -1,7 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
 <h1>Case #{{ case.pk }}</h1>
-{% for m in messages %}<p>{{ m }}</p>{% endfor %}
 <p><strong>Status:</strong> {{ case.get_status_display }}</p>
 <p><strong>Patient:</strong> {{ case.patient }}</p>
 <p><strong>Department:</strong> {{ case.department|default:"Not yet routed" }}</p>
@@ -31,6 +30,21 @@
   {% csrf_token %}{{ status_form.as_p }}
   <button type="submit">Update</button>
 </form>
+{% endif %}
+
+{% if active_admission %}
+<h3>Admission</h3>
+<p>Admitted to {{ active_admission.bed }} ({{ active_admission.bed.ward.building }})
+   on {{ active_admission.admitted_at|date:"d M Y H:i" }}.</p>
+{% if can_manage_admission %}
+<form method="post" action="{% url 'facilities:discharge' active_admission.pk %}">
+  {% csrf_token %}
+  <button type="submit">Discharge from bed</button>
+</form>
+{% endif %}
+{% elif can_admit %}
+<h3>Admission</h3>
+<p><a href="{% url 'facilities:admit' case.pk %}">Admit to a bed</a></p>
 {% endif %}
 
 <h3>History</h3>

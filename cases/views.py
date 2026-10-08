@@ -149,6 +149,15 @@ class CaseDetailView(LoginRequiredMixin, View):
             "assign_form": AssignForm(case=case) if perms.can_assign(u, case) else None,
             "status_form": StatusForm(case=case) if perms.can_change_status(u, case) else None,
         }
+        active = case.admissions.filter(discharged_at__isnull=True).select_related(
+            "bed__ward__building").first()
+        ctx["active_admission"] = active
+        ctx["can_manage_admission"] = perms.can_admit(u, case)
+        ctx["can_admit"] = (
+            active is None
+            and perms.can_admit(u, case)
+            and case.status in (Case.Status.ASSIGNED, Case.Status.IN_TREATMENT)
+        )
         return render(request, "cases/case_detail.html", ctx)
 
 

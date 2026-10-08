@@ -71,3 +71,11 @@ def can_assign(user, case):
 def can_change_status(user, case):
     return case.assigned_to_id == user.id and bool(case.allowed_next()) \
         and case.status != Case.Status.PENDING
+
+
+def can_admit(user, case):
+    """Admit to or discharge from a bed: the assigned doctor or the department head."""
+    if case.assigned_to_id == user.id:
+        return True
+    dept = headed_department(user)
+    return bool(dept and case.department_id == dept.pk)

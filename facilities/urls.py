@@ -16,4 +16,12 @@ urlpatterns = [
     path("wards/<int:pk>/", views.WardDetailView.as_view(), name="ward_detail"),
     path("wards/<int:pk>/edit/", views.WardUpdateView.as_view(), name="ward_update"),
     path("wards/<int:pk>/beds/add/", views.BedAddView.as_view(), name="bed_add"),
+    # Admissions
+    path("admissions/", views.AdmissionListView.as_view(), name="admission_list"),
+    path("cases/<int:case_pk>/admit/", views.AdmitView.as_view(), name="admit"),
+    path(
+        "admissions/<int:pk>/discharge/",
+        views.DischargeView.as_view(),
+        name="discharge",
+    ),
 ]
