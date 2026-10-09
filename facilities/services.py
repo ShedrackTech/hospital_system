@@ -4,6 +4,7 @@ from django.db import transaction
 from django.utils import timezone
 
 from cases.models import Case, CaseEvent
+from core.audit import log as audit_log
 
 from .models import Admission, Bed
 
@@ -32,6 +33,10 @@ def admit_patient(case, bed, actor, notes=""):
             case=case, actor=actor, action=CaseEvent.Action.ADMITTED,
             note=f"Admitted to {bed}",
         )
+        audit_log(
+            actor, "patient_admitted", admission,
+            patient=case.patient, detail=f"Admitted to {bed}",
+        )
     return admission
 
 
@@ -51,5 +56,9 @@ def discharge_patient(admission, actor):
         CaseEvent.objects.create(
             case=admission.case, actor=actor, action=CaseEvent.Action.DISCHARGED,
             note=f"Discharged from {admission.bed}",
+        )
+        audit_log(
+            actor, "patient_discharged", admission,
+            patient=admission.case.patient, detail=f"Discharged from {admission.bed}",
         )
     return admission

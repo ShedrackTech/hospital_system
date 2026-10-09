@@ -5,6 +5,8 @@ from django.http import Http404
 from django.shortcuts import redirect, render
 from django.views import View
 
+from core import audit
+
 from . import permissions as perms
 from . import services
 from .forms import AssignForm, CaseCreateForm, RouteForm, StatusForm
@@ -122,6 +124,7 @@ class CaseCreateView(LoginRequiredMixin, View):
             case = services.create_case(
                 patient, form.cleaned_data["complaint"],
                 form.cleaned_data["department"], actor=request.user,
+                request=request,
             )
             messages.success(request, "Your complaint has been submitted.")
             return redirect("cases:detail", pk=case.pk)
@@ -158,6 +161,9 @@ class CaseDetailView(LoginRequiredMixin, View):
             and perms.can_admit(u, case)
             and case.status in (Case.Status.ASSIGNED, Case.Status.IN_TREATMENT)
         )
+        if case.patient.user_id != u.id:  # staff access to a record is logged
+            audit.log(u, audit.AuditLog.CASE_VIEWED, case, patient=case.patient,
+                      request=request)
         return render(request, "cases/case_detail.html", ctx)
 
 
@@ -196,7 +202,7 @@ class CaseRouteView(CaseActionView):
 
     def run(self, case, form, user):
         services.route_case(case, form.cleaned_data["department"], user,
-                            form.cleaned_data["note"])
+                            form.cleaned_data["note"], request=self.request)
 
 
 class CaseAssignView(CaseActionView):
@@ -208,7 +214,7 @@ class CaseAssignView(CaseActionView):
 
     def run(self, case, form, user):
         services.assign_case(case, form.cleaned_data["assignee"], user,
-                             form.cleaned_data["note"])
+                             form.cleaned_data["note"], request=self.request)
 
 
 class CaseStatusView(CaseActionView):
@@ -220,4 +226,4 @@ class CaseStatusView(CaseActionView):
 
     def run(self, case, form, user):
         services.change_status(case, form.cleaned_data["status"], user,
-                               form.cleaned_data["note"])
+                               form.cleaned_data["note"], request=self.request)

@@ -10,6 +10,7 @@ urlpatterns = [
     path("departments/", include("departments.urls")),
     path("facilities/", include("facilities.urls")),
     path("patients/", include("patients.urls")),
+    path("audit/", include("core.urls")),
     # Temporary: send the home page to login until the public website app is built
     path("", RedirectView.as_view(pattern_name="accounts:login", permanent=False)),
     path("cases/", include("cases.urls")),

@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Audit log{% endblock %}
+{% block content %}
+  <h1>Audit log</h1>
+  <p class="muted">A permanent, read-only record of who did or viewed what. Entries cannot be edited or deleted.</p>
+
+  <div class="card">
+    <form method="get">
+      {{ form.as_p }}
+      <button class="btn" type="submit">Filter</button>
+      <a href="{% url 'core:audit_list' %}">Clear</a>
+    </form>
+  </div>
+
+  <p>{{ page_obj.paginator.count }} entr{{ page_obj.paginator.count|pluralize:"y,ies" }}</p>
+
+  {% if entries %}
+  <div class="wrap">
+  <table>
+    <tr>
+      <th>When</th><th>Who</th><th>Action</th><th>Record</th>
+      <th>Patient</th><th>Details</th><th>IP</th>
+    </tr>
+    {% for e in entries %}
+    <tr>
+      <td>{{ e.created_at|date:"d M Y H:i" }}</td>
+      <td>{{ e.actor_label|default:"system" }}</td>
+      <td>{{ e.action_label }}</td>
+      <td>{{ e.target_repr|default:"-" }}</td>
+      <td>{% if e.patient %}{{ e.patient.user.get_full_name }} ({{ e.patient.user.login_id }}){% else %}-{% endif %}</td>
+      <td>{{ e.detail|default:"-" }}</td>
+      <td>{{ e.ip_address|default:"-" }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  </div>
+
+  {% if is_paginated %}
+  <p>
+    {% if page_obj.has_previous %}<a href="?{{ query_string }}{% if query_string %}&{% endif %}page={{ page_obj.previous_page_number }}">Previous</a>{% endif %}
+    Page {{ page_obj.number }} of {{ paginator.num_pages }}
+    {% if page_obj.has_next %}<a href="?{{ query_string }}{% if query_string %}&{% endif %}page={{ page_obj.next_page_number }}">Next</a>{% endif %}
+  </p>
+  {% endif %}
+  {% else %}
+    <p class="muted">No entries match.</p>
+  {% endif %}
+{% endblock %}

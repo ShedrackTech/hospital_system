@@ -11,6 +11,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.views.generic import DetailView, FormView, ListView, TemplateView
 
+from core.audit import log as audit_log
 from core.mixins import ADMIN_ROLES, AdminRequiredMixin, StaffRequiredMixin
 
 from .cards import add_months, issue_card, next_period
@@ -158,6 +159,13 @@ class PatientDetailView(AdminRequiredMixin, DetailView):
         return Patient.objects.select_related("user", "family").prefetch_related(
             "allergies", "history"
         )
+
+    def get(self, request, *args, **kwargs):
+        response = super().get(request, *args, **kwargs)
+        # Viewing a patient's record (allergies, history) is audited
+        audit_log(request.user, "patient_record_viewed", self.object,
+                  patient=self.object, request=request)
+        return response
 
 
 class MyProfileView(LoginRequiredMixin, TemplateView):

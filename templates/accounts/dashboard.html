@@ -1,9 +1,118 @@
 {% extends "base.html" %}
 {% block title %}Dashboard{% endblock %}
 {% block content %}
-  <h1>Welcome, {{ user.get_full_name|default:user.username }}</h1>
-  <div class="card">
-    <p><strong>ID:</strong> {{ user.login_id }}</p>
-    <p><strong>Role:</strong> {{ user.get_role_display }}</p>
+<style>
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: .8rem; margin-top: 1rem; }
+  .stat { background: #fff; border-radius: 8px; padding: 1rem; }
+  .stat a { color: inherit; text-decoration: none; display: block; }
+  .stat .n { font-size: 1.8rem; font-weight: bold; color: #0b6e99; }
+  .actions { display: flex; gap: .6rem; flex-wrap: wrap; margin-top: 1rem; }
+</style>
+
+<h1>Welcome, {{ user.get_full_name|default:user.username }}</h1>
+<p class="muted">{{ user.get_role_display }} &middot; ID {{ user.login_id }}</p>
+<h2>{{ dash.title }}</h2>
+
+{% if dash.kind == "admin" %}
+  <div class="stats">
+    <div class="stat"><a href="{% url 'cases:triage' %}"><div class="n">{{ dash.counts.awaiting_triage }}</div>Awaiting triage</a></div>
+    <div class="stat"><a href="{% url 'cases:all' %}?status=pending"><div class="n">{{ dash.counts.awaiting_assignment }}</div>Awaiting assignment</a></div>
+    <div class="stat"><a href="{% url 'cases:all' %}?status=in_treatment"><div class="n">{{ dash.counts.in_treatment }}</div>In treatment</a></div>
+    <div class="stat"><a href="{% url 'cases:all' %}"><div class="n">{{ dash.counts.total }}</div>Total cases</a></div>
+    <div class="stat"><a href="{% url 'facilities:admission_list' %}"><div class="n">{{ dash.admitted }}</div>Admitted now</a></div>
+    <div class="stat"><a href="{% url 'facilities:overview' %}"><div class="n">{{ dash.beds.free }} / {{ dash.beds.total }}</div>Beds free</a></div>
+    <div class="stat"><a href="{% url 'patients:list' %}"><div class="n">{{ dash.patients }}</div>Patients</a></div>
+    <div class="stat"><div class="n">{{ dash.staff }}</div>Active staff</div>
   </div>
+  <div class="actions">
+    <a class="btn" href="{% url 'cases:all' %}">All cases</a>
+    <a class="btn" href="{% url 'departments:list' %}">Departments</a>
+    <a class="btn" href="{% url 'patients:staff_register' %}">Register patient</a>
+    <a class="btn" href="{% url 'core:audit_list' %}">Audit log</a>
+  </div>
+  <div class="card">
+    <h3>Recent activity</h3>
+    {% if dash.recent_audit %}
+    <ul>
+      {% for e in dash.recent_audit %}
+      <li>{{ e.created_at|date:"d M H:i" }} &ndash; {{ e.actor_label|default:"system" }}: {{ e.action }}{% if e.target_repr %} ({{ e.target_repr }}){% endif %}</li>
+      {% endfor %}
+    </ul>
+    {% else %}<p class="muted">No activity yet.</p>{% endif %}
+    <p><a href="{% url 'core:audit_list' %}">View the full audit log</a></p>
+  </div>
+
+{% elif dash.kind == "head" %}
+  <div class="stats">
+    <div class="stat"><a href="{% url 'cases:department' %}?status=pending"><div class="n">{{ dash.counts.awaiting }}</div>Awaiting assignment</a></div>
+    <div class="stat"><a href="{% url 'cases:department' %}?status=assigned"><div class="n">{{ dash.counts.assigned }}</div>Assigned</a></div>
+    <div class="stat"><a href="{% url 'cases:department' %}?status=in_treatment"><div class="n">{{ dash.counts.in_treatment }}</div>In treatment</a></div>
+    <div class="stat"><div class="n">{{ dash.admitted }}</div>Admitted now</div>
+    <div class="stat"><div class="n">{{ dash.team }}</div>Team members</div>
+  </div>
+  <div class="card">
+    <h3>Waiting for you to assign</h3>
+    {% include "accounts/_case_rows.html" with rows=dash.waiting show_patient=True empty_text="No cases are waiting." %}
+    <p><a href="{% url 'cases:department' %}">All department cases</a></p>
+  </div>
+
+{% elif dash.kind == "general" %}
+  <div class="stats">
+    <div class="stat"><a href="{% url 'cases:triage' %}"><div class="n">{{ dash.waiting_count }}</div>Waiting to be routed</a></div>
+  </div>
+  <div class="card">
+    <h3>Oldest cases in the triage queue</h3>
+    {% include "accounts/_case_rows.html" with rows=dash.waiting show_patient=True empty_text="The triage queue is empty." %}
+    <p><a href="{% url 'cases:triage' %}">Open the triage queue</a></p>
+  </div>
+
+{% elif dash.kind == "medical" %}
+  <div class="stats">
+    <div class="stat"><a href="{% url 'cases:assigned' %}?status=assigned"><div class="n">{{ dash.counts.assigned }}</div>Newly assigned</a></div>
+    <div class="stat"><a href="{% url 'cases:assigned' %}?status=in_treatment"><div class="n">{{ dash.counts.in_treatment }}</div>In treatment</a></div>
+    <div class="stat"><div class="n">{{ dash.admitted }}</div>Admitted now</div>
+    <div class="stat"><a href="{% url 'cases:assigned' %}?status=completed"><div class="n">{{ dash.counts.completed }}</div>Completed</a></div>
+  </div>
+  <div class="card">
+    <h3>Your active patients</h3>
+    {% include "accounts/_case_rows.html" with rows=dash.active show_patient=True empty_text="No active cases assigned to you." %}
+    <p><a href="{% url 'cases:assigned' %}">All my cases</a></p>
+  </div>
+
+{% elif dash.kind == "front_desk" %}
+  <div class="actions">
+    <a class="btn" href="{% url 'patients:staff_register' %}">Register patient</a>
+    <a class="btn" href="{% url 'patients:card_desk' %}">Card desk</a>
+    <a class="btn" href="{% url 'departments:list' %}">Departments</a>
+  </div>
+
+{% elif dash.kind == "support" %}
+  <div class="card">
+    <p>Your duty roster and tasks will appear here.</p>
+    <p class="muted">Support staff do not have access to patient records.</p>
+  </div>
+
+{% elif dash.kind == "patient" %}
+  {% if dash.patient %}
+  <div class="card">
+    <p><strong>Card number:</strong> {{ user.login_id }}</p>
+    <p><strong>Card status:</strong> {{ dash.patient.card_status|title }}{% if dash.patient.card_expires_on %} (valid until {{ dash.patient.card_expires_on|date:"d M Y" }}){% endif %}</p>
+  </div>
+  {% endif %}
+  <div class="stats">
+    <div class="stat"><a href="{% url 'cases:mine' %}"><div class="n">{{ dash.open_count }}</div>Open cases</a></div>
+  </div>
+  <div class="actions">
+    <a class="btn" href="{% url 'cases:new' %}">Report a problem</a>
+    <a class="btn" href="{% url 'patients:my_profile' %}">My profile</a>
+    <a class="btn" href="{% url 'cases:mine' %}">My cases</a>
+  </div>
+  <div class="card">
+    <h3>Recent cases</h3>
+    {% include "accounts/_case_rows.html" with rows=dash.cases show_patient=False empty_text="You have no cases yet." %}
+  </div>
+
+{% else %}
+  <div class="card"><p>Your dashboard is not set up yet. Please contact the administrator.</p></div>
+{% endif %}
 {% endblock %}
