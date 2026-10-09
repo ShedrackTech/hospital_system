@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}My attendance{% endblock %}
+{% block content %}
+  <h1>My attendance</h1>
+  <div class="card">
+    {% if panel.open %}
+      <p>You clocked in at {{ panel.open.clock_in|date:"H:i" }} on {{ panel.open.clock_in|date:"d M Y" }}.</p>
+      <form method="post" action="{% url 'attendance:clock_out' %}">{% csrf_token %}<button class="btn" type="submit">Clock out</button></form>
+    {% else %}
+      <p class="muted">You are not clocked in.</p>
+      <form method="post" action="{% url 'attendance:clock_in' %}">{% csrf_token %}<button class="btn" type="submit">Clock in</button></form>
+    {% endif %}
+    <p class="muted">Your times are checked by your department head or an attendance officer. You cannot change them yourself; ask them to correct a mistake.</p>
+  </div>
+
+  {% if records %}
+  <div class="wrap">
+  <table>
+    <tr><th>Date</th><th>In</th><th>Out</th><th>Hours</th><th>Recorded</th><th>Status</th></tr>
+    {% for r in records %}
+    <tr>
+      <td>{{ r.work_date|date:"d M Y" }}</td>
+      <td>{{ r.clock_in|date:"H:i" }}</td>
+      <td>{% if r.clock_out %}{{ r.clock_out|date:"H:i" }}{% else %}-{% endif %}</td>
+      <td>{{ r.hours_display|default:"-" }}</td>
+      <td>{{ r.get_source_display }}</td>
+      <td>{% if r.confirmed_at %}Confirmed by {{ r.confirmed_by|default:"-" }}{% else %}Waiting for confirmation{% endif %}{% if r.correction_count %} (corrected){% endif %}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  </div>
+  {% else %}<p class="muted">No attendance records yet.</p>{% endif %}
+{% endblock %}

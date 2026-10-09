@@ -17,6 +17,8 @@ class Department(models.Model):
     )
     # General department: general doctors/nurses who triage new cases
     is_general = models.BooleanField(default=False)
+    # Laboratory department: its medical staff enter and release lab results
+    is_laboratory = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
 
     class Meta:
@@ -55,6 +57,8 @@ class StaffProfile(models.Model):
     grade = models.CharField(
         max_length=10, choices=Grade.choices, default=Grade.JUNIOR
     )
+    # Attendance officer (e.g. gateman, HR): may record and confirm anyone's attendance
+    attendance_officer = models.BooleanField(default=False)
 
     class Meta:
         ordering = ["user__login_id"]

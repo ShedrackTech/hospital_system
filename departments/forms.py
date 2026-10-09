@@ -9,14 +9,14 @@ from .models import Department, StaffProfile
 class DepartmentForm(forms.ModelForm):
     class Meta:
         model = Department
-        fields = ("name", "description", "head", "is_general", "is_active")
+        fields = ("name", "description", "head", "is_general", "is_laboratory", "is_active")
         widgets = {"description": forms.Textarea(attrs={"rows": 3})}
 
 
 class StaffProfileForm(forms.ModelForm):
     class Meta:
         model = StaffProfile
-        fields = ("user", "category", "job_title", "department", "grade")
+        fields = ("user", "category", "job_title", "department", "grade", "attendance_officer")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

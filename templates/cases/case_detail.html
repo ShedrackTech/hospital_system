@@ -47,6 +47,23 @@
 <p><a href="{% url 'facilities:admit' case.pk %}">Admit to a bed</a></p>
 {% endif %}
 
+{% if lab_results or can_order_lab %}
+<h3>Laboratory</h3>
+{% if can_order_lab %}<p><a href="{% url 'laboratory:order' case.pk %}">Order lab tests</a></p>{% endif %}
+{% if lab_results %}
+<table>
+  <tr><th>Test</th><th>Status</th><th>Ordered</th><th></th></tr>
+  {% for r in lab_results %}
+  <tr>
+    <td>{{ r.test.name }}</td><td>{{ r.get_status_display }}</td>
+    <td>{{ r.ordered_at|date:"d M Y H:i" }}</td>
+    <td><a href="{% url 'laboratory:result' r.pk %}">Open</a></td>
+  </tr>
+  {% endfor %}
+</table>
+{% endif %}
+{% endif %}
+
 <h3>History</h3>
 <ul>
   {% for e in events %}

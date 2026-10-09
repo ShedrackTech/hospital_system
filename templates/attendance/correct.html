@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Correct attendance record{% endblock %}
+{% block content %}
+  <h1>Correct attendance record</h1>
+  <p>{{ record.user.get_full_name|default:record.user.username }} ({{ record.user.login_id }}), {{ record.work_date|date:"d M Y" }}</p>
+  <div class="card">
+    <form method="post">
+      {% csrf_token %}{{ form.as_p }}
+      <button class="btn" type="submit">Save correction</button>
+      <a href="{% url 'attendance:team' %}">Cancel</a>
+    </form>
+    <p class="muted">The old times and your reason are kept permanently and shown in the history.</p>
+  </div>
+  {% if corrections %}
+  <div class="card">
+    <h3>History of corrections</h3>
+    <ul>
+      {% for c in corrections %}
+      <li>{{ c.created_at|date:"d M Y H:i" }} by {{ c.corrected_by|default:"-" }}:
+          {{ c.old_clock_in|date:"H:i" }}&ndash;{% if c.old_clock_out %}{{ c.old_clock_out|date:"H:i" }}{% else %}open{% endif %}
+          changed to {{ c.new_clock_in|date:"H:i" }}&ndash;{% if c.new_clock_out %}{{ c.new_clock_out|date:"H:i" }}{% else %}open{% endif %}
+          ({{ c.reason }})</li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+{% endblock %}

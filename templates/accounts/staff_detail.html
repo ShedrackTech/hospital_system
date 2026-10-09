@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}{{ member.get_full_name|default:member.username }}{% endblock %}
+{% block content %}
+  <div class="bar">
+    <h1>{{ member.get_full_name|default:member.username }}</h1>
+    <a href="{% url 'accounts:staff_list' %}">Back to staff</a>
+  </div>
+  <div class="card">
+    <p><strong>Staff ID:</strong> {{ member.login_id }}</p>
+    <p><strong>Username:</strong> {{ member.username }}</p>
+    <p><strong>Role:</strong> {{ member.get_role_display }}</p>
+    <p><strong>Status:</strong> {% if member.is_active %}Active{% else %}Inactive (cannot log in){% endif %}</p>
+    <p><strong>Phone:</strong> {{ member.phone|default:"-" }} &nbsp; <strong>Email:</strong> {{ member.email|default:"-" }}</p>
+    <p><strong>Reports to:</strong> {{ member.supervisor|default:"-" }}</p>
+    {% if profile %}
+      <p><strong>Category:</strong> {{ profile.get_category_display }} &nbsp;
+         <strong>Job title:</strong> {{ profile.job_title }} &nbsp;
+         <strong>Grade:</strong> {{ profile.get_grade_display }}</p>
+      <p><strong>Department:</strong> {{ profile.department|default:"-" }}</p>
+      {% if profile.attendance_officer %}<p><strong>Attendance officer:</strong> Yes</p>{% endif %}
+    {% else %}
+      <p class="muted">No staff profile yet. Use Edit to add one.</p>
+    {% endif %}
+    {% if headed %}<p><strong>Head of:</strong> {{ headed.name }}</p>{% endif %}
+  </div>
+
+  {% if manageable %}
+  <div class="bar" style="justify-content:flex-start; gap:.6rem; margin-top:1rem;">
+    <a class="btn" href="{% url 'accounts:staff_update' member.pk %}">Edit</a>
+    <a class="btn" href="{% url 'accounts:staff_password' member.pk %}">Reset password</a>
+    {% if member.is_active %}
+      <a class="btn" href="{% url 'accounts:staff_deactivate' member.pk %}">Deactivate</a>
+    {% else %}
+      <a class="btn" href="{% url 'accounts:staff_reactivate' member.pk %}">Reactivate</a>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  <div class="card">
+    <h3>Team (reports to this person)</h3>
+    {% if team %}
+      <ul>{% for t in team %}<li><a href="{% url 'accounts:staff_detail' t.pk %}">{{ t }}</a></li>{% endfor %}</ul>
+    {% else %}<p class="muted">No one reports to this person.</p>{% endif %}
+  </div>
+{% endblock %}

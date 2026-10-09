@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Staff{% endblock %}
+{% block content %}
+  <div class="bar">
+    <h1>Staff</h1>
+    <a class="btn" href="{% url 'accounts:staff_create' %}">Add staff</a>
+  </div>
+  <div class="card">
+    <form method="get">
+      {{ form.as_p }}
+      <button class="btn" type="submit">Filter</button>
+      <a href="{% url 'accounts:staff_list' %}">Clear</a>
+    </form>
+  </div>
+
+  {% if members %}
+  <div class="wrap">
+  <table>
+    <tr><th>Staff ID</th><th>Name</th><th>Role</th><th>Department</th><th>Reports to</th><th>Status</th><th></th></tr>
+    {% for m in members %}
+    <tr>
+      <td>{{ m.login_id }}</td>
+      <td>{{ m.get_full_name|default:m.username }}</td>
+      <td>{{ m.get_role_display }}</td>
+      <td>{{ m.staff_profile.department|default:"-" }}</td>
+      <td>{{ m.supervisor|default:"-" }}</td>
+      <td>{% if m.is_active %}Active{% else %}Inactive{% endif %}</td>
+      <td><a href="{% url 'accounts:staff_detail' m.pk %}">View</a>
+          {% if m.manageable %} | <a href="{% url 'accounts:staff_update' m.pk %}">Edit</a>{% endif %}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  </div>
+  {% if is_paginated %}
+  <p>
+    {% if page_obj.has_previous %}<a href="?{{ query_string }}{% if query_string %}&{% endif %}page={{ page_obj.previous_page_number }}">Previous</a>{% endif %}
+    Page {{ page_obj.number }} of {{ paginator.num_pages }}
+    {% if page_obj.has_next %}<a href="?{{ query_string }}{% if query_string %}&{% endif %}page={{ page_obj.next_page_number }}">Next</a>{% endif %}
+  </p>
+  {% endif %}
+  {% else %}<p class="muted">No staff match.</p>{% endif %}
+{% endblock %}

@@ -12,12 +12,26 @@ from django.db.models import Count, Q
 
 
 def build_dashboard(user):
+    dash = _role_dashboard(user)
+    # Staff with a staff profile also get the clock in / clock out panel
+    if not user.is_patient and getattr(user, "staff_profile", None) is not None:
+        from attendance import services as attendance_services
+
+        dash["attendance"] = attendance_services.panel_for(user)
+    return dash
+
+
+def _role_dashboard(user):
     from cases import permissions as perms
 
     if perms.is_admin(user):
         return _admin()
     if user.is_patient:
         return _patient(user)
+    from laboratory import permissions as lab_perms
+
+    if lab_perms.is_lab_staff(user):
+        return _lab()
     if perms.headed_department(user):
         return _head(user)
     if perms.is_general_staff(user):
@@ -130,11 +144,34 @@ def _medical(user):
     }
 
 
+def _lab():
+    from laboratory.models import LabResult
+
+    counts = LabResult.objects.aggregate(
+        ordered=Count("id", filter=Q(status="ordered")),
+        resulted=Count("id", filter=Q(status="resulted")),
+        released=Count("id", filter=Q(status="released")),
+    )
+    return {
+        "kind": "lab",
+        "title": "Laboratory",
+        "counts": counts,
+        "waiting": list(
+            LabResult.objects.filter(status="ordered")
+            .select_related("patient__user", "test").order_by("ordered_at")[:5]
+        ),
+    }
+
+
 def _patient(user):
     from cases.models import Case
     from cases.permissions import get_patient
+    from laboratory.models import LabResult
 
     patient = get_patient(user)
+    results_count = 0
+    if patient is not None:
+        results_count = LabResult.objects.filter(patient=patient, status="released").count()
     cases = Case.objects.none()
     if patient is not None:
         cases = Case.objects.filter(patient=patient).select_related("department", "assigned_to")
@@ -143,5 +180,6 @@ def _patient(user):
         "title": "My health portal",
         "patient": patient,
         "open_count": cases.exclude(status="completed").count(),
+        "results_count": results_count,
         "cases": list(cases[:5]),
     }

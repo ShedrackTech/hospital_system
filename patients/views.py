@@ -12,7 +12,7 @@ from django.utils import timezone
 from django.views.generic import DetailView, FormView, ListView, TemplateView
 
 from core.audit import log as audit_log
-from core.mixins import ADMIN_ROLES, AdminRequiredMixin, StaffRequiredMixin
+from core.mixins import ADMIN_ROLES, AdminRequiredMixin, FrontDeskRequiredMixin
 
 from .cards import add_months, issue_card, next_period
 from .forms import (
@@ -78,8 +78,8 @@ class PatientRegisterView(RegistrationFormMixin, FormView):
         return super().form_invalid(form)
 
 
-class StaffRegisterPatientView(StaffRequiredMixin, RegistrationFormMixin, FormView):
-    """Front-desk registration of a patient by any staff member."""
+class StaffRegisterPatientView(FrontDeskRequiredMixin, RegistrationFormMixin, FormView):
+    """Registration of a patient at the front desk (administrative staff and admins only)."""
 
     template_name = "patients/staff_register.html"
     form_class = StaffPatientRegistrationForm
@@ -227,7 +227,7 @@ class FamilyDetailView(AdminRequiredMixin, DetailView):
         return context
 
 
-class CardDeskView(StaffRequiredMixin, TemplateView):
+class CardDeskView(FrontDeskRequiredMixin, TemplateView):
     """Find a card by number, then issue or renew it. Shows no medical information."""
 
     template_name = "patients/card_desk.html"

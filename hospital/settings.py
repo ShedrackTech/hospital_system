@@ -26,6 +26,7 @@ INSTALLED_APPS = [
     "appointments",
     "pharmacy",
     "laboratory",
+    "attendance",
     "billing",
 ]
 

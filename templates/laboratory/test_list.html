@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Lab test catalogue{% endblock %}
+{% block content %}
+  <div class="bar">
+    <h1>Lab test catalogue</h1>
+    <span><a href="{% url 'laboratory:worklist' %}">Worklist</a> &nbsp; <a class="btn" href="{% url 'laboratory:test_create' %}">Add test</a></span>
+  </div>
+  {% if tests %}
+  <div class="wrap">
+  <table>
+    <tr><th>Test</th><th>Unit</th><th>Reference range</th><th>Status</th><th></th></tr>
+    {% for t in tests %}
+    <tr>
+      <td>{{ t.name }}</td><td>{{ t.unit|default:"-" }}</td><td>{{ t.reference_range|default:"-" }}</td>
+      <td>{% if t.is_active %}Available{% else %}Not available{% endif %}</td>
+      <td><a href="{% url 'laboratory:test_update' t.pk %}">Edit</a></td>
+    </tr>
+    {% endfor %}
+  </table>
+  </div>
+  {% else %}<p class="muted">No tests yet. Add the first one.</p>{% endif %}
+{% endblock %}

@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Lab result{% endblock %}
+{% block content %}
+  <div class="bar">
+    <h1>{{ result.test.name }}</h1>
+    <a href="{% if is_patient_view %}{% url 'laboratory:mine' %}{% else %}{% url 'cases:detail' result.case_id %}{% endif %}">Back</a>
+  </div>
+  <div class="card">
+    {% if not is_patient_view %}
+      <p><strong>Patient:</strong> {{ result.patient.user.get_full_name }} ({{ result.patient.user.login_id }})</p>
+      <p><strong>Case:</strong> #{{ result.case_id }}</p>
+    {% endif %}
+    <p><strong>Status:</strong> {{ result.get_status_display }}</p>
+    <p><strong>Ordered:</strong> {{ result.ordered_at|date:"d M Y H:i" }}{% if result.ordered_by and not is_patient_view %} by {{ result.ordered_by }}{% endif %}</p>
+    {% if result.order_note and not is_patient_view %}<p><strong>Note for the lab:</strong> {{ result.order_note }}</p>{% endif %}
+
+    {% if result.status == "resulted" or result.status == "released" %}
+      <hr>
+      <p><strong>Result:</strong> {{ result.value }} {{ result.test.unit }}</p>
+      {% if result.test.reference_range %}<p><strong>Reference range:</strong> {{ result.test.reference_range }} {{ result.test.unit }}</p>{% endif %}
+      {% if result.result_notes %}<p><strong>Notes:</strong> {{ result.result_notes|linebreaksbr }}</p>{% endif %}
+      {% if not is_patient_view %}<p class="muted">Entered by {{ result.entered_by|default:"-" }} on {{ result.resulted_at|date:"d M Y H:i" }}</p>{% endif %}
+    {% endif %}
+    {% if result.status == "released" %}
+      <p class="muted">Released by {{ result.released_by|default:"-" }} on {{ result.released_at|date:"d M Y H:i" }}</p>
+    {% endif %}
+    {% if result.status == "cancelled" %}
+      <p class="muted">Cancelled{% if result.cancel_reason %}: {{ result.cancel_reason }}{% endif %}</p>
+    {% endif %}
+  </div>
+
+  {% if can_print %}
+    <p><a class="btn" href="{% url 'laboratory:print' result.pk %}" target="_blank">Print or save as PDF</a></p>
+  {% endif %}
+
+  {% if enter_form %}
+  <div class="card">
+    <h3>Enter the result</h3>
+    <form method="post" action="{% url 'laboratory:result_enter' result.pk %}">
+      {% csrf_token %}{{ enter_form.as_p }}
+      <button class="btn" type="submit">Save result</button>
+    </form>
+  </div>
+  {% endif %}
+
+  {% if can_release %}
+  <div class="card">
+    <h3>Release to the patient</h3>
+    <p class="muted">Check the result first. The patient can see it as soon as you release it.</p>
+    <form method="post" action="{% url 'laboratory:result_release' result.pk %}">
+      {% csrf_token %}<button class="btn" type="submit">Release result</button>
+    </form>
+  </div>
+  {% endif %}
+
+  {% if cancel_form %}
+  <div class="card">
+    <h3>Cancel this test</h3>
+    <form method="post" action="{% url 'laboratory:result_cancel' result.pk %}">
+      {% csrf_token %}{{ cancel_form.as_p }}
+      <button class="btn" type="submit">Cancel test</button>
+    </form>
+  </div>
+  {% endif %}
+{% endblock %}

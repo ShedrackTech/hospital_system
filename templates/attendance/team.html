@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Team attendance{% endblock %}
+{% block content %}
+  <h1>Team attendance</h1>
+
+  {% if arrival_form %}
+  <div class="card">
+    <form method="post" action="{% url 'attendance:officer_record' %}">
+      {% csrf_token %}{{ arrival_form.as_p }}
+      <button class="btn" type="submit">Record arrival</button>
+    </form>
+  </div>
+  {% endif %}
+
+  <div class="card">
+    <form method="get">
+      {{ form.as_p }}
+      <button class="btn" type="submit">Filter</button>
+      <a href="{% url 'attendance:team' %}">Today</a>
+    </form>
+  </div>
+
+  {% if records %}
+  <div class="wrap">
+  <table>
+    <tr><th>Staff</th><th>Date</th><th>In</th><th>Out</th><th>Hours</th><th>Recorded</th><th>Status</th><th></th></tr>
+    {% for r in records %}
+    <tr>
+      <td>{{ r.user.get_full_name|default:r.user.username }} ({{ r.user.login_id }})<br>
+          <span class="muted">{{ r.user.staff_profile.department|default:"" }}</span></td>
+      <td>{{ r.work_date|date:"d M Y" }}</td>
+      <td>{{ r.clock_in|date:"H:i" }}</td>
+      <td>{% if r.clock_out %}{{ r.clock_out|date:"H:i" }}{% else %}-{% endif %}</td>
+      <td>{{ r.hours_display|default:"-" }}</td>
+      <td>{{ r.get_source_display }}</td>
+      <td>
+        {% if r.confirmed_at %}Confirmed by {{ r.confirmed_by|default:"-" }}{% else %}Unconfirmed{% endif %}
+        {% if r.clock_out is None %}<br>Still clocked in{% endif %}
+        {% if r.is_flagged %}<br><strong>Needs review</strong>{% endif %}
+        {% if r.correction_count %}<br>Corrected {{ r.correction_count }} time{{ r.correction_count|pluralize }}{% endif %}
+      </td>
+      <td>
+        {% if r.manageable %}
+          {% if not r.confirmed_at %}
+          <form method="post" action="{% url 'attendance:confirm' r.pk %}" style="display:inline">{% csrf_token %}<button class="btn" type="submit">Confirm</button></form>
+          {% endif %}
+          {% if r.clock_out is None %}
+          <form method="post" action="{% url 'attendance:departure' r.pk %}" style="display:inline">{% csrf_token %}<button class="btn" type="submit">Record departure</button></form>
+          {% endif %}
+          <a href="{% url 'attendance:correct' r.pk %}">Correct</a>
+        {% elif r.user_id == user.id %}
+          <span class="muted">Your own record</span>
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+  </div>
+  {% if is_paginated %}
+  <p>
+    {% if page_obj.has_previous %}<a href="?{{ query_string }}{% if query_string %}&{% endif %}page={{ page_obj.previous_page_number }}">Previous</a>{% endif %}
+    Page {{ page_obj.number }} of {{ paginator.num_pages }}
+    {% if page_obj.has_next %}<a href="?{{ query_string }}{% if query_string %}&{% endif %}page={{ page_obj.next_page_number }}">Next</a>{% endif %}
+  </p>
+  {% endif %}
+  {% else %}<p class="muted">No records match.</p>{% endif %}
+{% endblock %}

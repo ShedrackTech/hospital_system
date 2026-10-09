@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lab result - {{ result.test.name }}</title>
+  <style>
+    body { font-family: Arial, sans-serif; color: #000; margin: 2rem auto; max-width: 720px; }
+    h1 { margin: 0; } h2 { margin: .2rem 0 1.2rem; font-weight: normal; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 1.2rem; }
+    th, td { text-align: left; padding: .5rem; border: 1px solid #999; }
+    th { width: 35%; background: #f2f2f2; }
+    .foot { font-size: .85rem; color: #333; margin-top: 2rem; border-top: 1px solid #999; padding-top: .6rem; }
+    .noprint { margin-bottom: 1.5rem; }
+    button { padding: .5rem 1rem; }
+    @media print { .noprint { display: none; } body { margin: 0; } }
+  </style>
+</head>
+<body>
+  <div class="noprint">
+    <button onclick="window.print()">Print or save as PDF</button>
+    <a href="{% url 'laboratory:result' result.pk %}">Back</a>
+  </div>
+  <h1>{{ hospital_name }}</h1>
+  <h2>Laboratory result</h2>
+
+  <table>
+    <tr><th>Patient</th><td>{{ result.patient.user.get_full_name }}</td></tr>
+    <tr><th>Card number</th><td>{{ result.patient.user.login_id }}</td></tr>
+    <tr><th>Date of birth</th><td>{{ result.patient.date_of_birth|date:"d M Y" }}</td></tr>
+    <tr><th>Gender</th><td>{{ result.patient.get_gender_display }}</td></tr>
+  </table>
+
+  <table>
+    <tr><th>Test</th><td>{{ result.test.name }}</td></tr>
+    <tr><th>Result</th><td><strong>{{ result.value }} {{ result.test.unit }}</strong></td></tr>
+    {% if result.test.reference_range %}<tr><th>Reference range</th><td>{{ result.test.reference_range }} {{ result.test.unit }}</td></tr>{% endif %}
+    {% if result.result_notes %}<tr><th>Notes</th><td>{{ result.result_notes|linebreaksbr }}</td></tr>{% endif %}
+    <tr><th>Ordered</th><td>{{ result.ordered_at|date:"d M Y" }}</td></tr>
+    <tr><th>Released</th><td>{{ result.released_at|date:"d M Y H:i" }}{% if result.released_by %} by {{ result.released_by.get_full_name|default:result.released_by.username }}{% endif %}</td></tr>
+  </table>
+
+  <p class="foot">This is a copy of a result released by {{ hospital_name }}. Printed by {{ request.user.get_full_name|default:request.user.username }} on {% now "d M Y H:i" %}.</p>
+</body>
+</html>

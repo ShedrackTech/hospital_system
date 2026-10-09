@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}My results{% endblock %}
+{% block content %}
+  <h1>My lab results</h1>
+  <p class="muted">Results appear here after your doctor or the laboratory has checked and released them.</p>
+  {% if results %}
+  <div class="wrap">
+  <table>
+    <tr><th>Test</th><th>Result</th><th>Date</th><th></th></tr>
+    {% for r in results %}
+    <tr>
+      <td>{{ r.test.name }}</td>
+      <td>{{ r.value }} {{ r.test.unit }}</td>
+      <td>{{ r.released_at|date:"d M Y" }}</td>
+      <td><a href="{% url 'laboratory:result' r.pk %}">View</a> |
+          <a href="{% url 'laboratory:print' r.pk %}" target="_blank">Print</a></td>
+    </tr>
+    {% endfor %}
+  </table>
+  </div>
+  {% else %}<p class="muted">You have no released results yet.</p>{% endif %}
+{% endblock %}

@@ -33,11 +33,23 @@
       <a href="{% url 'patients:my_profile' %}">My profile</a>
       <a href="{% url 'cases:mine' %}">My cases</a>
       <a href="{% url 'cases:new' %}">Report a problem</a>
+      <a href="{% url 'laboratory:mine' %}">My results</a>
     {% else %}
       <a href="{% url 'departments:list' %}">Departments</a>
-      <a href="{% url 'patients:staff_register' %}">Register patient</a>
+      {% if user.role == "main_admin" or user.role == "sub_admin" or user.staff_profile.category == "admin" %}
+        <a href="{% url 'patients:staff_register' %}">Register patient</a>
+      {% endif %}
       {% if user.staff_profile.category != "support" %}
         <a href="{% url 'cases:home' %}">Cases</a>
+      {% endif %}
+      {% if user.staff_profile %}
+        <a href="{% url 'attendance:mine' %}">Attendance</a>
+      {% endif %}
+      {% if user.role == "main_admin" or user.role == "sub_admin" or user.headed_department or user.staff_profile.attendance_officer %}
+        <a href="{% url 'attendance:team' %}">Team attendance</a>
+      {% endif %}
+      {% if user.staff_profile.department.is_laboratory or user.role == "main_admin" or user.role == "sub_admin" %}
+        <a href="{% url 'laboratory:worklist' %}">Laboratory</a>
       {% endif %}
     {% endif %}
     {% if user.role == "main_admin" or user.role == "sub_admin" %}
@@ -45,6 +57,7 @@
       <a href="{% url 'patients:family_list' %}">Families</a>
       <a href="{% url 'facilities:overview' %}">Facilities</a>
       <a href="{% url 'facilities:admission_list' %}">Admissions</a>
+      <a href="{% url 'accounts:staff_list' %}">Staff</a>
       <a href="{% url 'core:audit_list' %}">Audit log</a>
     {% endif %}
     <form method="post" action="{% url 'accounts:logout' %}">

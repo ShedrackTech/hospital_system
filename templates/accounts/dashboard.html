@@ -26,6 +26,7 @@
   </div>
   <div class="actions">
     <a class="btn" href="{% url 'cases:all' %}">All cases</a>
+    <a class="btn" href="{% url 'accounts:staff_list' %}">Staff</a>
     <a class="btn" href="{% url 'departments:list' %}">Departments</a>
     <a class="btn" href="{% url 'patients:staff_register' %}">Register patient</a>
     <a class="btn" href="{% url 'core:audit_list' %}">Audit log</a>
@@ -79,6 +80,31 @@
     <p><a href="{% url 'cases:assigned' %}">All my cases</a></p>
   </div>
 
+{% elif dash.kind == "lab" %}
+  <div class="stats">
+    <div class="stat"><a href="{% url 'laboratory:worklist' %}?status=ordered"><div class="n">{{ dash.counts.ordered }}</div>Waiting for a result</a></div>
+    <div class="stat"><a href="{% url 'laboratory:worklist' %}?status=resulted"><div class="n">{{ dash.counts.resulted }}</div>Awaiting release</a></div>
+    <div class="stat"><a href="{% url 'laboratory:worklist' %}?status=released"><div class="n">{{ dash.counts.released }}</div>Released</a></div>
+  </div>
+  <div class="actions">
+    <a class="btn" href="{% url 'laboratory:worklist' %}">Worklist</a>
+    <a class="btn" href="{% url 'laboratory:tests' %}">Test catalogue</a>
+  </div>
+  <div class="card">
+    <h3>Oldest requests waiting</h3>
+    {% if dash.waiting %}
+    <div class="wrap"><table>
+      <tr><th>#</th><th>Patient</th><th>Test</th><th>Ordered</th></tr>
+      {% for r in dash.waiting %}
+      <tr>
+        <td><a href="{% url 'laboratory:result' r.pk %}">{{ r.pk }}</a></td>
+        <td>{{ r.patient }}</td><td>{{ r.test.name }}</td><td>{{ r.ordered_at|date:"d M Y H:i" }}</td>
+      </tr>
+      {% endfor %}
+    </table></div>
+    {% else %}<p class="muted">No tests are waiting.</p>{% endif %}
+  </div>
+
 {% elif dash.kind == "front_desk" %}
   <div class="actions">
     <a class="btn" href="{% url 'patients:staff_register' %}">Register patient</a>
@@ -101,11 +127,13 @@
   {% endif %}
   <div class="stats">
     <div class="stat"><a href="{% url 'cases:mine' %}"><div class="n">{{ dash.open_count }}</div>Open cases</a></div>
+    <div class="stat"><a href="{% url 'laboratory:mine' %}"><div class="n">{{ dash.results_count }}</div>Lab results</a></div>
   </div>
   <div class="actions">
     <a class="btn" href="{% url 'cases:new' %}">Report a problem</a>
     <a class="btn" href="{% url 'patients:my_profile' %}">My profile</a>
     <a class="btn" href="{% url 'cases:mine' %}">My cases</a>
+    <a class="btn" href="{% url 'laboratory:mine' %}">My results</a>
   </div>
   <div class="card">
     <h3>Recent cases</h3>
@@ -115,4 +143,6 @@
 {% else %}
   <div class="card"><p>Your dashboard is not set up yet. Please contact the administrator.</p></div>
 {% endif %}
+
+{% if dash.attendance %}{% include "accounts/_attendance_panel.html" %}{% endif %}
 {% endblock %}

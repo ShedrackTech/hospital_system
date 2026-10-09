@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Laboratory worklist{% endblock %}
+{% block content %}
+  <div class="bar">
+    <h1>Laboratory worklist</h1>
+    <a href="{% url 'laboratory:tests' %}">Test catalogue</a>
+  </div>
+  <p>
+    <a href="?status=open">Open (ordered and awaiting release)</a>
+    {% for value, label in statuses %}| <a href="?status={{ value }}">{{ label }}</a> {% endfor %}
+  </p>
+  {% if results %}
+  <div class="wrap">
+  <table>
+    <tr><th>#</th><th>Patient</th><th>Test</th><th>Status</th><th>Ordered</th><th>By</th></tr>
+    {% for r in results %}
+    <tr>
+      <td><a href="{% url 'laboratory:result' r.pk %}">{{ r.pk }}</a></td>
+      <td>{{ r.patient.user.get_full_name }} ({{ r.patient.user.login_id }})</td>
+      <td>{{ r.test.name }}</td>
+      <td>{{ r.get_status_display }}</td>
+      <td>{{ r.ordered_at|date:"d M Y H:i" }}</td>
+      <td>{{ r.ordered_by|default:"-" }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  </div>
+  {% if is_paginated %}
+  <p>
+    {% if page_obj.has_previous %}<a href="?status={{ status }}&page={{ page_obj.previous_page_number }}">Previous</a>{% endif %}
+    Page {{ page_obj.number }} of {{ paginator.num_pages }}
+    {% if page_obj.has_next %}<a href="?status={{ status }}&page={{ page_obj.next_page_number }}">Next</a>{% endif %}
+  </p>
+  {% endif %}
+  {% else %}<p class="muted">Nothing here.</p>{% endif %}
+{% endblock %}
