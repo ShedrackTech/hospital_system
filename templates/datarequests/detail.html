@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Data request #{{ data_request.pk }}{% endblock %}
+{% block content %}
+  <div class="bar">
+    <h1>{{ data_request.get_kind_display }}</h1>
+    <a href="{% if is_admin_view %}{% url 'datarequests:manage' %}{% else %}{% url 'datarequests:mine' %}{% endif %}">Back</a>
+  </div>
+  <div class="card">
+    {% if is_admin_view %}
+      <p><strong>Patient:</strong> {{ data_request.patient.user.get_full_name }} ({{ data_request.patient.user.login_id }})</p>
+    {% endif %}
+    <p><strong>Status:</strong> {{ data_request.get_status_display }}</p>
+    <p><strong>Sent:</strong> {{ data_request.created_at|date:"d M Y H:i" }}</p>
+    <p><strong>Subject:</strong> {{ data_request.subject }}</p>
+    <p><strong>Details:</strong><br>{{ data_request.details|linebreaksbr }}</p>
+  </div>
+
+  {% if data_request.response %}
+  <div class="card">
+    <h3>Answer from the hospital</h3>
+    <p>{{ data_request.response|linebreaksbr }}</p>
+    {% if data_request.handled_at %}
+      <p class="muted">{{ data_request.handled_at|date:"d M Y H:i" }}{% if is_admin_view and data_request.handled_by %} by {{ data_request.handled_by }}{% endif %}</p>
+    {% endif %}
+  </div>
+  {% elif not is_admin_view %}
+    <p class="muted">We have received your request. The answer will appear here.</p>
+  {% endif %}
+
+  {% if handle_form %}
+  <div class="card">
+    <h3>Handle this request</h3>
+    {% if data_request.kind == "deletion" %}
+      <p class="muted">Medical records are kept for the legal retention period. Explain clearly what was removed and what must be kept, and why. Nothing is deleted automatically.</p>
+    {% endif %}
+    <form method="post" action="{% url 'datarequests:handle' data_request.pk %}">
+      {% csrf_token %}{{ handle_form.as_p }}
+      <button class="btn" type="submit">Save</button>
+    </form>
+  </div>
+  {% endif %}
+{% endblock %}

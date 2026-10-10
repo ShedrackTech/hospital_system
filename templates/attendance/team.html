@@ -1,7 +1,21 @@
 {% extends "base.html" %}
 {% block title %}Team attendance{% endblock %}
 {% block content %}
-  <h1>Team attendance</h1>
+  <div class="bar">
+    <h1>Team attendance</h1>
+    <a href="{% url 'attendance:roster' %}">Duty roster</a>
+  </div>
+
+  {% if missing %}
+  <div class="card">
+    <h3>Planned for today but not clocked in</h3>
+    <ul>
+      {% for e in missing %}
+      <li>{{ e.user.get_full_name|default:e.user.username }} ({{ e.user.login_id }}) &ndash; {{ e.shift.name }} from {{ e.shift.start_time|time:"H:i" }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %}
 
   {% if arrival_form %}
   <div class="card">
@@ -23,12 +37,13 @@
   {% if records %}
   <div class="wrap">
   <table>
-    <tr><th>Staff</th><th>Date</th><th>In</th><th>Out</th><th>Hours</th><th>Recorded</th><th>Status</th><th></th></tr>
+    <tr><th>Staff</th><th>Date</th><th>Planned shift</th><th>In</th><th>Out</th><th>Hours</th><th>Recorded</th><th>Status</th><th></th></tr>
     {% for r in records %}
     <tr>
       <td>{{ r.user.get_full_name|default:r.user.username }} ({{ r.user.login_id }})<br>
           <span class="muted">{{ r.user.staff_profile.department|default:"" }}</span></td>
       <td>{{ r.work_date|date:"d M Y" }}</td>
+      <td>{{ r.scheduled|default:"-" }}{% if r.late_minutes %}<br><strong>{{ r.late_minutes }} min late</strong>{% endif %}</td>
       <td>{{ r.clock_in|date:"H:i" }}</td>
       <td>{% if r.clock_out %}{{ r.clock_out|date:"H:i" }}{% else %}-{% endif %}</td>
       <td>{{ r.hours_display|default:"-" }}</td>

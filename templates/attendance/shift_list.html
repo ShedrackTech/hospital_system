@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Shift types{% endblock %}
+{% block content %}
+  <div class="bar">
+    <h1>Shift types</h1>
+    <span><a href="{% url 'attendance:roster' %}">Duty roster</a> &nbsp; <a class="btn" href="{% url 'attendance:shift_create' %}">Add shift</a></span>
+  </div>
+  {% if shifts %}
+  <div class="wrap">
+  <table>
+    <tr><th>Name</th><th>Starts</th><th>Ends</th><th>Status</th><th></th></tr>
+    {% for s in shifts %}
+    <tr>
+      <td>{{ s.name }}</td><td>{{ s.start_time|time:"H:i" }}</td>
+      <td>{{ s.end_time|time:"H:i" }}{% if s.is_overnight %} (next day){% endif %}</td>
+      <td>{% if s.is_active %}In use{% else %}Not in use{% endif %}</td>
+      <td><a href="{% url 'attendance:shift_update' s.pk %}">Edit</a></td>
+    </tr>
+    {% endfor %}
+  </table>
+  </div>
+  {% else %}<p class="muted">No shifts yet. Add the first one, for example Morning 07:00 to 15:00.</p>{% endif %}
+{% endblock %}

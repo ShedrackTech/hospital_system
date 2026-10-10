@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}My duty roster{% endblock %}
+{% block content %}
+  <h1>My duty roster</h1>
+  <p class="muted">Your planned shifts for the next four weeks. Ask your department head if something looks wrong.</p>
+  {% if entries %}
+  <div class="wrap">
+  <table>
+    <tr><th>Date</th><th>Shift</th><th>Time</th><th>Work area</th><th>Note</th></tr>
+    {% for e in entries %}
+    <tr>
+      <td>{{ e.date|date:"D d M Y" }}{% if e.date == today %} (today){% endif %}</td>
+      <td>{{ e.shift.name }}</td>
+      <td>{{ e.shift.start_time|time:"H:i" }} - {{ e.shift.end_time|time:"H:i" }}{% if e.shift.is_overnight %} (next day){% endif %}</td>
+      <td>{{ e.building|default:"-" }}</td>
+      <td>{{ e.note|default:"-" }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  </div>
+  {% else %}<p class="muted">No shifts are planned for you yet.</p>{% endif %}
+  <p><a href="{% url 'attendance:mine' %}">My attendance</a></p>
+{% endblock %}

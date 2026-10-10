@@ -62,12 +62,12 @@ class StaffManagementTests(TestCase):
     def test_sub_admin_cannot_create_a_sub_admin_but_main_admin_can(self):
         self.login("sub")
         self.client.post(reverse("accounts:staff_create"),
-                         self.data(role="sub_admin", username="x1"))
-        self.assertFalse(User.objects.filter(username="x1").exists())
+                         self.data(role="sub_admin", username="newsub1"))
+        self.assertFalse(User.objects.filter(username="newsub1").exists())
         self.login("boss")
         self.client.post(reverse("accounts:staff_create"),
-                         self.data(role="sub_admin", username="x2"))
-        created = User.objects.get(username="x2")
+                         self.data(role="sub_admin", username="newsub2"))
+        created = User.objects.get(username="newsub2")
         self.assertEqual(created.role, "sub_admin")
         self.assertTrue(created.is_staff)
 

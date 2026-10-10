@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Data requests{% endblock %}
+{% block content %}
+  <h1>Patient data requests</h1>
+  <div class="card">
+    <form method="get">
+      {{ form.as_p }}
+      <button class="btn" type="submit">Filter</button>
+      <a href="{% url 'datarequests:manage' %}">Clear</a>
+    </form>
+  </div>
+  {% if requests %}
+  <div class="wrap">
+  <table>
+    <tr><th>#</th><th>Patient</th><th>Request</th><th>Subject</th><th>Status</th><th>Sent</th></tr>
+    {% for r in requests %}
+    <tr>
+      <td><a href="{% url 'datarequests:detail' r.pk %}">{{ r.pk }}</a></td>
+      <td>{{ r.patient.user.get_full_name }} ({{ r.patient.user.login_id }})</td>
+      <td>{{ r.get_kind_display }}</td>
+      <td>{{ r.subject }}</td>
+      <td>{{ r.get_status_display }}</td>
+      <td>{{ r.created_at|date:"d M Y" }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  </div>
+  {% if is_paginated %}
+  <p>
+    {% if page_obj.has_previous %}<a href="?{{ query_string }}{% if query_string %}&{% endif %}page={{ page_obj.previous_page_number }}">Previous</a>{% endif %}
+    Page {{ page_obj.number }} of {{ paginator.num_pages }}
+    {% if page_obj.has_next %}<a href="?{{ query_string }}{% if query_string %}&{% endif %}page={{ page_obj.next_page_number }}">Next</a>{% endif %}
+  </p>
+  {% endif %}
+  {% else %}<p class="muted">No requests match.</p>{% endif %}
+{% endblock %}

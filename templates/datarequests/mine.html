@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}My data requests{% endblock %}
+{% block content %}
+  <div class="bar">
+    <h1>My data requests</h1>
+    <a class="btn" href="{% url 'datarequests:new' %}">New request</a>
+  </div>
+  <p class="muted">You can ask for a copy of your information, ask us to correct it, or ask us to delete it. The hospital reviews every request and tells you the decision here.</p>
+  {% if requests %}
+  <div class="wrap">
+  <table>
+    <tr><th>#</th><th>Request</th><th>Subject</th><th>Status</th><th>Sent</th></tr>
+    {% for r in requests %}
+    <tr>
+      <td><a href="{% url 'datarequests:detail' r.pk %}">{{ r.pk }}</a></td>
+      <td>{{ r.get_kind_display }}</td>
+      <td>{{ r.subject }}</td>
+      <td>{{ r.get_status_display }}</td>
+      <td>{{ r.created_at|date:"d M Y" }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  </div>
+  {% else %}<p class="muted">You have not sent any requests.</p>{% endif %}
+{% endblock %}

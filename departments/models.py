@@ -59,6 +59,8 @@ class StaffProfile(models.Model):
     )
     # Attendance officer (e.g. gateman, HR): may record and confirm anyone's attendance
     attendance_officer = models.BooleanField(default=False)
+    # Records officer: may read and answer patients' data requests (copy, correction, deletion)
+    records_officer = models.BooleanField(default=False)
 
     class Meta:
         ordering = ["user__login_id"]

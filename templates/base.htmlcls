@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Hospital Portal{% endblock %}</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; background: #f2f6fa; color: #222; }
+    nav { background: #0b6e99; padding: .8rem 1.5rem; display: flex; gap: 1.2rem; align-items: center; }
+    nav a, nav button { color: #fff; text-decoration: none; background: none; border: 0;
+                        font-size: 1rem; cursor: pointer; padding: 0; }
+    nav form { margin: 0 0 0 auto; }
+    main { max-width: 900px; margin: 1.5rem auto; padding: 0 1rem; }
+    .bar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: .5rem; }
+    .btn { background: #0b6e99; color: #fff; padding: .5rem .9rem; border-radius: 4px;
+           text-decoration: none; border: 0; cursor: pointer; font-size: .95rem; }
+    table { width: 100%; border-collapse: collapse; background: #fff; margin-top: 1rem; }
+    th, td { text-align: left; padding: .6rem; border-bottom: 1px solid #e3e8ee; }
+    .wrap { overflow-x: auto; }
+    .card { background: #fff; padding: 1.2rem; border-radius: 8px; margin-top: 1rem; }
+    .messages { list-style: none; padding: 0; }
+    .messages li { background: #e6f4ea; padding: .6rem 1rem; border-radius: 4px; margin-top: 1rem; }
+    .errorlist { color: #b00020; padding-left: 1rem; }
+    form p { margin: .8rem 0; }
+    form input[type=text], form textarea, form select { width: 100%; padding: .5rem; box-sizing: border-box; }
+    .muted { color: #666; }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="{% url 'accounts:dashboard' %}">Dashboard</a>
+    {% if user.role == "patient" %}
+      <a href="{% url 'patients:my_profile' %}">My profile</a>
+      <a href="{% url 'cases:mine' %}">My cases</a>
+      <a href="{% url 'cases:new' %}">Report a problem</a>
+      <a href="{% url 'laboratory:mine' %}">My results</a>
+      <a href="{% url 'datarequests:mine' %}">Data requests</a>
+    {% else %}
+      <a href="{% url 'departments:list' %}">Departments</a>
+      {% if user.role == "main_admin" or user.role == "sub_admin" or user.staff_profile.category == "admin" %}
+        <a href="{% url 'patients:staff_register' %}">Register patient</a>
+      {% endif %}
+      {% if user.staff_profile.category != "support" %}
+        <a href="{% url 'cases:home' %}">Cases</a>
+      {% endif %}
+      {% if user.staff_profile %}
+        <a href="{% url 'attendance:mine' %}">Attendance</a>
+        <a href="{% url 'attendance:roster_mine' %}">My roster</a>
+      {% endif %}
+      {% if user.role == "main_admin" or user.role == "sub_admin" or user.headed_department or user.team.exists %}
+        <a href="{% url 'attendance:roster' %}">Duty roster</a>
+      {% endif %}
+      {% if user.role == "main_admin" or user.role == "sub_admin" or user.headed_department or user.staff_profile.attendance_officer %}
+        <a href="{% url 'attendance:team' %}">Team attendance</a>
+      {% endif %}
+      {% if user.staff_profile.department.is_laboratory or user.role == "main_admin" or user.role == "sub_admin" %}
+        <a href="{% url 'laboratory:worklist' %}">Laboratory</a>
+      {% endif %}
+    {% endif %}
+    {% if user.role == "main_admin" or user.role == "sub_admin" %}
+      <a href="{% url 'patients:list' %}">Patients</a>
+      <a href="{% url 'patients:family_list' %}">Families</a>
+      <a href="{% url 'facilities:overview' %}">Facilities</a>
+      <a href="{% url 'facilities:admission_list' %}">Admissions</a>
+      <a href="{% url 'accounts:staff_list' %}">Staff</a>
+      <a href="{% url 'datarequests:manage' %}">Data requests</a>
+      <a href="{% url 'core:audit_list' %}">Audit log</a>
+    {% endif %}
+    <form method="post" action="{% url 'accounts:logout' %}">
+      {% csrf_token %}
+      <button type="submit">Log out</button>
+    </form>
+  </nav>
+  <main>
+    {% if messages %}
+      <ul class="messages">{% for message in messages %}<li>{{ message }}</li>{% endfor %}</ul>
+    {% endif %}
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>

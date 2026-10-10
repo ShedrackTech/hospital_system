@@ -49,6 +49,10 @@ class StaffBaseForm(forms.Form):
         required=False, label="Attendance officer",
         help_text="Can record and confirm anyone's attendance (e.g. gateman, HR).",
     )
+    records_officer = forms.BooleanField(
+        required=False, label="Records officer",
+        help_text="Can read and answer patients' data requests (copy, correction, deletion).",
+    )
 
     def __init__(self, *args, actor, target=None, **kwargs):
         super().__init__(*args, **kwargs)
@@ -104,6 +108,7 @@ class StaffBaseForm(forms.Form):
             "category": d["category"], "job_title": d["job_title"],
             "department": d["department"], "grade": d["grade"],
             "attendance_officer": d["attendance_officer"],
+            "records_officer": d["records_officer"],
         }
 
 
@@ -154,6 +159,7 @@ class StaffEditForm(StaffBaseForm):
                 "category": profile.category, "job_title": profile.job_title,
                 "department": profile.department_id, "grade": profile.grade,
                 "attendance_officer": profile.attendance_officer,
+                "records_officer": profile.records_officer,
             })
 
     @transaction.atomic

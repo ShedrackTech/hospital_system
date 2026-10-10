@@ -1,5 +1,17 @@
 <div class="card">
   <h3>Attendance</h3>
+  {% if dash.attendance.shifts_today %}
+    <p><strong>Today's shift:</strong>
+      {% for e in dash.attendance.shifts_today %}{{ e.shift.name }} ({{ e.shift.start_time|time:"H:i" }}-{{ e.shift.end_time|time:"H:i" }}){% if e.building %}, {{ e.building }}{% endif %}{% if not forloop.last %}; {% endif %}{% endfor %}
+    </p>
+  {% else %}
+    <p class="muted">No shift is planned for you today.</p>
+  {% endif %}
+  {% if dash.attendance.shifts_next %}
+    <p class="muted">Next:
+      {% for e in dash.attendance.shifts_next %}{{ e.date|date:"D d M" }} {{ e.shift.name }}{% if not forloop.last %}; {% endif %}{% endfor %}
+    </p>
+  {% endif %}
   {% if dash.attendance.open %}
     <p>You clocked in at {{ dash.attendance.open.clock_in|date:"H:i" }} on {{ dash.attendance.open.clock_in|date:"d M" }}.</p>
     <form method="post" action="{% url 'attendance:clock_out' %}">
@@ -15,6 +27,7 @@
   {% endif %}
   <p>
     <a href="{% url 'attendance:mine' %}">My attendance</a>
+    | <a href="{% url 'attendance:roster_mine' %}">My roster</a>
     {% if dash.attendance.review_count %}
       | <a href="{% url 'attendance:team' %}?status=flagged">{{ dash.attendance.review_count }} record{{ dash.attendance.review_count|pluralize }} to review</a>
     {% elif dash.attendance.can_review %}

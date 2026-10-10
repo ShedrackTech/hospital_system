@@ -18,6 +18,7 @@
          <strong>Grade:</strong> {{ profile.get_grade_display }}</p>
       <p><strong>Department:</strong> {{ profile.department|default:"-" }}</p>
       {% if profile.attendance_officer %}<p><strong>Attendance officer:</strong> Yes</p>{% endif %}
+      {% if profile.records_officer %}<p><strong>Records officer:</strong> Yes</p>{% endif %}
     {% else %}
       <p class="muted">No staff profile yet. Use Edit to add one.</p>
     {% endif %}

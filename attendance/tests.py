@@ -152,8 +152,8 @@ class ViewTests(AttendanceBase):
     def test_head_confirms_team_member_and_stranger_gets_404(self):
         record = services.clock_in(self.doc)
         url = reverse("attendance:confirm", args=[record.pk])
-        self.login("physiodoc")
-        self.assertEqual(self.client.post(url).status_code, 404)
+        self.login("physiodoc")  # ordinary staff: no access to the team tools at all
+        self.assertEqual(self.client.post(url).status_code, 403)
         self.login("doc")
         self.assertEqual(self.client.post(url).status_code, 403)  # cannot confirm own
         self.login("head")

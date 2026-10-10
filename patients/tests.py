@@ -59,6 +59,9 @@ def make_patient(username, first_name):
     )
 
 
+from departments.models import StaffProfile
+
+
 class RegistrationTests(TestCase):
     def setUp(self):
         cache.clear()
@@ -182,6 +185,10 @@ class StaffRegistrationTests(TestCase):
         cls.nurse = User.objects.create_user(
             "nurse1", password=PASSWORD, role=User.Role.NURSE
         )
+        StaffProfile.objects.get_or_create(
+            user=cls.nurse,
+            defaults={"category": "admin", "job_title": "Receptionist"},
+        )
         cls.patient = make_patient("p1", "Chi")
 
     def test_anonymous_is_sent_to_login(self):
@@ -234,6 +241,10 @@ class PatientRecordAccessTests(TestCase):
         )
         cls.nurse = User.objects.create_user(
             "nurse1", password=PASSWORD, role=User.Role.NURSE
+        )
+        StaffProfile.objects.get_or_create(
+            user=cls.nurse,
+            defaults={"category": "admin", "job_title": "Receptionist"},
         )
         cls.alice = make_patient("alice", "Alice")
         cls.bob = make_patient("bob", "Bob")
@@ -309,6 +320,10 @@ class FamilyCardTests(TestCase):
         )
         cls.nurse = User.objects.create_user(
             "nurse1", password=PASSWORD, role=User.Role.NURSE
+        )
+        StaffProfile.objects.get_or_create(
+            user=cls.nurse,
+            defaults={"category": "admin", "job_title": "Receptionist"},
         )
 
     def register(self, **overrides):
@@ -472,6 +487,10 @@ class CardTests(TestCase):
         )
         cls.nurse = User.objects.create_user(
             "nurse1", password=PASSWORD, role=User.Role.NURSE
+        )
+        StaffProfile.objects.get_or_create(
+            user=cls.nurse,
+            defaults={"category": "admin", "job_title": "Receptionist"},
         )
         cls.single = CardType.for_kind(CardType.Kind.SINGLE)
         cls.family_type = CardType.for_kind(CardType.Kind.FAMILY)

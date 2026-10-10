@@ -8,6 +8,7 @@ from django.views import View
 from django.views.generic import ListView
 
 from . import permissions as perms
+from . import roster_services
 from . import services
 from .forms import CorrectionForm, FilterForm, StaffIdForm
 from .models import AttendanceRecord
@@ -106,11 +107,15 @@ class TeamAttendanceView(TeamAccessMixin, ListView):
         user = self.request.user
         today = timezone.localdate()
         records = list(context["records"])
+        schedule = roster_services.schedule_map(records)
         for record in records:
+            record.scheduled, record.late_minutes = roster_services.evaluate(
+                record, schedule.get((record.user_id, record.work_date), []))
             record.manageable = perms.can_manage_record(user, record)
             record.is_flagged = record.work_date < today and (
                 record.confirmed_at is None or record.clock_out is None)
         context["records"] = records
+        context["missing"] = roster_services.missing_today(user)
         context["form"] = self.form
         context["arrival_form"] = StaffIdForm() if perms.can_record_arrival(user) else None
         params = self.request.GET.copy()

@@ -40,7 +40,13 @@ def _role_dashboard(user):
         return _medical(user)
     profile = getattr(user, "staff_profile", None)
     if profile and profile.category == "admin":
-        return {"kind": "front_desk", "title": "Front desk"}
+        dash = {"kind": "front_desk", "title": "Front desk"}
+        if profile.records_officer:
+            from datarequests.models import DataRequest
+
+            dash["open_requests"] = DataRequest.objects.filter(
+                status__in=["open", "in_review"]).count()
+        return dash
     if profile and profile.category == "support":
         return {"kind": "support", "title": "Your duties"}
     return {"kind": "other", "title": "Welcome"}
@@ -49,6 +55,7 @@ def _role_dashboard(user):
 def _admin():
     from cases.models import Case
     from core.models import AuditLog
+    from datarequests.models import DataRequest
     from facilities.models import Admission, Bed
     from patients.models import Patient
 
@@ -71,6 +78,7 @@ def _admin():
         "counts": counts,
         "beds": beds,
         "admitted": Admission.objects.filter(discharged_at__isnull=True).count(),
+        "open_requests": DataRequest.objects.filter(status__in=["open", "in_review"]).count(),
         "patients": Patient.objects.count(),
         "staff": User.objects.exclude(role=User.Role.PATIENT).filter(is_active=True).count(),
         "recent_audit": list(AuditLog.objects.all()[:8]),

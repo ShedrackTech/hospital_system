@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Duty roster{% endblock %}
+{% block content %}
+  <div class="bar">
+    <h1>Duty roster</h1>
+    <span>
+      {% if can_edit_shifts %}<a href="{% url 'attendance:shifts' %}">Shift types</a> &nbsp;{% endif %}
+      <a href="{% url 'attendance:team' %}">Team attendance</a>
+    </span>
+  </div>
+
+  <p>
+    <a href="?start={{ prev_start|date:'Y-m-d' }}">&laquo; Previous week</a>
+    &nbsp; <a href="{% url 'attendance:roster' %}">This week</a> &nbsp;
+    <a href="?start={{ next_start|date:'Y-m-d' }}">Next week &raquo;</a>
+  </p>
+
+  {% if rows %}
+  <div class="wrap">
+  <table>
+    <tr>
+      <th>Staff</th>
+      {% for d in days %}<th>{{ d|date:"D d M" }}{% if d == today %} (today){% endif %}</th>{% endfor %}
+    </tr>
+    {% for row in rows %}
+    <tr>
+      <td>{{ row.user.get_full_name|default:row.user.username }}<br>
+          <span class="muted">{{ row.user.login_id }} &middot; {{ row.user.staff_profile.department|default:"-" }}</span></td>
+      {% for cell in row.cells %}
+      <td>
+        {% for e in cell %}
+          <div>
+            {{ e.shift.name }} {{ e.shift.start_time|time:"H:i" }}-{{ e.shift.end_time|time:"H:i" }}{% if e.building %}<br><span class="muted">{{ e.building }}</span>{% endif %}
+            {% if row.editable and e.date >= today %}
+            <form method="post" action="{% url 'attendance:roster_remove' e.pk %}" style="display:inline">
+              {% csrf_token %}<button type="submit" title="Remove this shift">x</button>
+            </form>
+            {% endif %}
+          </div>
+        {% empty %}<span class="muted">-</span>{% endfor %}
+      </td>
+      {% endfor %}
+    </tr>
+    {% endfor %}
+  </table>
+  </div>
+  {% else %}<p class="muted">No staff to show yet.</p>{% endif %}
+
+  <div class="card">
+    <h3>Plan a shift</h3>
+    <form method="post" action="{% url 'attendance:roster_assign' %}">
+      {% csrf_token %}{{ form.as_p }}
+      <button class="btn" type="submit">Add to roster</button>
+    </form>
+    <p class="muted">Hold Ctrl (or Cmd) to choose several people. Days that have passed cannot be planned, and you can plan up to 31 days at a time.</p>
+  </div>
+{% endblock %}

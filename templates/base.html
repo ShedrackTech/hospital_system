@@ -34,6 +34,7 @@
       <a href="{% url 'cases:mine' %}">My cases</a>
       <a href="{% url 'cases:new' %}">Report a problem</a>
       <a href="{% url 'laboratory:mine' %}">My results</a>
+      <a href="{% url 'datarequests:mine' %}">Data requests</a>
     {% else %}
       <a href="{% url 'departments:list' %}">Departments</a>
       {% if user.role == "main_admin" or user.role == "sub_admin" or user.staff_profile.category == "admin" %}
@@ -42,8 +43,15 @@
       {% if user.staff_profile.category != "support" %}
         <a href="{% url 'cases:home' %}">Cases</a>
       {% endif %}
+      {% if user.staff_profile.records_officer and user.role != "main_admin" and user.role != "sub_admin" %}
+        <a href="{% url 'datarequests:manage' %}">Data requests</a>
+      {% endif %}
       {% if user.staff_profile %}
         <a href="{% url 'attendance:mine' %}">Attendance</a>
+        <a href="{% url 'attendance:roster_mine' %}">My roster</a>
+      {% endif %}
+      {% if user.role == "main_admin" or user.role == "sub_admin" or user.headed_department or user.team.exists %}
+        <a href="{% url 'attendance:roster' %}">Duty roster</a>
       {% endif %}
       {% if user.role == "main_admin" or user.role == "sub_admin" or user.headed_department or user.staff_profile.attendance_officer %}
         <a href="{% url 'attendance:team' %}">Team attendance</a>
@@ -58,6 +66,7 @@
       <a href="{% url 'facilities:overview' %}">Facilities</a>
       <a href="{% url 'facilities:admission_list' %}">Admissions</a>
       <a href="{% url 'accounts:staff_list' %}">Staff</a>
+      <a href="{% url 'datarequests:manage' %}">Data requests</a>
       <a href="{% url 'core:audit_list' %}">Audit log</a>
     {% endif %}
     <form method="post" action="{% url 'accounts:logout' %}">

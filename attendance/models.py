@@ -78,3 +78,53 @@ class AttendanceCorrection(models.Model):
 
     def __str__(self):
         return f"Correction of record {self.record_id}"
+
+
+class ShiftType(models.Model):
+    """A named working period, e.g. Morning 07:00-15:00 or Night 19:00-07:00."""
+
+    name = models.CharField(max_length=60, unique=True)
+    start_time = models.TimeField()
+    end_time = models.TimeField()  # earlier than start_time means the shift ends next day
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ["start_time", "name"]
+
+    def __str__(self):
+        return f"{self.name} ({self.start_time:%H:%M}-{self.end_time:%H:%M})"
+
+    @property
+    def is_overnight(self):
+        return self.end_time <= self.start_time
+
+
+class RosterEntry(models.Model):
+    """One staff member planned to work one shift on one day (optionally in a building)."""
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="roster_entries"
+    )
+    date = models.DateField(db_index=True)  # the day the shift starts
+    shift = models.ForeignKey(ShiftType, on_delete=models.PROTECT, related_name="entries")
+    building = models.ForeignKey(
+        "facilities.Building", null=True, blank=True,
+        on_delete=models.SET_NULL, related_name="+",
+    )
+    note = models.CharField(max_length=200, blank=True)
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True,
+        on_delete=models.SET_NULL, related_name="+",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["date", "shift__start_time", "user_id"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "date", "shift"], name="one_roster_entry_per_shift"
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.user} {self.date} {self.shift.name}"

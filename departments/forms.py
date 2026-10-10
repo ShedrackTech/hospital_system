@@ -16,7 +16,7 @@ class DepartmentForm(forms.ModelForm):
 class StaffProfileForm(forms.ModelForm):
     class Meta:
         model = StaffProfile
-        fields = ("user", "category", "job_title", "department", "grade", "attendance_officer")
+        fields = ("user", "category", "job_title", "department", "grade", "attendance_officer", "records_officer")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

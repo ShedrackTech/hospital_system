@@ -9,7 +9,7 @@ from django.utils import timezone
 from core import audit
 
 from . import permissions as perms
-from .models import AttendanceCorrection, AttendanceRecord
+from .models import AttendanceCorrection, AttendanceRecord, RosterEntry
 
 
 def _open_today(user):
@@ -141,8 +141,15 @@ def panel_for(user):
     review_count = 0
     if can_review:
         review_count = perms.flagged(perms.visible_records(user)).exclude(user=user).count()
+    today = timezone.localdate()
+    upcoming = list(
+        RosterEntry.objects.filter(user=user, date__gte=today, date__lte=today + timedelta(days=7))
+        .select_related("shift", "building").order_by("date", "shift__start_time")[:6]
+    )
     return {
         "open": _open_today(user),
         "can_review": can_review,
         "review_count": review_count,
+        "shifts_today": [e for e in upcoming if e.date == today],
+        "shifts_next": [e for e in upcoming if e.date > today][:3],
     }
