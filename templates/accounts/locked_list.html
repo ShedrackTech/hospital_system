@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Locked accounts{% endblock %}
+{% block content %}
+  <h1>Locked accounts</h1>
+  <p class="muted">An account is locked for a short time after {{ max_attempts }} wrong passwords in a row. You can unlock it early once you are sure the real owner is asking.</p>
+  {% if locks %}
+  <div class="wrap">
+  <table>
+    <tr><th>Account</th><th>Failed attempts</th><th>Locked until</th><th>Last address</th><th></th></tr>
+    {% for l in locks %}
+    <tr>
+      <td>{{ l.label }}</td><td>{{ l.failed_count }}</td>
+      <td>{{ l.locked_until|date:"d M Y H:i" }}</td><td>{{ l.last_ip|default:"-" }}</td>
+      <td>
+        <form method="post" action="{% url 'accounts:unlock' l.pk %}">
+          {% csrf_token %}<button class="btn" type="submit">Unlock</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+  </div>
+  {% else %}<p class="muted">No accounts are locked.</p>{% endif %}
+
+  <div class="card">
+    <h3>Recent failed attempts (not locked)</h3>
+    {% if watching %}
+    <ul>
+      {% for w in watching %}
+      <li>{{ w.label }}: {{ w.failed_count }} failed, last at {{ w.last_failed_at|date:"H:i" }} from {{ w.last_ip|default:"-" }}</li>
+      {% endfor %}
+    </ul>
+    {% else %}<p class="muted">None in the last few minutes.</p>{% endif %}
+    <p><a href="{% url 'core:audit_list' %}?action=login_failed">See all failed logins in the audit log</a></p>
+  </div>
+{% endblock %}

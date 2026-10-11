@@ -9,6 +9,7 @@ Rules (same as the rest of the portal):
 """
 from django.contrib.auth import get_user_model
 from django.db.models import Count, Q
+from django.utils import timezone
 
 
 def build_dashboard(user):
@@ -55,6 +56,7 @@ def _role_dashboard(user):
 def _admin():
     from cases.models import Case
     from core.models import AuditLog
+    from core.models import LoginThrottle
     from datarequests.models import DataRequest
     from facilities.models import Admission, Bed
     from patients.models import Patient
@@ -79,6 +81,7 @@ def _admin():
         "beds": beds,
         "admitted": Admission.objects.filter(discharged_at__isnull=True).count(),
         "open_requests": DataRequest.objects.filter(status__in=["open", "in_review"]).count(),
+        "locked_accounts": LoginThrottle.objects.filter(locked_until__gt=timezone.now()).count(),
         "patients": Patient.objects.count(),
         "staff": User.objects.exclude(role=User.Role.PATIENT).filter(is_active=True).count(),
         "recent_audit": list(AuditLog.objects.all()[:8]),

@@ -23,6 +23,7 @@
     <div class="stat"><a href="{% url 'facilities:overview' %}"><div class="n">{{ dash.beds.free }} / {{ dash.beds.total }}</div>Beds free</a></div>
     <div class="stat"><a href="{% url 'patients:list' %}"><div class="n">{{ dash.patients }}</div>Patients</a></div>
     <div class="stat"><a href="{% url 'datarequests:manage' %}"><div class="n">{{ dash.open_requests }}</div>Data requests</a></div>
+    <div class="stat"><a href="{% url 'accounts:locked_list' %}"><div class="n">{{ dash.locked_accounts }}</div>Locked accounts</a></div>
     <div class="stat"><div class="n">{{ dash.staff }}</div>Active staff</div>
   </div>
   <div class="actions">

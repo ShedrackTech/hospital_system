@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.backends import ModelBackend
+from django.core.exceptions import PermissionDenied
 from django.db.models import Q
 
 UserModel = get_user_model()
@@ -15,6 +16,14 @@ class LoginIDBackend(ModelBackend):
             return None
 
         username = username.strip()
+
+        # A locked account cannot log in, even with the right password. Raising
+        # PermissionDenied stops every other login method too (portal and Django admin).
+        from core import lockout
+
+        if lockout.is_locked(username):
+            raise PermissionDenied
+
         try:
             user = UserModel.objects.get(
                 Q(login_id__iexact=username) | Q(username__iexact=username)

@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.db import models
+from django.utils import timezone
 
 
 class AuditLog(models.Model):
@@ -56,3 +57,28 @@ class AuditLog(models.Model):
 
     def delete(self, *args, **kwargs):
         raise RuntimeError("Audit log entries cannot be deleted.")
+
+
+class LoginThrottle(models.Model):
+    """
+    Failed-login counter for one account (or one unknown ID that someone typed).
+    One row per account no matter whether the person typed the username or the
+    card number / staff ID. See core/lockout.py for the rules.
+    """
+
+    key = models.CharField(max_length=200, unique=True)  # "user:<pk>" or "unknown:<typed id>"
+    label = models.CharField(max_length=200)              # what admins see
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True,
+        on_delete=models.SET_NULL, related_name="+",
+    )
+    failed_count = models.PositiveSmallIntegerField(default=0)
+    last_failed_at = models.DateTimeField(default=timezone.now)
+    locked_until = models.DateTimeField(null=True, blank=True)
+    last_ip = models.GenericIPAddressField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["-last_failed_at"]
+
+    def __str__(self):
+        return f"{self.label} ({self.failed_count} failed)"

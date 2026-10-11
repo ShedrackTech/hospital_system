@@ -35,3 +35,20 @@ class LoginForm(AuthenticationForm):
             attrs={"autofocus": True, "placeholder": "e.g. ada, PAT000001 or STF000001"}
         ),
     )
+
+    def clean(self):
+        # Show a clear message when the account is locked (the same message for a real
+        # account and for an ID that does not exist, so nothing is revealed).
+        from core import lockout
+
+        username = self.cleaned_data.get("username")
+        if username:
+            wait = lockout.minutes_left(username)
+            if wait:
+                lockout.note_blocked(username, self.request)
+                raise forms.ValidationError(
+                    "Too many failed attempts. Please try again in "
+                    f"{wait} minute{'s' if wait != 1 else ''}.",
+                    code="locked",
+                )
+        return super().clean()

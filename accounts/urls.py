@@ -1,7 +1,7 @@
 from django.contrib.auth.views import LogoutView
 from django.urls import path
 
-from . import staff_views, views
+from . import lock_views, staff_views, views
 
 app_name = "accounts"
 
@@ -9,6 +9,9 @@ urlpatterns = [
     path("login/", views.PortalLoginView.as_view(), name="login"),
     path("logout/", LogoutView.as_view(), name="logout"),
     path("dashboard/", views.dashboard, name="dashboard"),
+    # Locked accounts (admin roles only)
+    path("locked/", lock_views.LockedAccountsView.as_view(), name="locked_list"),
+    path("locked/<int:pk>/unlock/", lock_views.UnlockView.as_view(), name="unlock"),
     # Staff management (admin roles only)
     path("staff/", staff_views.StaffListView.as_view(), name="staff_list"),
     path("staff/new/", staff_views.StaffCreateView.as_view(), name="staff_create"),
