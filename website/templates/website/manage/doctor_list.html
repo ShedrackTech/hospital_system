@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Doctors on the website</h1>
+{% include "website/manage/_nav.html" %}
+<p class="ws-muted">Only a doctor you list here appears publicly, and only with their name, job title, department and the bio you write. A doctor who is deactivated or no longer a doctor disappears automatically.</p>
+<p><a href="{% url 'website:manage_doctor_new' %}">+ List a doctor</a></p>
+<table class="ws">
+  <tr><th>Doctor</th><th>Department</th><th>Order</th><th>Shown</th><th></th></tr>
+  {% for listing in listings %}
+  <tr>
+    <td>{{ listing }}</td>
+    <td>{{ listing.user.staff_profile.department|default:"-" }}</td>
+    <td>{{ listing.display_order }}</td>
+    <td>{% if listing.is_listed %}Yes{% else %}No{% endif %}</td>
+    <td><a href="{% url 'website:manage_doctor_edit' listing.pk %}">Edit</a></td>
+  </tr>
+  {% empty %}
+  <tr><td colspan="5" class="ws-muted">No doctors listed yet.</td></tr>
+  {% endfor %}
+</table>
+{% endblock %}

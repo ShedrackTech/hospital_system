@@ -1,0 +1,12 @@
+{% extends "website/base_public.html" %}
+{% block title %}Departments | {{ HOSPITAL_NAME|default:"Hospital" }}{% endblock %}
+{% block content %}
+<h1>Departments</h1>
+<div class="grid">
+  {% for department in departments %}
+    <div class="card"><h3>{{ department.name }}</h3><p>{{ department.description }}</p></div>
+  {% empty %}
+    <p>No departments to show yet.</p>
+  {% endfor %}
+</div>
+{% endblock %}

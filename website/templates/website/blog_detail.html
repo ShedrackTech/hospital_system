@@ -1,0 +1,10 @@
+{% extends "website/base_public.html" %}
+{% block title %}{{ post.title }} | {{ HOSPITAL_NAME|default:"Hospital" }}{% endblock %}
+{% block content %}
+<article class="article">
+  <p><a href="{% url 'website:blog' %}">&laquo; All posts</a></p>
+  <h1>{{ post.title }}</h1>
+  <p class="meta">{{ post.get_category_display }} &middot; {{ post.published_at|date:"j F Y" }}{% if post.author %} by {{ post.author.get_full_name|default:"the hospital team" }}{% endif %}</p>
+  {{ post.body|linebreaks }}
+</article>
+{% endblock %}

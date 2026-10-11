@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Services</h1>
+{% include "website/manage/_nav.html" %}
+<p><a href="{% url 'website:manage_service_new' %}">+ New service</a></p>
+<table class="ws">
+  <tr><th>Name</th><th>Order</th><th>Shown on website</th><th></th></tr>
+  {% for service in services %}
+  <tr>
+    <td>{{ service.name }}</td><td>{{ service.display_order }}</td>
+    <td>{% if service.is_active %}Yes{% else %}No{% endif %}</td>
+    <td><a href="{% url 'website:manage_service_edit' service.pk %}">Edit</a></td>
+  </tr>
+  {% empty %}
+  <tr><td colspan="4" class="ws-muted">No services yet.</td></tr>
+  {% endfor %}
+</table>
+{% endblock %}

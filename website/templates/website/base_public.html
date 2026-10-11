@@ -1,0 +1,56 @@
+{% load static %}<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{{ HOSPITAL_NAME|default:"Hospital" }}{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'website/site.css' %}">
+</head>
+<body>
+<header class="site">
+  <div class="wrap">
+    <a class="brand" href="{% url 'website:home' %}">{{ HOSPITAL_NAME|default:"Hospital" }}</a>
+    <nav class="main">
+      <a href="{% url 'website:about' %}">About</a>
+      <a href="{% url 'website:departments' %}">Departments</a>
+      <a href="{% url 'website:doctors' %}">Doctors</a>
+      <a href="{% url 'website:services' %}">Services</a>
+      <a href="{% url 'website:blog' %}">Blog</a>
+      <a href="{% url 'website:contact' %}">Contact</a>
+      {% if request.user.is_authenticated %}
+        <a class="btn" href="{% url 'accounts:dashboard' %}">My portal</a>
+      {% else %}
+        <a class="btn" href="{% url 'accounts:login' %}">Login</a>
+      {% endif %}
+    </nav>
+  </div>
+</header>
+
+<main class="page">
+  <div class="wrap">
+    {% for message in messages %}
+      <div class="msg {{ message.tags }}">{{ message }}</div>
+    {% endfor %}
+    {% block content %}{% endblock %}
+  </div>
+</main>
+
+<footer class="site">
+  <div class="wrap">
+    <div>
+      <strong>{{ HOSPITAL_NAME|default:"Hospital" }}</strong><br>
+      {% if site.address %}{{ site.address|linebreaksbr }}{% endif %}
+    </div>
+    <div>
+      {% if site.phone %}Phone: {{ site.phone }}<br>{% endif %}
+      {% if site.email %}Email: {{ site.email }}<br>{% endif %}
+      {% if site.opening_hours %}{{ site.opening_hours }}{% endif %}
+    </div>
+    <div>
+      {% if site.emergency_phone %}<span class="emergency" style="color:#ffb4b4">Emergency: {{ site.emergency_phone }}</span><br>{% endif %}
+      <a href="{% url 'website:contact' %}">Contact us</a>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

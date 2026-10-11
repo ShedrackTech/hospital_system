@@ -1,0 +1,30 @@
+{% extends "website/base_public.html" %}
+{% block title %}Blog | {{ HOSPITAL_NAME|default:"Hospital" }}{% endblock %}
+{% block content %}
+<h1>Blog</h1>
+<p class="meta">Health news and tips, and updates on the development of our hospital.</p>
+<nav class="main" style="margin:12px 0 20px;">
+  <a href="{% url 'website:blog' %}"{% if not category_filter %} class="on"{% endif %}>All</a>
+  {% for value, label in categories %}
+    <a href="?category={{ value }}"{% if category_filter == value %} class="on"{% endif %}>{{ label }}</a>
+  {% endfor %}
+</nav>
+<div class="grid">
+  {% for post in posts %}
+    <div class="card">
+      <p class="meta">{{ post.get_category_display }} &middot; {{ post.published_at|date:"j F Y" }}</p>
+      <h3><a href="{% url 'website:blog_detail' post.slug %}">{{ post.title }}</a></h3>
+      <p>{{ post.summary }}</p>
+    </div>
+  {% empty %}
+    <p>No posts yet.</p>
+  {% endfor %}
+</div>
+{% if is_paginated %}
+<div class="pager">
+  {% if page_obj.has_previous %}<a href="?{{ query_extra }}page={{ page_obj.previous_page_number }}">&laquo; Newer</a>{% endif %}
+  <span class="meta">Page {{ page_obj.number }} of {{ paginator.num_pages }}</span>
+  {% if page_obj.has_next %}<a href="?{{ query_extra }}page={{ page_obj.next_page_number }}">Older &raquo;</a>{% endif %}
+</div>
+{% endif %}
+{% endblock %}

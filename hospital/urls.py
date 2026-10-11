@@ -2,7 +2,6 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
-from django.views.generic import RedirectView
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -14,9 +13,10 @@ urlpatterns = [
     path("laboratory/", include("laboratory.urls")),
     path("attendance/", include("attendance.urls")),
     path("requests/", include("datarequests.urls")),
-    # Temporary: send the home page to login until the public website app is built
-    path("", RedirectView.as_view(pattern_name="accounts:login", permanent=False)),
     path("cases/", include("cases.urls")),
+    # Public website (home page, about, departments, doctors, services, contact, blog)
+    # and the admin pages under /site/ that run it.
+    path("", include("website.urls")),
 ]
 
 if settings.DEBUG:

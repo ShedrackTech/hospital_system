@@ -67,6 +67,7 @@
       <a href="{% url 'facilities:admission_list' %}">Admissions</a>
       <a href="{% url 'accounts:staff_list' %}">Staff</a>
       <a href="{% url 'datarequests:manage' %}">Data requests</a>
+      <a href="{% url 'website:manage_home' %}">Website</a>
       <a href="{% url 'core:audit_list' %}">Audit log</a>
     {% endif %}
     <form method="post" action="{% url 'accounts:logout' %}">

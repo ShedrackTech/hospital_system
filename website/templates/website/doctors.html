@@ -1,0 +1,18 @@
+{% extends "website/base_public.html" %}
+{% block title %}Doctors | {{ HOSPITAL_NAME|default:"Hospital" }}{% endblock %}
+{% block content %}
+<h1>Our doctors</h1>
+<div class="grid">
+  {% for listing in listings %}
+    <div class="card">
+      <h3>{{ listing.public_name }}</h3>
+      <p class="meta">
+        {{ listing.user.staff_profile.job_title }}{% if listing.user.staff_profile.department %}{% if listing.user.staff_profile.job_title %}, {% endif %}{{ listing.user.staff_profile.department.name }}{% endif %}
+      </p>
+      {% if listing.bio %}<p>{{ listing.bio }}</p>{% endif %}
+    </div>
+  {% empty %}
+    <p>No doctors to show yet.</p>
+  {% endfor %}
+</div>
+{% endblock %}

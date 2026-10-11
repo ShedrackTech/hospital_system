@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>{{ page_title }}</h1>
+{% include "website/manage/_nav.html" %}
+<form method="post">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button type="submit">Save</button>
+  {% if cancel_url %}<a href="{{ cancel_url }}">Cancel</a>{% endif %}
+</form>
+{% endblock %}

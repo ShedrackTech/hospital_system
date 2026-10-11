@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Public website</h1>
+{% include "website/manage/_nav.html" %}
+<ul>
+  <li>Blog posts: {{ published_count }} published, {{ draft_count }} draft(s). <a href="{% url 'website:manage_posts' %}">Manage</a></li>
+  <li>Unanswered contact messages: {{ open_message_count }}. <a href="{% url 'website:manage_messages' %}">Open</a></li>
+</ul>
+{% endblock %}

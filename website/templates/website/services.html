@@ -1,0 +1,12 @@
+{% extends "website/base_public.html" %}
+{% block title %}Services | {{ HOSPITAL_NAME|default:"Hospital" }}{% endblock %}
+{% block content %}
+<h1>Services</h1>
+<div class="grid">
+  {% for service in services %}
+    <div class="card"><h3>{{ service.name }}</h3><p>{{ service.description }}</p></div>
+  {% empty %}
+    <p>No services to show yet.</p>
+  {% endfor %}
+</div>
+{% endblock %}

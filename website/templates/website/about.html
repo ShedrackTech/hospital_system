@@ -1,0 +1,8 @@
+{% extends "website/base_public.html" %}
+{% block title %}About | {{ HOSPITAL_NAME|default:"Hospital" }}{% endblock %}
+{% block content %}
+<h1>About us</h1>
+<div class="article">
+  {% if site.about_text %}{{ site.about_text|linebreaks }}{% else %}<p>Information about the hospital will be added soon.</p>{% endif %}
+</div>
+{% endblock %}
