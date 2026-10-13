@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.db.models import Count, Q
 
-from .models import Admission, Bed, Building, Ward
+from .models import Admission, Bed, Building, Ward, WardAssignment
 
 
 class BedInline(admin.TabularInline):
@@ -78,3 +78,11 @@ class AdmissionAdmin(admin.ModelAdmin):
 
     def has_delete_permission(self, request, obj=None):
         return False
+
+
+@admin.register(WardAssignment)
+class WardAssignmentAdmin(admin.ModelAdmin):
+    list_display = ("user", "ward", "created_by", "created_at")
+    list_filter = ("ward__building", "ward")
+    search_fields = ("user__first_name", "user__last_name", "user__login_id", "ward__name")
+    list_select_related = ("user", "ward", "ward__building")

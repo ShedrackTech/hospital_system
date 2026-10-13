@@ -35,6 +35,17 @@ def get_patient(user):
     return Patient.objects.filter(user=user).first()
 
 
+def is_ward_nurse_for(user, case):
+    """A nurse assigned to the ward where this case's patient is admitted right now."""
+    from facilities.models import WardAssignment  # local import: avoids a cycle
+
+    return WardAssignment.objects.filter(
+        user=user,
+        ward__beds__admissions__case=case,
+        ward__beds__admissions__discharged_at__isnull=True,
+    ).exists()
+
+
 def can_view(user, case):
     if is_admin(user):
         return True
@@ -47,6 +58,8 @@ def can_view(user, case):
         return True
     if is_general_staff(user) and not case.is_routed:
         return True
+    if is_medical(user) and is_ward_nurse_for(user, case):
+        return True  # read-only: the case actions have their own checks
     return False
 
 

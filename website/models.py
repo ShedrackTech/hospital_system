@@ -1,7 +1,17 @@
+import os
+import uuid
+
 from django.conf import settings
+from django.core.validators import FileExtensionValidator
 from django.db import models
 from django.utils import timezone
 from django.utils.text import slugify
+
+
+def doctor_photo_path(instance, filename):
+    """Store photos under a random name so the original file name (often a person's name) is not exposed."""
+    extension = os.path.splitext(filename)[1].lower()
+    return f"doctor_photos/{uuid.uuid4().hex}{extension}"
 
 
 class SiteInfo(models.Model):
@@ -18,6 +28,10 @@ class SiteInfo(models.Model):
     emergency_phone = models.CharField(max_length=40, blank=True)
     email = models.EmailField(blank=True)
     opening_hours = models.CharField(max_length=200, blank=True)
+    notify_email = models.EmailField(
+        blank=True,
+        help_text="New contact messages are also emailed to this address. Leave blank to turn this off. It is never shown on the website.",
+    )
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
@@ -63,6 +77,12 @@ class DoctorListing(models.Model):
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="doctor_listing"
     )
     bio = models.TextField(blank=True)
+    photo = models.ImageField(
+        upload_to=doctor_photo_path,
+        blank=True,
+        validators=[FileExtensionValidator(["jpg", "jpeg", "png", "webp"])],
+        help_text="JPG, PNG or WebP, up to 2 MB. Only upload a photo the doctor has agreed to publish.",
+    )
     display_order = models.PositiveIntegerField(default=0, help_text="Lower numbers show first.")
     is_listed = models.BooleanField(default=True, help_text="Untick to hide from the website.")
     updated_at = models.DateTimeField(auto_now=True)

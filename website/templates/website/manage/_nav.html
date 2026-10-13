@@ -6,11 +6,15 @@
   .ws-muted { color:#666; font-size:.9em; }
 </style>
 <div class="wsnav">
-  <a href="{% url 'website:manage_home' %}">Website</a>
+  {% if user.role == "main_admin" or user.role == "sub_admin" %}
+    <a href="{% url 'website:manage_home' %}">Website</a>
+  {% endif %}
   <a href="{% url 'website:manage_posts' %}">Blog posts</a>
-  <a href="{% url 'website:manage_services' %}">Services</a>
-  <a href="{% url 'website:manage_doctors' %}">Doctors</a>
-  <a href="{% url 'website:manage_info' %}">About and contact details</a>
-  <a href="{% url 'website:manage_messages' %}">Messages</a>
+  {% if user.role == "main_admin" or user.role == "sub_admin" %}
+    <a href="{% url 'website:manage_services' %}">Services</a>
+    <a href="{% url 'website:manage_doctors' %}">Doctors</a>
+    <a href="{% url 'website:manage_info' %}">About and contact details</a>
+    <a href="{% url 'website:manage_messages' %}">Messages</a>
+  {% endif %}
   <a href="{% url 'website:home' %}" target="_blank" rel="noopener">View public site</a>
 </div>

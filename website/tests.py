@@ -1,9 +1,17 @@
+import shutil
+import tempfile
 from datetime import timedelta
+from io import BytesIO
+from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
+from django.core import mail
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
+
+from PIL import Image
 
 from core.models import AuditLog
 from departments.models import Department, StaffProfile
@@ -23,6 +31,20 @@ def make_doctor(username, first="Ada", last="Obi", role="doctor", category="medi
     user = make_account(username, role=role, first=first, last=last, phone="08011112222", email=f"{username}@example.com")
     StaffProfile.objects.create(user=user, category=category, job_title="Consultant", department=department)
     return user
+
+
+def make_staff_member(username, role="nurse", category="admin", first="Ngozi", last="Eze"):
+    """A staff account that is not an admin role, with a chosen staff category."""
+    user = make_account(username, role=role, first=first, last=last)
+    StaffProfile.objects.create(user=user, category=category, job_title="Officer")
+    return user
+
+
+def image_upload(name="photo.png", fmt="PNG", size=(40, 40)):
+    buffer = BytesIO()
+    Image.new("RGB", size, "teal").save(buffer, fmt)
+    content_types = {"PNG": "image/png", "JPEG": "image/jpeg", "GIF": "image/gif"}
+    return SimpleUploadedFile(name, buffer.getvalue(), content_type=content_types[fmt])
 
 
 def make_post(title="Hand washing", status=BlogPost.Status.PUBLISHED, published_at=None, **extra):
@@ -381,3 +403,183 @@ class ManageActionTests(TestCase):
         self.assertContains(response, "Open one")
         self.assertNotContains(response, "Done one")
         self.assertContains(self.client.get(reverse("website:manage_messages") + "?show=all"), "Done one")
+
+
+@FAST
+class BlogAccessTests(TestCase):
+    """Blog posts: admin roles and administrative-category staff. Nobody else."""
+
+    def setUp(self):
+        self.admin_staff = make_staff_member("frontdesk1", role="nurse", category="admin")
+        self.medical = make_doctor("dr_blog")
+        self.patient = make_account("pat_blog", role="patient")
+        self.post = make_post("Existing post")
+        self.post_urls = [
+            reverse("website:manage_posts"),
+            reverse("website:manage_post_new"),
+            reverse("website:manage_post_edit", args=[self.post.pk]),
+        ]
+        self.other_urls = [
+            reverse("website:manage_home"),
+            reverse("website:manage_info"),
+            reverse("website:manage_services"),
+            reverse("website:manage_service_new"),
+            reverse("website:manage_doctors"),
+            reverse("website:manage_doctor_new"),
+            reverse("website:manage_messages"),
+        ]
+
+    def test_administrative_staff_can_use_blog_pages(self):
+        self.client.force_login(self.admin_staff)
+        for url in self.post_urls:
+            self.assertEqual(self.client.get(url).status_code, 200, url)
+
+    def test_administrative_staff_cannot_use_other_website_pages(self):
+        self.client.force_login(self.admin_staff)
+        for url in self.other_urls:
+            self.assertEqual(self.client.get(url).status_code, 403, url)
+
+    def test_medical_staff_and_patients_cannot_use_blog_pages(self):
+        for account in (self.medical, self.patient):
+            self.client.force_login(account)
+            for url in self.post_urls:
+                self.assertEqual(self.client.get(url).status_code, 403, f"{account.username} {url}")
+
+    def test_anonymous_is_sent_to_login(self):
+        for url in self.post_urls:
+            response = self.client.get(url)
+            self.assertEqual(response.status_code, 302, url)
+            self.assertIn("login", response["Location"], url)
+
+    def test_administrative_staff_can_publish_and_it_is_audited_with_their_name(self):
+        self.client.force_login(self.admin_staff)
+        self.client.post(reverse("website:manage_post_new"),
+                         {"title": "New wing opens", "category": "hospital", "summary": "", "body": "Details.", "status": "published"})
+        post = BlogPost.objects.get(title="New wing opens")
+        self.assertEqual(post.author, self.admin_staff)
+        self.assertContains(self.client.get(reverse("website:blog")), "New wing opens")
+        entry = AuditLog.objects.filter(action="blog_post_published").first() or AuditLog.objects.filter(action="blog_post_created").first()
+        self.assertEqual(entry.actor, self.admin_staff)
+
+    def test_blog_menu_pages_hide_admin_only_links_from_administrative_staff(self):
+        self.client.force_login(self.admin_staff)
+        response = self.client.get(reverse("website:manage_posts"))
+        self.assertNotContains(response, reverse("website:manage_services"))
+        self.assertNotContains(response, reverse("website:manage_messages"))
+
+
+@FAST
+class ContactEmailTests(TestCase):
+    data = {"reason": "help", "name": "Chika", "email": "chika@example.com", "social_handle": "@chika",
+            "subject": "Visiting hours", "message": "When can I visit?", "company": ""}
+
+    def set_notify(self, address="inbox@hospital.example"):
+        info = SiteInfo.get()
+        info.notify_email = address
+        info.save()
+
+    def test_no_email_when_no_address_is_set(self):
+        self.client.post(reverse("website:contact"), self.data)
+        self.assertEqual(ContactMessage.objects.count(), 1)
+        self.assertEqual(len(mail.outbox), 0)
+
+    def test_new_message_is_emailed_to_the_hospital(self):
+        self.set_notify()
+        self.client.post(reverse("website:contact"), self.data)
+        self.assertEqual(len(mail.outbox), 1)
+        email = mail.outbox[0]
+        self.assertEqual(email.to, ["inbox@hospital.example"])
+        self.assertEqual(email.reply_to, ["chika@example.com"])
+        self.assertIn("Visiting hours", email.subject)
+        self.assertIn("When can I visit?", email.body)
+        self.assertIn("@chika", email.body)
+
+    def test_spam_and_invalid_messages_send_nothing(self):
+        self.set_notify()
+        self.client.post(reverse("website:contact"), {**self.data, "company": "Spam Ltd"})
+        self.client.post(reverse("website:contact"), {**self.data, "email": "nope"})
+        self.assertEqual(len(mail.outbox), 0)
+
+    def test_mail_failure_does_not_lose_the_message(self):
+        self.set_notify()
+        with patch("website.notifications.send_mail", side_effect=OSError("smtp down")):
+            with self.assertLogs("website.notifications", level="ERROR"):
+                response = self.client.post(reverse("website:contact"), self.data)
+        self.assertRedirects(response, reverse("website:contact"))
+        self.assertEqual(ContactMessage.objects.count(), 1)
+
+    def test_notify_address_is_never_shown_publicly(self):
+        self.set_notify("secret-inbox@hospital.example")
+        for name in ["home", "about", "contact", "doctors", "blog"]:
+            self.assertNotContains(self.client.get(reverse(f"website:{name}")), "secret-inbox@hospital.example")
+
+    def test_admin_can_set_the_notify_address(self):
+        admin = make_account("subadmin_mail", role="sub_admin")
+        self.client.force_login(admin)
+        self.client.post(reverse("website:manage_info"), {"about_text": "", "address": "", "phone": "", "emergency_phone": "",
+                                                           "email": "", "opening_hours": "", "notify_email": "inbox@hospital.example"})
+        self.assertEqual(SiteInfo.get().notify_email, "inbox@hospital.example")
+
+
+@FAST
+class DoctorPhotoTests(TestCase):
+    def setUp(self):
+        self.media = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, self.media, ignore_errors=True)
+        override = override_settings(MEDIA_ROOT=self.media)
+        override.enable()
+        self.addCleanup(override.disable)
+        self.admin = make_account("subadmin_photo", role="sub_admin")
+        self.doctor = make_doctor("dr_photo", first="Photo", last="Doc")
+        self.client.force_login(self.admin)
+        self.url = reverse("website:manage_doctor_new")
+
+    def post(self, upload):
+        return self.client.post(self.url, {"user": self.doctor.pk, "bio": "Hi", "display_order": 0, "is_listed": "on", "photo": upload})
+
+    def test_photo_is_saved_under_a_random_name_and_shown_publicly(self):
+        self.post(image_upload("Dr Photo Doc Real Name.png"))
+        listing = DoctorListing.objects.get(user=self.doctor)
+        self.assertTrue(listing.photo)
+        self.assertNotIn("Real Name", listing.photo.name)
+        self.assertTrue(listing.photo.name.startswith("doctor_photos/"))
+        self.assertContains(self.client.get(reverse("website:doctors")), listing.photo.url)
+
+    def test_photo_is_optional(self):
+        self.client.post(self.url, {"user": self.doctor.pk, "bio": "Hi", "display_order": 0, "is_listed": "on"})
+        listing = DoctorListing.objects.get(user=self.doctor)
+        self.assertFalse(listing.photo)
+        self.assertNotContains(self.client.get(reverse("website:doctors")), "<img")
+
+    def test_non_image_is_rejected(self):
+        self.post(SimpleUploadedFile("evil.png", b"<script>alert(1)</script>", content_type="image/png"))
+        self.assertEqual(DoctorListing.objects.count(), 0)
+
+    def test_wrong_format_is_rejected(self):
+        self.post(image_upload("anim.gif", fmt="GIF"))
+        self.assertEqual(DoctorListing.objects.count(), 0)
+
+    def test_wrong_extension_is_rejected(self):
+        self.post(image_upload("photo.svg"))
+        self.assertEqual(DoctorListing.objects.count(), 0)
+
+    def test_large_file_is_rejected(self):
+        with patch("website.forms.MAX_PHOTO_BYTES", 50):
+            self.post(image_upload("big.png"))
+        self.assertEqual(DoctorListing.objects.count(), 0)
+
+    def test_unlisted_doctors_photo_is_not_on_the_public_page(self):
+        self.post(image_upload())
+        listing = DoctorListing.objects.get(user=self.doctor)
+        listing.is_listed = False
+        listing.save()
+        self.assertNotContains(self.client.get(reverse("website:doctors")), listing.photo.url)
+
+    def test_photo_can_be_replaced_when_editing(self):
+        self.post(image_upload("one.png"))
+        listing = DoctorListing.objects.get(user=self.doctor)
+        old_name = listing.photo.name
+        self.client.post(reverse("website:manage_doctor_edit", args=[listing.pk]),
+                         {"bio": "Hi", "display_order": 0, "is_listed": "on", "photo": image_upload("two.png", fmt="JPEG")})
+        listing.refresh_from_db()
+        self.assertNotEqual(listing.photo.name, old_name)

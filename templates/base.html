@@ -40,6 +40,9 @@
       {% if user.role == "main_admin" or user.role == "sub_admin" or user.staff_profile.category == "admin" %}
         <a href="{% url 'patients:staff_register' %}">Register patient</a>
       {% endif %}
+      {% if user.staff_profile.category == "admin" and user.role != "main_admin" and user.role != "sub_admin" %}
+        <a href="{% url 'website:manage_posts' %}">Blog posts</a>
+      {% endif %}
       {% if user.staff_profile.category != "support" %}
         <a href="{% url 'cases:home' %}">Cases</a>
       {% endif %}

@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Ward staff{% endblock %}
+{% block content %}
+  <div class="bar">
+    <h1>Nurses in wards</h1>
+    <a href="{% url 'facilities:overview' %}">Facilities</a>
+  </div>
+  <p class="muted">A nurse sees only the patients who are admitted in the wards they are assigned to. Cleaners are placed in buildings through the duty roster.</p>
+
+  {% if rows %}
+  <div class="wrap">
+  <table>
+    <tr><th>Ward</th><th>Department</th><th>Nurses assigned</th></tr>
+    {% for row in rows %}
+    <tr>
+      <td>{{ row.ward.building.name }} / {{ row.ward.name }}<br><span class="muted">{{ row.ward.get_ward_type_display }}</span></td>
+      <td>{{ row.ward.department|default:"Shared" }}</td>
+      <td>
+        {% for a in row.assignments %}
+          <div>
+            {{ a.user.get_full_name|default:a.user.username }} ({{ a.user.login_id }})
+            {% if a.editable %}
+            <form method="post" action="{% url 'facilities:ward_unassign' a.pk %}" style="display:inline">
+              {% csrf_token %}<button type="submit" title="Remove from this ward">x</button>
+            </form>
+            {% endif %}
+          </div>
+        {% empty %}<span class="muted">No nurse assigned</span>{% endfor %}
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+  </div>
+  {% else %}<p class="muted">No wards yet.</p>{% endif %}
+
+  <div class="card">
+    <h3>Assign nurses to a ward</h3>
+    <form method="post" action="{% url 'facilities:ward_assign' %}">
+      {% csrf_token %}{{ form.as_p }}
+      <button class="btn" type="submit">Assign</button>
+    </form>
+    <p class="muted">Hold Ctrl (or Cmd) to choose several nurses. Only nurses (Nurse or Senior Nurse, Medical category) appear. Department heads see only their own team.</p>
+  </div>
+{% endblock %}

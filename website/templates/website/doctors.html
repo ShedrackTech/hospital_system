@@ -5,6 +5,10 @@
 <div class="grid">
   {% for listing in listings %}
     <div class="card">
+      {% if listing.photo %}
+        <img src="{{ listing.photo.url }}" alt="{{ listing.public_name }}" loading="lazy"
+             style="width:100%; height:220px; object-fit:cover; border-radius:6px; margin-bottom:10px;">
+      {% endif %}
       <h3>{{ listing.public_name }}</h3>
       <p class="meta">
         {{ listing.user.staff_profile.job_title }}{% if listing.user.staff_profile.department %}{% if listing.user.staff_profile.job_title %}, {% endif %}{{ listing.user.staff_profile.department.name }}{% endif %}

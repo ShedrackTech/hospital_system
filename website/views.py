@@ -11,6 +11,7 @@ from departments.models import Department
 
 from .forms import DOCTOR_ROLES, ContactForm
 from .models import BlogPost, ContactMessage, DoctorListing, Service, SiteInfo
+from .notifications import notify_new_contact_message
 
 MAX_MESSAGES_PER_HOUR = 5  # per IP address
 
@@ -106,6 +107,7 @@ class ContactView(SiteContextMixin, FormView):
         message = form.save(commit=False)
         message.ip_address = ip
         message.save()
+        notify_new_contact_message(message)
         messages.success(self.request, "Thank you. Your message has been sent. We will reply as soon as we can.")
         return redirect("website:contact")
 

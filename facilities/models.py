@@ -115,3 +115,26 @@ class Admission(models.Model):
     @property
     def is_active(self):
         return self.discharged_at is None
+
+
+class WardAssignment(models.Model):
+    """A nurse assigned to a ward. The nurse sees the patients currently admitted there."""
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="ward_assignments"
+    )
+    ward = models.ForeignKey(Ward, on_delete=models.CASCADE, related_name="assignments")
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True,
+        on_delete=models.SET_NULL, related_name="+",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["ward__name", "user_id"]
+        constraints = [
+            models.UniqueConstraint(fields=["user", "ward"], name="one_assignment_per_nurse_and_ward")
+        ]
+
+    def __str__(self):
+        return f"{self.user} in {self.ward}"

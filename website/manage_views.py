@@ -11,7 +11,7 @@ from django.views import View
 from django.views.generic import CreateView, DetailView, ListView, TemplateView, UpdateView
 
 from core import audit
-from core.mixins import AdminRequiredMixin
+from core.mixins import AdminRequiredMixin, FrontDeskRequiredMixin
 
 from .forms import BlogPostForm, DoctorListingForm, ServiceForm, SiteInfoForm
 from .models import BlogPost, ContactMessage, DoctorListing, Service, SiteInfo
@@ -78,7 +78,11 @@ class AuditedFormMixin:
 
 # ---- Blog posts -------------------------------------------------------------
 
-class PostListView(AdminRequiredMixin, ListView):
+# Blog posts may be written by admin roles and by administrative-category staff
+# (FrontDeskRequiredMixin: "administrative staff and admin roles only"). Everything
+# else under /site/ stays admin roles only.
+
+class PostListView(FrontDeskRequiredMixin, ListView):
     template_name = "website/manage/post_list.html"
     context_object_name = "posts"
     paginate_by = 25
@@ -105,14 +109,14 @@ class PostFormMixin(AuditedFormMixin):
         return "blog_post_updated"
 
 
-class PostCreateView(AdminRequiredMixin, PostFormMixin, CreateView):
+class PostCreateView(FrontDeskRequiredMixin, PostFormMixin, CreateView):
     page_title = "New blog post"
 
     def prepare(self, form, creating):
         form.instance.author = self.request.user
 
 
-class PostUpdateView(AdminRequiredMixin, PostFormMixin, UpdateView):
+class PostUpdateView(FrontDeskRequiredMixin, PostFormMixin, UpdateView):
     page_title = "Edit blog post"
 
 

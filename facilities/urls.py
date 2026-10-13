@@ -1,6 +1,6 @@
 from django.urls import path
 
-from . import views
+from . import views, ward_views
 
 app_name = "facilities"
 
@@ -24,4 +24,10 @@ urlpatterns = [
         views.DischargeView.as_view(),
         name="discharge",
     ),
+    # Nurses and wards
+    path("ward-staff/", ward_views.WardStaffView.as_view(), name="ward_staff"),
+    path("ward-staff/assign/", ward_views.WardAssignView.as_view(), name="ward_assign"),
+    path("ward-staff/<int:pk>/remove/", ward_views.WardAssignmentRemoveView.as_view(),
+         name="ward_unassign"),
+    path("my-ward/", ward_views.MyWardView.as_view(), name="my_ward"),
 ]

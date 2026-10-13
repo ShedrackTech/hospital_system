@@ -133,7 +133,7 @@ def _general():
 
 def _medical(user):
     from cases.models import Case
-    from facilities.models import Admission
+    from facilities.models import Admission, WardAssignment
 
     mine = Case.objects.filter(assigned_to=user)
     counts = mine.aggregate(
@@ -151,6 +151,10 @@ def _medical(user):
         ),
         "admitted": Admission.objects.filter(
             case__assigned_to=user, discharged_at__isnull=True
+        ).count(),
+        "has_wards": WardAssignment.objects.filter(user=user).exists(),
+        "ward_patients": Admission.objects.filter(
+            discharged_at__isnull=True, bed__ward__assignments__user=user
         ).count(),
     }
 

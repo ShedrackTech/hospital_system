@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}My ward{% endblock %}
+{% block content %}
+  <h1>My ward</h1>
+  {% for w in wards %}
+  <div class="card">
+    <h3>{{ w.ward.building.name }} / {{ w.ward.name }}
+      <span class="muted">({{ w.occupied }} of {{ w.total }} beds in use)</span></h3>
+    {% if w.rows %}
+    <div class="wrap">
+    <table>
+      <tr><th>Bed</th><th>Patient</th><th>Case</th><th>Doctor</th><th>Admitted</th></tr>
+      {% for row in w.rows %}
+      <tr>
+        <td>{{ row.bed.number }}</td>
+        {% if row.admission %}
+          <td>{{ row.admission.case.patient.user.get_full_name }} ({{ row.admission.case.patient.user.login_id }})</td>
+          <td><a href="{% url 'cases:detail' row.admission.case_id %}">#{{ row.admission.case_id }}</a></td>
+          <td>{{ row.admission.case.assigned_to|default:"-" }}</td>
+          <td>{{ row.admission.admitted_at|date:"d M H:i" }}</td>
+        {% else %}
+          <td colspan="4" class="muted">Free</td>
+        {% endif %}
+      </tr>
+      {% endfor %}
+    </table>
+    </div>
+    {% else %}<p class="muted">This ward has no beds yet.</p>{% endif %}
+  </div>
+  {% empty %}
+    <p class="muted">You are not assigned to a ward yet. Ask your department head or an administrator.</p>
+  {% endfor %}
+{% endblock %}

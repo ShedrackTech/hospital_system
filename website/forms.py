@@ -7,6 +7,8 @@ from .models import BlogPost, ContactMessage, DoctorListing, Service, SiteInfo
 User = get_user_model()
 
 DOCTOR_ROLES = ("doctor", "senior_doctor")
+MAX_PHOTO_BYTES = 2 * 1024 * 1024
+ALLOWED_PHOTO_FORMATS = ("JPEG", "PNG", "WEBP")
 
 
 class ContactForm(forms.ModelForm):
@@ -49,15 +51,25 @@ class ServiceForm(forms.ModelForm):
 class SiteInfoForm(forms.ModelForm):
     class Meta:
         model = SiteInfo
-        fields = ["about_text", "address", "phone", "emergency_phone", "email", "opening_hours"]
+        fields = ["about_text", "address", "phone", "emergency_phone", "email", "opening_hours", "notify_email"]
         widgets = {"about_text": forms.Textarea(attrs={"rows": 8}), "address": forms.Textarea(attrs={"rows": 3})}
 
 
 class DoctorListingForm(forms.ModelForm):
     class Meta:
         model = DoctorListing
-        fields = ["user", "bio", "display_order", "is_listed"]
+        fields = ["user", "bio", "photo", "display_order", "is_listed"]
         labels = {"user": "Doctor"}
+
+    def clean_photo(self):
+        photo = self.cleaned_data.get("photo")
+        # Only a newly uploaded file has an .image; an unchanged or cleared photo needs no checks.
+        if photo and hasattr(photo, "image"):
+            if photo.size > MAX_PHOTO_BYTES:
+                raise forms.ValidationError("The photo is too large. Please use a file under 2 MB.")
+            if photo.image.format not in ALLOWED_PHOTO_FORMATS:
+                raise forms.ValidationError("Please upload a JPG, PNG or WebP photo.")
+        return photo
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

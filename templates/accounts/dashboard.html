@@ -74,6 +74,9 @@
     <div class="stat"><a href="{% url 'cases:assigned' %}?status=assigned"><div class="n">{{ dash.counts.assigned }}</div>Newly assigned</a></div>
     <div class="stat"><a href="{% url 'cases:assigned' %}?status=in_treatment"><div class="n">{{ dash.counts.in_treatment }}</div>In treatment</a></div>
     <div class="stat"><div class="n">{{ dash.admitted }}</div>Admitted now</div>
+    {% if dash.has_wards %}
+    <div class="stat"><a href="{% url 'facilities:my_ward' %}"><div class="n">{{ dash.ward_patients }}</div>Patients in my ward</a></div>
+    {% endif %}
     <div class="stat"><a href="{% url 'cases:assigned' %}?status=completed"><div class="n">{{ dash.counts.completed }}</div>Completed</a></div>
   </div>
   <div class="card">
