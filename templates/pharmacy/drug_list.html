@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Drug catalogue{% endblock %}
+{% block content %}
+  <div class="bar">
+    <h1>Drugs and stock levels</h1>
+    <span>
+      <a href="{% url 'pharmacy:worklist' %}">Prescriptions</a> &nbsp;
+      <a href="{% url 'pharmacy:stock' %}">Batches</a>
+      {% if can_receive %}&nbsp; <a class="btn" href="{% url 'pharmacy:receive' %}">Receive stock</a>{% endif %}
+      {% if can_manage %}&nbsp; <a class="btn" href="{% url 'pharmacy:drug_create' %}">Add drug</a>{% endif %}
+    </span>
+  </div>
+  {% if drugs %}
+  <div class="wrap">
+  <table>
+    <tr><th>Drug</th><th>Available</th><th>Level</th><th>Expired stock</th><th>Catalogue</th>{% if can_manage %}<th></th>{% endif %}</tr>
+    {% for d in drugs %}
+    <tr>
+      <td>{{ d }}</td>
+      <td>{{ d.available }} {{ d.unit }}</td>
+      <td>{% if d.stock_state == "out" %}<strong>Out of stock</strong>{% elif d.stock_state == "low" %}<strong>Low</strong>{% else %}OK{% endif %}</td>
+      <td>{% if d.expired_stock %}{{ d.expired_stock }} (write off){% else %}-{% endif %}</td>
+      <td>{% if d.is_active %}Available to prescribe{% else %}Not available{% endif %}</td>
+      {% if can_manage %}<td><a href="{% url 'pharmacy:drug_update' d.pk %}">Edit</a></td>{% endif %}
+    </tr>
+    {% endfor %}
+  </table>
+  </div>
+  {% else %}<p class="muted">No drugs yet.{% if can_manage %} Add the first one.{% endif %}</p>{% endif %}
+{% endblock %}

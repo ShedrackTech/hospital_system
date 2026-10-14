@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Stock batches{% endblock %}
+{% block content %}
+  <div class="bar">
+    <h1>Stock batches</h1>
+    <span>
+      <a href="{% url 'pharmacy:drugs' %}">Drugs</a> &nbsp;
+      <a href="{% url 'pharmacy:worklist' %}">Prescriptions</a>
+      {% if can_receive %}&nbsp; <a class="btn" href="{% url 'pharmacy:receive' %}">Receive stock</a>{% endif %}
+    </span>
+  </div>
+
+  {% if expired %}
+  <div class="card">
+    <h3>Expired stock to write off</h3>
+    <ul>
+      {% for b in expired %}<li>{{ b.drug }}, batch {{ b.batch_number }}: {{ b.quantity_remaining }} left, expired {{ b.expiry_date|date:"d M Y" }}
+        {% if can_manage %}<a href="{% url 'pharmacy:adjust' b.pk %}">Write off</a>{% endif %}</li>{% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+  {% if expiring %}
+  <div class="card">
+    <h3>Expiring within {{ warning_days }} days</h3>
+    <ul>
+      {% for b in expiring %}<li>{{ b.drug }}, batch {{ b.batch_number }}: {{ b.quantity_remaining }} left, expires {{ b.expiry_date|date:"d M Y" }}</li>{% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+
+  <p>{% if show_all %}Showing all batches. <a href="?">Only batches with stock</a>{% else %}Showing batches with stock. <a href="?show=all">Show all</a>{% endif %}</p>
+  {% if batches %}
+  <div class="wrap">
+  <table>
+    <tr><th>Drug</th><th>Batch</th><th>Expires</th><th>Received</th><th>Remaining</th>{% if can_manage %}<th></th>{% endif %}</tr>
+    {% for b in batches %}
+    <tr>
+      <td>{{ b.drug }}</td><td>{{ b.batch_number }}</td><td>{{ b.expiry_date|date:"d M Y" }}</td>
+      <td>{{ b.quantity_received }}</td><td>{{ b.quantity_remaining }}</td>
+      {% if can_manage %}<td><a href="{% url 'pharmacy:adjust' b.pk %}">Adjust</a></td>{% endif %}
+    </tr>
+    {% endfor %}
+  </table>
+  </div>
+  {% if is_paginated %}
+  <p>
+    {% if page_obj.has_previous %}<a href="?{% if show_all %}show=all&{% endif %}page={{ page_obj.previous_page_number }}">Previous</a>{% endif %}
+    Page {{ page_obj.number }} of {{ paginator.num_pages }}
+    {% if page_obj.has_next %}<a href="?{% if show_all %}show=all&{% endif %}page={{ page_obj.next_page_number }}">Next</a>{% endif %}
+  </p>
+  {% endif %}
+  {% else %}<p class="muted">No batches.</p>{% endif %}
+{% endblock %}

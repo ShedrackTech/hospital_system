@@ -11,6 +11,7 @@ urlpatterns = [
     path("patients/", include("patients.urls")),
     path("audit/", include("core.urls")),
     path("laboratory/", include("laboratory.urls")),
+    path("pharmacy/", include("pharmacy.urls")),
     path("attendance/", include("attendance.urls")),
     path("requests/", include("datarequests.urls")),
     path("cases/", include("cases.urls")),

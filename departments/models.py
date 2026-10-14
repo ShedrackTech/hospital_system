@@ -19,6 +19,8 @@ class Department(models.Model):
     is_general = models.BooleanField(default=False)
     # Laboratory department: its medical staff enter and release lab results
     is_laboratory = models.BooleanField(default=False)
+    # Pharmacy department: its medical staff dispense prescriptions and manage drug stock
+    is_pharmacy = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
 
     class Meta:

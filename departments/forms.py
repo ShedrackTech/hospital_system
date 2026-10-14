@@ -9,7 +9,7 @@ from .models import Department, StaffProfile
 class DepartmentForm(forms.ModelForm):
     class Meta:
         model = Department
-        fields = ("name", "description", "head", "is_general", "is_laboratory", "is_active")
+        fields = ("name", "description", "head", "is_general", "is_laboratory", "is_pharmacy", "is_active")
         widgets = {"description": forms.Textarea(attrs={"rows": 3})}
 
 

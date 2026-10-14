@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}Prescription{% endblock %}
+{% block content %}
+  <div class="bar">
+    <h1>Prescription #{{ prescription.pk }}</h1>
+    <a href="{% if is_patient_view %}{% url 'pharmacy:mine' %}{% else %}{% url 'cases:detail' prescription.case_id %}{% endif %}">Back</a>
+  </div>
+
+  {% if not is_patient_view and allergy_conflicts %}
+  <div class="card" style="border:2px solid #b00020;">
+    <p><strong>Allergy warning.</strong>
+      {% for drug, allergy in allergy_conflicts %}{{ allergy.name }} allergy is recorded for this patient: {{ drug }}.{% if not forloop.last %} {% endif %}{% endfor %}
+    </p>
+  </div>
+  {% endif %}
+
+  <div class="card">
+    {% if not is_patient_view %}
+      <p><strong>Patient:</strong> {{ prescription.patient.user.get_full_name }} ({{ prescription.patient.user.login_id }})</p>
+      <p><strong>Case:</strong> #{{ prescription.case_id }}</p>
+      <p><strong>Recorded allergies:</strong>
+        {% for a in allergies %}{{ a.name }} ({{ a.get_severity_display|lower }}){% if not forloop.last %}, {% endif %}{% empty %}none recorded{% endfor %}
+      </p>
+    {% endif %}
+    <p><strong>Status:</strong> {{ prescription.get_status_display }}</p>
+    <p><strong>Prescribed:</strong> {{ prescription.prescribed_at|date:"d M Y H:i" }}{% if prescription.prescribed_by %} by {{ prescription.prescribed_by }}{% endif %}</p>
+    {% if prescription.note and not is_patient_view %}<p><strong>Note for the pharmacy:</strong> {{ prescription.note }}</p>{% endif %}
+    {% if prescription.status == "cancelled" %}<p class="muted">Cancelled{% if prescription.cancel_reason %}: {{ prescription.cancel_reason }}{% endif %}</p>{% endif %}
+    {% if prescription.status == "closed" %}<p class="muted">Closed with items not supplied: {{ prescription.close_reason }}</p>{% endif %}
+  </div>
+
+  <div class="card">
+    <h3>Medicines</h3>
+    <div class="wrap">
+    <table>
+      <tr><th>Drug</th><th>Dose</th><th>How often</th><th>Days</th><th>Quantity</th><th>Dispensed</th><th>Instructions</th></tr>
+      {% for item in prescription.items.all %}
+      <tr>
+        <td>{{ item.drug }}</td><td>{{ item.dose }}</td><td>{{ item.frequency }}</td>
+        <td>{{ item.duration_days }}</td><td>{{ item.quantity }}</td><td>{{ item.quantity_dispensed }}</td>
+        <td>{{ item.instructions|default:"-" }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+    </div>
+  </div>
+
+  {% if dispense_form %}
+  <div class="card">
+    <h3>Dispense</h3>
+    <p class="muted">Stock is taken from the batch that expires first. Expired stock is never used. Leave a drug at 0 to supply it later.</p>
+    <form method="post" action="{% url 'pharmacy:dispense' prescription.pk %}">
+      {% csrf_token %}
+      <div class="wrap">
+      <table>
+        <tr><th>Drug</th><th>Still to dispense</th><th>In stock (not expired)</th><th>Dispense now</th></tr>
+        {% for item, field, available in dispense_rows %}
+        <tr>
+          <td>{{ item.drug }}</td><td>{{ item.quantity_outstanding }}</td>
+          <td>{{ available }}</td><td>{{ field }}</td>
+        </tr>
+        {% endfor %}
+      </table>
+      </div>
+      {% if allergy_conflicts %}<p>{{ dispense_form.acknowledge_allergy }} {{ dispense_form.acknowledge_allergy.label }}</p>{% endif %}
+      <button class="btn" type="submit">Dispense</button>
+    </form>
+  </div>
+  {% endif %}
+
+  {% if can_close %}
+  <div class="card">
+    <h3>Close without supplying the rest</h3>
+    <form method="post" action="{% url 'pharmacy:close' prescription.pk %}">
+      {% csrf_token %}{{ close_form.as_p }}
+      <button class="btn" type="submit">Close prescription</button>
+    </form>
+  </div>
+  {% endif %}
+
+  {% if can_cancel %}
+  <div class="card">
+    <h3>Cancel this prescription</h3>
+    <form method="post" action="{% url 'pharmacy:cancel' prescription.pk %}">
+      {% csrf_token %}{{ cancel_form.as_p }}
+      <button class="btn" type="submit">Cancel prescription</button>
+    </form>
+  </div>
+  {% endif %}
+{% endblock %}

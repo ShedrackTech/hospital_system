@@ -164,6 +164,9 @@ class CaseDetailView(LoginRequiredMixin, View):
         from laboratory import permissions as lab_perms  # local import: avoids a cycle
         ctx["lab_results"] = list(lab_perms.results_for_case(u, case))
         ctx["can_order_lab"] = lab_perms.can_order(u, case)
+        from pharmacy import permissions as pharmacy_perms  # local import: avoids a cycle
+        ctx["prescriptions"] = list(pharmacy_perms.prescriptions_for_case(u, case))
+        ctx["can_prescribe"] = pharmacy_perms.can_prescribe(u, case)
         if case.patient.user_id != u.id:  # staff access to a record is logged
             audit.log(u, audit.AuditLog.CASE_VIEWED, case, patient=case.patient,
                       request=request)

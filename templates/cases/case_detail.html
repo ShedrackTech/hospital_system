@@ -64,6 +64,24 @@
 {% endif %}
 {% endif %}
 
+{% if prescriptions or can_prescribe %}
+<h3>Prescriptions</h3>
+{% if can_prescribe %}<p><a href="{% url 'pharmacy:prescribe' case.pk %}">Prescribe medicine</a></p>{% endif %}
+{% if prescriptions %}
+<table>
+  <tr><th>Medicines</th><th>Status</th><th>Prescribed</th><th></th></tr>
+  {% for p in prescriptions %}
+  <tr>
+    <td>{% for item in p.items.all %}{{ item.drug }}{% if not forloop.last %}, {% endif %}{% endfor %}</td>
+    <td>{{ p.get_status_display }}</td>
+    <td>{{ p.prescribed_at|date:"d M Y H:i" }}</td>
+    <td><a href="{% url 'pharmacy:prescription' p.pk %}">Open</a></td>
+  </tr>
+  {% endfor %}
+</table>
+{% endif %}
+{% endif %}
+
 <h3>History</h3>
 <ul>
   {% for e in events %}

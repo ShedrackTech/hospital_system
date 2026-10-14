@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Prescribe{% endblock %}
+{% block content %}
+  <div class="bar">
+    <h1>Prescribe for case #{{ case.pk }}</h1>
+    <a href="{% url 'cases:detail' case.pk %}">Back to the case</a>
+  </div>
+  <div class="card">
+    <p><strong>Patient:</strong> {{ case.patient.user.get_full_name }} ({{ case.patient.user.login_id }})</p>
+    <p><strong>Recorded allergies:</strong>
+      {% for a in allergies %}{{ a.name }} ({{ a.get_severity_display|lower }}){% if not forloop.last %}, {% endif %}{% empty %}none recorded{% endfor %}
+    </p>
+  </div>
+
+  {% if no_drugs %}
+    <div class="card"><p class="muted">The pharmacy has not added any drugs to the catalogue yet.</p></div>
+  {% else %}
+  <form method="post">
+    {% csrf_token %}
+    {% if allergy_warning %}
+      <div class="card" style="border:2px solid #b00020;">
+        <p><strong>Allergy warning.</strong> {{ allergy_warning }}</p>
+        <p>{{ note_form.acknowledge_allergy }} {{ note_form.acknowledge_allergy.label }}</p>
+      </div>
+    {% endif %}
+    {% if note_form.non_field_errors %}<div class="card"><ul class="errorlist">{% for e in note_form.non_field_errors %}<li>{{ e }}</li>{% endfor %}</ul></div>{% endif %}
+    {% if formset.non_form_errors %}<div class="card"><ul class="errorlist">{% for e in formset.non_form_errors %}<li>{{ e }}</li>{% endfor %}</ul></div>{% endif %}
+
+    {{ formset.management_form }}
+    <div class="card">
+      <div class="wrap">
+      <table>
+        <tr><th>Drug</th><th>Dose</th><th>How often</th><th>Days</th><th>Total quantity</th><th>Instructions</th></tr>
+        {% for form in formset %}
+        <tr>
+          <td>{{ form.drug.errors }}{{ form.drug }}</td>
+          <td>{{ form.dose.errors }}{{ form.dose }}</td>
+          <td>{{ form.frequency.errors }}{{ form.frequency }}</td>
+          <td>{{ form.duration_days.errors }}{{ form.duration_days }}</td>
+          <td>{{ form.quantity.errors }}{{ form.quantity }}</td>
+          <td>{{ form.instructions.errors }}{{ form.instructions }}</td>
+        </tr>
+        {% endfor %}
+      </table>
+      </div>
+      <p class="muted">Leave unused rows empty.</p>
+      <p>{{ note_form.note.label_tag }} {{ note_form.note }}{{ note_form.note.errors }}</p>
+      <button class="btn" type="submit">Send to the pharmacy</button>
+      <a href="{% url 'cases:detail' case.pk %}">Cancel</a>
+    </div>
+  </form>
+  {% endif %}
+{% endblock %}

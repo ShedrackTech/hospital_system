@@ -110,6 +110,33 @@
     {% else %}<p class="muted">No tests are waiting.</p>{% endif %}
   </div>
 
+{% elif dash.kind == "pharmacy" %}
+  <div class="stats">
+    <div class="stat"><a href="{% url 'pharmacy:worklist' %}?status=prescribed"><div class="n">{{ dash.counts.waiting }}</div>Waiting to be dispensed</a></div>
+    <div class="stat"><a href="{% url 'pharmacy:worklist' %}?status=partly_dispensed"><div class="n">{{ dash.counts.partly }}</div>Partly dispensed</a></div>
+    <div class="stat"><a href="{% url 'pharmacy:drugs' %}"><div class="n">{{ dash.low_stock }}</div>Low or out of stock</a></div>
+    <div class="stat"><a href="{% url 'pharmacy:stock' %}"><div class="n">{{ dash.expiring }}</div>Batches expiring soon</a></div>
+  </div>
+  <div class="actions">
+    <a class="btn" href="{% url 'pharmacy:worklist' %}">Prescriptions</a>
+    <a class="btn" href="{% url 'pharmacy:drugs' %}">Drugs and stock</a>
+    <a class="btn" href="{% url 'pharmacy:receive' %}">Receive stock</a>
+  </div>
+  <div class="card">
+    <h3>Oldest prescriptions waiting</h3>
+    {% if dash.waiting %}
+    <div class="wrap"><table>
+      <tr><th>#</th><th>Patient</th><th>Status</th><th>Prescribed</th></tr>
+      {% for p in dash.waiting %}
+      <tr>
+        <td><a href="{% url 'pharmacy:prescription' p.pk %}">{{ p.pk }}</a></td>
+        <td>{{ p.patient }}</td><td>{{ p.get_status_display }}</td><td>{{ p.prescribed_at|date:"d M Y H:i" }}</td>
+      </tr>
+      {% endfor %}
+    </table></div>
+    {% else %}<p class="muted">No prescriptions are waiting.</p>{% endif %}
+  </div>
+
 {% elif dash.kind == "front_desk" %}
   {% if "open_requests" in dash %}
   <div class="stats">
@@ -138,12 +165,14 @@
   <div class="stats">
     <div class="stat"><a href="{% url 'cases:mine' %}"><div class="n">{{ dash.open_count }}</div>Open cases</a></div>
     <div class="stat"><a href="{% url 'laboratory:mine' %}"><div class="n">{{ dash.results_count }}</div>Lab results</a></div>
+    <div class="stat"><a href="{% url 'pharmacy:mine' %}"><div class="n">{{ dash.prescriptions_count }}</div>Prescriptions</a></div>
   </div>
   <div class="actions">
     <a class="btn" href="{% url 'cases:new' %}">Report a problem</a>
     <a class="btn" href="{% url 'patients:my_profile' %}">My profile</a>
     <a class="btn" href="{% url 'cases:mine' %}">My cases</a>
     <a class="btn" href="{% url 'laboratory:mine' %}">My results</a>
+    <a class="btn" href="{% url 'pharmacy:mine' %}">My prescriptions</a>
     <a class="btn" href="{% url 'datarequests:mine' %}">My data requests</a>
   </div>
   <div class="card">

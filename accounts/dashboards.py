@@ -33,6 +33,10 @@ def _role_dashboard(user):
 
     if lab_perms.is_lab_staff(user):
         return _lab()
+    from pharmacy import permissions as pharmacy_perms
+
+    if pharmacy_perms.is_pharmacy_staff(user):
+        return _pharmacy()
     if perms.headed_department(user):
         return _head(user)
     if perms.is_general_staff(user):
@@ -178,15 +182,39 @@ def _lab():
     }
 
 
+def _pharmacy():
+    from pharmacy import services as pharmacy_services
+    from pharmacy.models import Prescription
+
+    counts = Prescription.objects.aggregate(
+        waiting=Count("id", filter=Q(status="prescribed")),
+        partly=Count("id", filter=Q(status="partly_dispensed")),
+    )
+    return {
+        "kind": "pharmacy",
+        "title": "Pharmacy",
+        "counts": counts,
+        "low_stock": pharmacy_services.low_stock_count(),
+        "expiring": pharmacy_services.expiring_batches().count(),
+        "waiting": list(
+            Prescription.objects.filter(status__in=["prescribed", "partly_dispensed"])
+            .select_related("patient__user").order_by("prescribed_at")[:5]
+        ),
+    }
+
+
 def _patient(user):
     from cases.models import Case
     from cases.permissions import get_patient
     from laboratory.models import LabResult
+    from pharmacy.models import Prescription
 
     patient = get_patient(user)
     results_count = 0
+    prescriptions_count = 0
     if patient is not None:
         results_count = LabResult.objects.filter(patient=patient, status="released").count()
+        prescriptions_count = Prescription.objects.filter(patient=patient).count()
     cases = Case.objects.none()
     if patient is not None:
         cases = Case.objects.filter(patient=patient).select_related("department", "assigned_to")
@@ -196,5 +224,6 @@ def _patient(user):
         "patient": patient,
         "open_count": cases.exclude(status="completed").count(),
         "results_count": results_count,
+        "prescriptions_count": prescriptions_count,
         "cases": list(cases[:5]),
     }

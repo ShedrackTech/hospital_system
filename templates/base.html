@@ -34,6 +34,7 @@
       <a href="{% url 'cases:mine' %}">My cases</a>
       <a href="{% url 'cases:new' %}">Report a problem</a>
       <a href="{% url 'laboratory:mine' %}">My results</a>
+      <a href="{% url 'pharmacy:mine' %}">My prescriptions</a>
       <a href="{% url 'datarequests:mine' %}">Data requests</a>
     {% else %}
       <a href="{% url 'departments:list' %}">Departments</a>
@@ -49,6 +50,9 @@
       {% if user.staff_profile.records_officer and user.role != "main_admin" and user.role != "sub_admin" %}
         <a href="{% url 'datarequests:manage' %}">Data requests</a>
       {% endif %}
+      {% if user.ward_assignments.exists %}
+        <a href="{% url 'facilities:my_ward' %}">My ward</a>
+      {% endif %}
       {% if user.staff_profile %}
         <a href="{% url 'attendance:mine' %}">Attendance</a>
         <a href="{% url 'attendance:roster_mine' %}">My roster</a>
@@ -62,11 +66,15 @@
       {% if user.staff_profile.department.is_laboratory or user.role == "main_admin" or user.role == "sub_admin" %}
         <a href="{% url 'laboratory:worklist' %}">Laboratory</a>
       {% endif %}
+      {% if user.staff_profile.department.is_pharmacy or user.headed_department.is_pharmacy or user.role == "main_admin" or user.role == "sub_admin" %}
+        <a href="{% url 'pharmacy:worklist' %}">Pharmacy</a>
+      {% endif %}
     {% endif %}
     {% if user.role == "main_admin" or user.role == "sub_admin" %}
       <a href="{% url 'patients:list' %}">Patients</a>
       <a href="{% url 'patients:family_list' %}">Families</a>
       <a href="{% url 'facilities:overview' %}">Facilities</a>
+      <a href="{% url 'facilities:ward_staff' %}">Ward staff</a>
       <a href="{% url 'facilities:admission_list' %}">Admissions</a>
       <a href="{% url 'accounts:staff_list' %}">Staff</a>
       <a href="{% url 'datarequests:manage' %}">Data requests</a>
