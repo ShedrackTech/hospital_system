@@ -35,6 +35,7 @@
       <a href="{% url 'cases:new' %}">Report a problem</a>
       <a href="{% url 'laboratory:mine' %}">My results</a>
       <a href="{% url 'pharmacy:mine' %}">My prescriptions</a>
+      <a href="{% url 'appointments:mine' %}">My appointments</a>
       <a href="{% url 'datarequests:mine' %}">Data requests</a>
     {% else %}
       <a href="{% url 'departments:list' %}">Departments</a>
@@ -46,6 +47,13 @@
       {% endif %}
       {% if user.staff_profile.category != "support" %}
         <a href="{% url 'cases:home' %}">Cases</a>
+      {% endif %}
+      {% if user.role == "main_admin" or user.role == "sub_admin" or user.staff_profile.category == "admin" or user.headed_department %}
+        <a href="{% url 'appointments:staff_list' %}">Appointments</a>
+      {% elif user.role == "doctor" or user.role == "senior_doctor" %}
+        {% if user.staff_profile.department and not user.staff_profile.department.is_general and not user.staff_profile.department.is_laboratory %}
+          <a href="{% url 'appointments:staff_list' %}">Appointments</a>
+        {% endif %}
       {% endif %}
       {% if user.staff_profile.records_officer and user.role != "main_admin" and user.role != "sub_admin" %}
         <a href="{% url 'datarequests:manage' %}">Data requests</a>
