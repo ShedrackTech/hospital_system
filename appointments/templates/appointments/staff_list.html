@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Appointments{% endblock %}
+{% block content %}
+<h1>Appointments</h1>
+<p>
+  {% if can_book %}<a href="{% url 'appointments:book' %}">Book for a patient</a>{% endif %}
+  {% if can_set_hours %} | <a href="{% url 'appointments:availability' %}">Doctors' available hours</a>{% endif %}
+</p>
+
+<form method="get">
+  <label>Show
+    <select name="when">
+      <option value="today" {% if when == "today" %}selected{% endif %}>Today</option>
+      <option value="upcoming" {% if when == "upcoming" %}selected{% endif %}>Today and later</option>
+      <option value="past" {% if when == "past" %}selected{% endif %}>Earlier days</option>
+    </select>
+  </label>
+  <label>Status
+    <select name="status">
+      <option value="">All</option>
+      {% for value, label in statuses %}
+      <option value="{{ value }}" {% if status == value %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <button type="submit">Filter</button>
+</form>
+
+{% if rows %}
+<table>
+  <tr><th>When</th><th>Patient</th><th>Doctor</th><th>Department</th><th>Status</th><th></th></tr>
+  {% for a in rows %}
+  <tr>
+    <td>{{ a.starts_at|date:"D d M Y, H:i" }}</td>
+    <td>{{ a.patient.user.get_full_name|default:a.patient.user.username }}</td>
+    <td>{{ a.doctor.get_full_name|default:a.doctor.username }}</td>
+    <td>{{ a.department.name }}</td>
+    <td>{{ a.get_status_display }}</td>
+    <td><a href="{% url 'appointments:detail' a.pk %}">Open</a></td>
+  </tr>
+  {% endfor %}
+</table>
+{% if truncated %}<p><small>Showing the first 200. Narrow the filter to see others.</small></p>{% endif %}
+{% else %}
+<p>No appointments match.</p>
+{% endif %}
+{% endblock %}

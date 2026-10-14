@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Appointment{% endblock %}
+{% block content %}
+<h1>Appointment</h1>
+<table>
+  <tr><th>When</th><td>{{ appt.starts_at|date:"l d M Y, H:i" }} to {{ appt.ends_at|date:"H:i" }}</td></tr>
+  <tr><th>Patient</th><td>{{ appt.patient.user.get_full_name|default:appt.patient.user.username }}</td></tr>
+  <tr><th>Doctor</th><td>{{ appt.doctor.get_full_name|default:appt.doctor.username }}</td></tr>
+  <tr><th>Department</th><td>{{ appt.department.name }}</td></tr>
+  <tr><th>Status</th><td>{{ appt.get_status_display }}</td></tr>
+  {% if show_reason %}<tr><th>Reason for the visit</th><td>{{ appt.reason|linebreaksbr }}</td></tr>{% endif %}
+  <tr><th>Booked by</th><td>{{ appt.booked_by.get_full_name|default:appt.booked_by.username }} on {{ appt.created_at|date:"d M Y, H:i" }}</td></tr>
+  {% if appt.closed_at %}
+  <tr><th>Closed</th><td>{{ appt.closed_at|date:"d M Y, H:i" }}</td></tr>
+  {% endif %}
+  {% if appt.cancel_reason and show_reason %}<tr><th>Cancellation reason</th><td>{{ appt.cancel_reason|linebreaksbr }}</td></tr>{% endif %}
+</table>
+
+{% if can_close %}
+<h2>Record the outcome</h2>
+<form method="post" action="{% url 'appointments:close' appt.pk %}">
+  {% csrf_token %}
+  <button type="submit" name="status" value="completed">Mark completed</button>
+  <button type="submit" name="status" value="no_show">Mark no-show</button>
+</form>
+{% endif %}
+
+{% if can_cancel %}
+<h2>Cancel this appointment</h2>
+<form method="post" action="{% url 'appointments:cancel' appt.pk %}">
+  {% csrf_token %}
+  {% if by_patient %}
+    <p><small>You can cancel up to {{ cancel_hours }} hours before the start.</small></p>
+  {% endif %}
+  {{ cancel_form.as_p }}
+  <button type="submit">Cancel appointment</button>
+</form>
+{% elif appt.status == "scheduled" and by_patient and cancel_blocked %}
+<p><small>{{ cancel_blocked }}</small></p>
+{% endif %}
+
+<p>
+  {% if by_patient %}<a href="{% url 'appointments:mine' %}">Back to my appointments</a>
+  {% else %}<a href="{% url 'appointments:staff_list' %}">Back to the list</a>{% endif %}
+</p>
+{% endblock %}

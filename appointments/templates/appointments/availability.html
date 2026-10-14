@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Available hours{% endblock %}
+{% block content %}
+<h1>Doctors' available hours</h1>
+
+{% if not selected %}
+<p>No doctor is available to manage. A doctor must be active, in the Medical category and in a clinical department (not the general or laboratory department).</p>
+{% else %}
+  {% if doctors.count > 1 %}
+  <form method="get">
+    <label>Doctor
+      <select name="doctor">
+        {% for d in doctors %}
+        <option value="{{ d.pk }}" {% if d.pk == selected.pk %}selected{% endif %}>{{ d.get_full_name|default:d.username }} ({{ d.staff_profile.department.name }})</option>
+        {% endfor %}
+      </select>
+    </label>
+    <button type="submit">Show</button>
+  </form>
+  {% endif %}
+
+  <h2>{{ selected.get_full_name|default:selected.username }}</h2>
+  {% if windows %}
+  <table>
+    <tr><th>Day</th><th>From</th><th>To</th><th>Visit length</th><th></th></tr>
+    {% for w in windows %}
+    <tr>
+      <td>{{ w.get_weekday_display }}</td>
+      <td>{{ w.start_time|time:"H:i" }}</td>
+      <td>{{ w.end_time|time:"H:i" }}</td>
+      <td>{{ w.slot_minutes }} min</td>
+      <td>
+        <form method="post" action="{% url 'appointments:availability_remove' w.pk %}">
+          {% csrf_token %}<button type="submit">Remove</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+  <p><small>Removing a window does not cancel appointments that are already booked.</small></p>
+  {% else %}
+  <p>No hours set yet. Patients cannot book this doctor until you add some.</p>
+  {% endif %}
+
+  <h3>Add a window</h3>
+  <form method="post">
+    {% csrf_token %}
+    <input type="hidden" name="doctor" value="{{ selected.pk }}">
+    {{ form.as_p }}
+    <button type="submit">Add</button>
+  </form>
+{% endif %}
+
+<p><a href="{% url 'appointments:staff_list' %}">Back to appointments</a></p>
+{% endblock %}

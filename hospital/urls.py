@@ -18,6 +18,7 @@ urlpatterns = [
     # Public website (home page, about, departments, doctors, services, contact, blog)
     # and the admin pages under /site/ that run it.
     path("", include("website.urls")),
+    path("appointments/", include("appointments.urls")),
 ]
 
 if settings.DEBUG:

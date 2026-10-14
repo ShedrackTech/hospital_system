@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}My appointments{% endblock %}
+{% block content %}
+<h1>My appointments</h1>
+<p><a href="{% url 'appointments:book' %}">Book a new appointment</a></p>
+
+<h2>Upcoming</h2>
+{% if upcoming %}
+<table>
+  <tr><th>When</th><th>Doctor</th><th>Department</th><th></th></tr>
+  {% for a in upcoming %}
+  <tr>
+    <td>{{ a.starts_at|date:"D d M Y, H:i" }}</td>
+    <td>{{ a.doctor.get_full_name|default:a.doctor.username }}</td>
+    <td>{{ a.department.name }}</td>
+    <td><a href="{% url 'appointments:detail' a.pk %}">Open</a></td>
+  </tr>
+  {% endfor %}
+</table>
+{% else %}
+<p>You have no upcoming appointments.</p>
+{% endif %}
+
+<h2>Earlier</h2>
+{% if history %}
+<table>
+  <tr><th>When</th><th>Doctor</th><th>Status</th><th></th></tr>
+  {% for a in history %}
+  <tr>
+    <td>{{ a.starts_at|date:"D d M Y, H:i" }}</td>
+    <td>{{ a.doctor.get_full_name|default:a.doctor.username }}</td>
+    <td>{{ a.get_status_display }}</td>
+    <td><a href="{% url 'appointments:detail' a.pk %}">Open</a></td>
+  </tr>
+  {% endfor %}
+</table>
+{% else %}
+<p>Nothing here yet.</p>
+{% endif %}
+{% endblock %}

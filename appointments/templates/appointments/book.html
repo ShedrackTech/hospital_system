@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Book an appointment{% endblock %}
+{% block content %}
+<h1>Book an appointment</h1>
+
+{% if staff_booking and patient %}
+<p>Booking for: <strong>{{ patient.user.get_full_name|default:patient.user.username }}</strong> ({{ patient.user.login_id }})</p>
+{% endif %}
+
+<form method="get">
+  {% if staff_booking %}
+  <p><label>Patient card number <input type="text" name="patient" value="{{ patient_card }}" placeholder="PAT000001"></label></p>
+  {% endif %}
+  {{ lookup.as_p }}
+  <button type="submit">Show available times</button>
+</form>
+<p><small>Appointments can be booked up to {{ max_days }} days ahead.</small></p>
+
+{% if lookup_ok %}
+  <h2>{{ doctor.get_full_name|default:doctor.username }}, {{ day|date:"l d M Y" }}</h2>
+  {% if form %}
+  <form method="post">
+    {% csrf_token %}
+    <input type="hidden" name="doctor" value="{{ doctor.pk }}">
+    <input type="hidden" name="date" value="{{ day|date:'Y-m-d' }}">
+    {% if staff_booking %}<input type="hidden" name="patient" value="{{ patient_card }}">{% endif %}
+    {{ form.non_field_errors }}
+    <fieldset>
+      <legend>Free times</legend>
+      {{ form.slot.errors }}
+      {{ form.slot }}
+    </fieldset>
+    <p>{{ form.reason.label_tag }}<br>{{ form.reason }}{{ form.reason.errors }}</p>
+    <button type="submit">Book this time</button>
+  </form>
+  {% else %}
+  <p>There are no free times for this doctor on that day. Try another day.</p>
+  {% endif %}
+{% endif %}
+
+<p><a href="{% if staff_booking %}{% url 'appointments:staff_list' %}{% else %}{% url 'appointments:mine' %}{% endif %}">Back to appointments</a></p>
+{% endblock %}
