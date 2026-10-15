@@ -277,8 +277,15 @@ class PrescriptionDetailView(LoginRequiredMixin, View):
         if not user.is_patient:  # staff access to a prescription is audited
             audit.log(user, "prescription_viewed", prescription, patient=prescription.patient,
                       request=request)
+        if user.is_patient:
+            back_url = reverse("pharmacy:mine")
+        elif perms.is_pharmacy_staff(user) or perms.is_pharmacy_head(user):
+            back_url = reverse("pharmacy:worklist")  # they cannot open the case page
+        else:
+            back_url = reverse("cases:detail", args=[prescription.case_id])
         context = {
             "prescription": prescription,
+            "back_url": back_url,
             "is_patient_view": user.is_patient,
             "can_cancel": perms.can_cancel(user, prescription),
             "can_close": perms.can_close(user, prescription),

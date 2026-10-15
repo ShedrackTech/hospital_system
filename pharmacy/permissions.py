@@ -43,16 +43,30 @@ def can_receive_stock(user):
     return can_manage_stock(user) or is_pharmacy_staff(user)
 
 
+# Roles that may prescribe when assigned to the case. Junior nurses and other staff
+# never prescribe, even if they are assigned to the case.
+PRESCRIBER_ROLES = ("doctor", "senior_doctor", "senior_nurse")
+
+
 def _clinician_for(user, case):
-    """The assigned doctor or the head of the case's department."""
+    """Anyone assigned to the case, or the head of its department (read access)."""
     if case.assigned_to_id == user.id:
         return True
     dept = case_perms.headed_department(user)
     return bool(dept and case.department_id == dept.pk)
 
 
+def _prescriber_for(user, case):
+    """May prescribe and cancel prescriptions on this case: the assigned doctor, the
+    assigned senior nurse, or the head of the case's department."""
+    if case.assigned_to_id == user.id and user.role in PRESCRIBER_ROLES:
+        return True
+    dept = case_perms.headed_department(user)
+    return bool(dept and case.department_id == dept.pk)
+
+
 def can_prescribe(user, case):
-    return _clinician_for(user, case) and case.status in (
+    return _prescriber_for(user, case) and case.status in (
         Case.Status.ASSIGNED, Case.Status.IN_TREATMENT
     )
 
@@ -65,7 +79,7 @@ def can_cancel(user, prescription):
     # Only before anything has been handed over
     return prescription.status == Prescription.Status.PRESCRIBED and (
         is_pharmacy_staff(user) or is_pharmacy_head(user)
-        or _clinician_for(user, prescription.case)
+        or _prescriber_for(user, prescription.case)
     )
 
 

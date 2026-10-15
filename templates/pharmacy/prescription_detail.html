@@ -3,7 +3,7 @@
 {% block content %}
   <div class="bar">
     <h1>Prescription #{{ prescription.pk }}</h1>
-    <a href="{% if is_patient_view %}{% url 'pharmacy:mine' %}{% else %}{% url 'cases:detail' prescription.case_id %}{% endif %}">Back</a>
+    <a href="{{ back_url }}">Back</a>
   </div>
 
   {% if not is_patient_view and allergy_conflicts %}
