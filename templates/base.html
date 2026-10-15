@@ -35,11 +35,13 @@
       <a href="{% url 'cases:new' %}">Report a problem</a>
       <a href="{% url 'laboratory:mine' %}">My results</a>
       <a href="{% url 'pharmacy:mine' %}">My prescriptions</a>
+      <a href="{% url 'billing:mine' %}">My bills</a>
       <a href="{% url 'datarequests:mine' %}">Data requests</a>
     {% else %}
       <a href="{% url 'departments:list' %}">Departments</a>
       {% if user.role == "main_admin" or user.role == "sub_admin" or user.staff_profile.category == "admin" %}
         <a href="{% url 'patients:staff_register' %}">Register patient</a>
+        <a href="{% url 'billing:home' %}">Billing</a>
       {% endif %}
       {% if user.staff_profile.category == "admin" and user.role != "main_admin" and user.role != "sub_admin" %}
         <a href="{% url 'website:manage_posts' %}">Blog posts</a>
