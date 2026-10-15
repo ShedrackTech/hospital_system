@@ -4,6 +4,9 @@ from django.contrib import admin
 from django.urls import include, path
 
 urlpatterns = [
+    # Public website (home page, about, departments, doctors, services, contact, blog)
+    # and the admin pages under /site/ that run it.
+    path("", include("website.urls")),
     path("admin/", admin.site.urls),
     path("accounts/", include("accounts.urls")),
     path("departments/", include("departments.urls")),
@@ -15,10 +18,7 @@ urlpatterns = [
     path("attendance/", include("attendance.urls")),
     path("requests/", include("datarequests.urls")),
     path("cases/", include("cases.urls")),
-    # Public website (home page, about, departments, doctors, services, contact, blog)
-    # and the admin pages under /site/ that run it.
-    path("", include("website.urls")),
-    path("appointments/", include("appointments.urls")),
+    path("billing/", include("billing.urls")),
 ]
 
 if settings.DEBUG:

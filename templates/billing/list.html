@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Invoices{% endblock %}
+{% block content %}
+{% include "billing/_styles.html" %}
+<div class="billing">
+  <h1>Invoices</h1>
+  <p class="actions">
+    <a href="{% url 'billing:new' %}">New invoice</a>
+    <a href="{% url 'billing:items' %}">Price list</a>
+  </p>
+  <form method="get" class="row">
+    <div><label for="q">Invoice or card number</label><input type="text" id="q" name="q" value="{{ q }}" maxlength="30"></div>
+    <div>
+      <label for="status">Status</label>
+      <select id="status" name="status">
+        <option value="">All</option>
+        {% for value, label in statuses %}<option value="{{ value }}"{% if value == status %} selected{% endif %}>{{ label }}</option>{% endfor %}
+      </select>
+    </div>
+    <div><button type="submit">Filter</button></div>
+  </form>
+  {% if rows %}
+  <table>
+    <thead><tr><th>Invoice</th><th>Patient</th><th>Date</th><th class="num">Total</th><th class="num">Balance</th><th>Status</th></tr></thead>
+    <tbody>
+    {% for invoice in rows %}
+      <tr>
+        <td><a href="{% url 'billing:detail' invoice.pk %}">{{ invoice.number }}</a></td>
+        <td>{{ invoice.patient.user.get_full_name|default:invoice.patient.user.username }} <span class="muted">{{ invoice.patient.user.login_id }}</span></td>
+        <td>{{ invoice.issued_at|date:"d M Y H:i" }}</td>
+        <td class="num">&#8358;{{ invoice.total|floatformat:"2g" }}</td>
+        <td class="num">&#8358;{{ invoice.balance|floatformat:"2g" }}</td>
+        <td><span class="badge {{ invoice.status }}">{{ invoice.get_status_display }}</span></td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% if truncated %}<p class="muted">Showing the latest 200. Use the filters to narrow the list.</p>{% endif %}
+  {% else %}<p class="muted">No invoices found.</p>{% endif %}
+</div>
+{% endblock %}
