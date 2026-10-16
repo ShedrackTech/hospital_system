@@ -10,7 +10,7 @@
     {% for r in results %}
     <tr>
       <td>{{ r.test.name }}</td>
-      <td>{{ r.value }} {{ r.test.unit }}</td>
+      <td>{{ r.value }} {{ r.test.unit }}{% if r.amended_at %} <span class="muted">(amended {{ r.amended_at|date:"d M Y" }})</span>{% endif %}</td>
       <td>{{ r.released_at|date:"d M Y" }}</td>
       <td><a href="{% url 'laboratory:result' r.pk %}">View</a> |
           <a href="{% url 'laboratory:print' r.pk %}" target="_blank">Print</a></td>

@@ -1,12 +1,15 @@
 """All lab state changes go through here (transactions, row locks, audit log)."""
-from django.core.exceptions import ValidationError
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import transaction
+from django.urls import reverse
 from django.utils import timezone
 
 from cases.models import Case
 from core import audit
+from notifications import services as notifications
 
-from .models import LabResult
+from . import permissions as perms
+from .models import LabResult, LabResultAmendment
 
 
 def _locked(result):
@@ -72,6 +75,49 @@ def release_result(result, actor, request=None):
         result.save()
         audit.log(actor, "lab_result_released", result, patient=result.patient,
                   detail=result.test.name, request=request)
+    return result
+
+
+def amend_result(result, value, notes, reason, actor, request=None):
+    """Correct a released result. The earlier value is kept, the patient is told, and so is the assigned doctor
+    (unless they made the amendment). Neither the values nor the reason are copied into the audit log or a notification."""
+    value = (value or "").strip()
+    notes = (notes or "").strip()
+    reason = (reason or "").strip()
+    if not value:
+        raise ValidationError("Enter the corrected result value.")
+    if not reason:
+        raise ValidationError("Give a reason for the amendment.")
+    with transaction.atomic():
+        result = _locked(result)
+        if result.status != LabResult.Status.RELEASED:
+            raise ValidationError("Only a released result can be amended.")
+        if not perms.can_amend(actor, result):
+            raise PermissionDenied
+        if value == result.value and notes == (result.result_notes or "").strip():
+            raise ValidationError("Nothing has changed. Change the result or the notes first.")
+        LabResultAmendment.objects.create(
+            result=result, old_value=result.value, old_notes=result.result_notes,
+            new_value=value, new_notes=notes, reason=reason[:300], amended_by=actor,
+        )
+        result.value = value
+        result.result_notes = notes
+        result.amended_at = timezone.now()
+        result.save()
+        audit.log(actor, "lab_result_amended", result, patient=result.patient,
+                  detail=result.test.name, request=request)
+
+        link = reverse("laboratory:result", args=[result.pk])
+        notifications.notify(
+            result.patient.user, "lab_amended", "A lab result was updated",
+            "One of your lab results was corrected. Open it to see what changed.", link,
+        )
+        doctor = result.case.assigned_to
+        if doctor is not None and doctor.pk != actor.pk:
+            notifications.notify(
+                doctor, "lab_amended", "A released lab result was amended",
+                f"A result on case #{result.case_id} was corrected.", link,
+            )
     return result
 
 

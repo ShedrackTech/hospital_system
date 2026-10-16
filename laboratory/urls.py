@@ -13,6 +13,7 @@ urlpatterns = [
     path("results/<int:pk>/", views.ResultDetailView.as_view(), name="result"),
     path("results/<int:pk>/enter/", views.ResultEnterView.as_view(), name="result_enter"),
     path("results/<int:pk>/release/", views.ResultReleaseView.as_view(), name="result_release"),
+    path("results/<int:pk>/amend/", views.ResultAmendView.as_view(), name="result_amend"),
     path("results/<int:pk>/cancel/", views.ResultCancelView.as_view(), name="result_cancel"),
     path("results/<int:pk>/print/", views.ResultPrintView.as_view(), name="print"),
     path("mine/", views.MyResultsView.as_view(), name="mine"),

@@ -1,4 +1,4 @@
-"""Who may order, enter, release, cancel, see and print lab results."""
+"""Who may order, enter, release, cancel, amend, see and print lab results."""
 from cases import permissions as case_perms
 from cases.models import Case
 
@@ -41,6 +41,13 @@ def can_enter(user, result):
 
 def can_release(user, result):
     return result.status == LabResult.Status.RESULTED and (
+        _clinician_for(user, result.case) or is_senior_lab(user)
+    )
+
+
+def can_amend(user, result):
+    """Same people who may release: the assigned doctor, the department head, or senior lab staff."""
+    return result.status == LabResult.Status.RELEASED and (
         _clinician_for(user, result.case) or is_senior_lab(user)
     )
 

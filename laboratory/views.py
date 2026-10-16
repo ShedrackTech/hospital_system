@@ -14,7 +14,7 @@ from core import audit
 
 from . import permissions as perms
 from . import services
-from .forms import CancelForm, EnterResultForm, LabTestForm, OrderForm
+from .forms import AmendResultForm, CancelForm, EnterResultForm, LabTestForm, OrderForm
 from .models import LabResult, LabTest
 
 RESULT_QS = LabResult.objects.select_related(
@@ -170,8 +170,13 @@ class ResultDetailView(LoginRequiredMixin, View):
             audit.log(u, "lab_result_viewed", result, patient=result.patient, request=request)
         return render(request, "laboratory/result_detail.html", {
             "result": result,
+            "amendments": result.amendments.select_related("amended_by"),
             "enter_form": EnterResultForm() if perms.can_enter(u, result) else None,
             "cancel_form": CancelForm() if perms.can_cancel(u, result) else None,
+            "amend_form": (
+                AmendResultForm(initial={"value": result.value, "notes": result.result_notes})
+                if perms.can_amend(u, result) else None
+            ),
             "can_release": perms.can_release(u, result),
             "can_print": perms.can_print(u, result),
             "is_patient_view": u.is_patient,
@@ -223,6 +228,16 @@ class ResultReleaseView(ResultActionView):
 
     def run(self, request, result, form):
         services.release_result(result, request.user, request=request)
+
+
+class ResultAmendView(ResultActionView):
+    form_class = AmendResultForm
+    success_text = "The result has been amended. The patient has been notified."
+    check = staticmethod(perms.can_amend)
+
+    def run(self, request, result, form):
+        services.amend_result(result, form.cleaned_data["value"], form.cleaned_data["notes"],
+                              form.cleaned_data["reason"], request.user, request=request)
 
 
 class ResultCancelView(ResultActionView):

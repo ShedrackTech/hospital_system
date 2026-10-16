@@ -28,3 +28,13 @@ class EnterResultForm(forms.Form):
 
 class CancelForm(forms.Form):
     reason = forms.CharField(max_length=300, required=False)
+
+
+class AmendResultForm(forms.Form):
+    value = forms.CharField(max_length=200, label="Corrected result")
+    notes = forms.CharField(widget=forms.Textarea(attrs={"rows": 3}), required=False)
+    reason = forms.CharField(
+        max_length=300, label="Reason for the amendment",
+        widget=forms.Textarea(attrs={"rows": 2}),
+        help_text="The patient can read this reason. Do not name other people.",
+    )

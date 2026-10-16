@@ -24,10 +24,28 @@
     {% if result.status == "released" %}
       <p class="muted">Released by {{ result.released_by|default:"-" }} on {{ result.released_at|date:"d M Y H:i" }}</p>
     {% endif %}
+    {% if result.amended_at %}
+      <p><strong>This result was amended on {{ result.amended_at|date:"d M Y H:i" }}.</strong> The values above are the corrected ones.</p>
+    {% endif %}
     {% if result.status == "cancelled" %}
       <p class="muted">Cancelled{% if result.cancel_reason %}: {{ result.cancel_reason }}{% endif %}</p>
     {% endif %}
   </div>
+
+  {% if amendments %}
+  <div class="card">
+    <h3>Amendment history</h3>
+    {% for a in amendments %}
+      <p>
+        <strong>{{ a.amended_at|date:"d M Y H:i" }}</strong>{% if not is_patient_view %} by {{ a.amended_by|default:"-" }}{% endif %}<br>
+        Before: {{ a.old_value }} {{ result.test.unit }}{% if a.old_notes %} ({{ a.old_notes|linebreaksbr }}){% endif %}<br>
+        After: {{ a.new_value }} {{ result.test.unit }}{% if a.new_notes %} ({{ a.new_notes|linebreaksbr }}){% endif %}<br>
+        <span class="muted">Reason: {{ a.reason }}</span>
+      </p>
+      {% if not forloop.last %}<hr>{% endif %}
+    {% endfor %}
+  </div>
+  {% endif %}
 
   {% if can_print %}
     <p><a class="btn" href="{% url 'laboratory:print' result.pk %}" target="_blank">Print or save as PDF</a></p>
@@ -49,6 +67,17 @@
     <p class="muted">Check the result first. The patient can see it as soon as you release it.</p>
     <form method="post" action="{% url 'laboratory:result_release' result.pk %}">
       {% csrf_token %}<button class="btn" type="submit">Release result</button>
+    </form>
+  </div>
+  {% endif %}
+
+  {% if amend_form %}
+  <div class="card">
+    <h3>Amend this result</h3>
+    <p class="muted">The earlier value is kept in the history above. The patient is notified, and so is the assigned doctor if someone else makes the change.</p>
+    <form method="post" action="{% url 'laboratory:result_amend' result.pk %}">
+      {% csrf_token %}{{ amend_form.as_p }}
+      <button class="btn" type="submit">Amend result</button>
     </form>
   </div>
   {% endif %}

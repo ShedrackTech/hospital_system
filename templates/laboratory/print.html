@@ -38,6 +38,7 @@
     {% if result.result_notes %}<tr><th>Notes</th><td>{{ result.result_notes|linebreaksbr }}</td></tr>{% endif %}
     <tr><th>Ordered</th><td>{{ result.ordered_at|date:"d M Y" }}</td></tr>
     <tr><th>Released</th><td>{{ result.released_at|date:"d M Y H:i" }}{% if result.released_by %} by {{ result.released_by.get_full_name|default:result.released_by.username }}{% endif %}</td></tr>
+    {% if result.amended_at %}<tr><th>Amended</th><td>This result was corrected on {{ result.amended_at|date:"d M Y H:i" }}. The values shown are the corrected ones.</td></tr>{% endif %}
   </table>
 
   <p class="foot">This is a copy of a result released by {{ hospital_name }}. Printed by {{ request.user.get_full_name|default:request.user.username }} on {% now "d M Y H:i" %}.</p>

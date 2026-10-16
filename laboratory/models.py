@@ -22,6 +22,7 @@ class LabResult(models.Model):
     One ordered test for one case. Workflow:
     ordered -> resulted (lab staff enter the value) -> released (a clinician or senior
     lab staff approve). A patient sees a result only once it is released.
+    A released result can later be amended; every earlier value is kept in LabResultAmendment.
     """
 
     class Status(models.TextChoices):
@@ -63,6 +64,9 @@ class LabResult(models.Model):
     )
     released_at = models.DateTimeField(null=True, blank=True)
 
+    # Set by services.amend_result; empty until the first amendment
+    amended_at = models.DateTimeField(null=True, blank=True)
+
     cancel_reason = models.CharField(max_length=300, blank=True)
     cancelled_at = models.DateTimeField(null=True, blank=True)
 
@@ -72,3 +76,25 @@ class LabResult(models.Model):
 
     def __str__(self):
         return f"{self.test.name} (case #{self.case_id})"
+
+
+class LabResultAmendment(models.Model):
+    """One correction of a released result. Never edited or deleted; keeps the value before and after."""
+
+    result = models.ForeignKey(LabResult, on_delete=models.PROTECT, related_name="amendments")
+    old_value = models.CharField(max_length=200)
+    old_notes = models.TextField(blank=True)
+    new_value = models.CharField(max_length=200)
+    new_notes = models.TextField(blank=True)
+    reason = models.CharField(max_length=300)
+    amended_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True,
+        on_delete=models.SET_NULL, related_name="+",
+    )
+    amended_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["amended_at", "id"]
+
+    def __str__(self):
+        return f"Amendment of result #{self.result_id}"
