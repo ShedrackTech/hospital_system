@@ -19,6 +19,7 @@ urlpatterns = [
     path("requests/", include("datarequests.urls")),
     path("cases/", include("cases.urls")),
     path("billing/", include("billing.urls")),
+    path("notifications/", include("notifications.urls")),
 ]
 
 if settings.DEBUG:

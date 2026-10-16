@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     "attendance",
     "datarequests",
     "billing",
+    "notifications",
 ]
 
 MIDDLEWARE = [

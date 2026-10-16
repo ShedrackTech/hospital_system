@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Notifications{% endblock %}
+{% block content %}
+<div class="bar">
+  <h1>Notifications</h1>
+  {% if unread %}
+  <form method="post" action="{% url 'notifications:mark_all' %}">
+    {% csrf_token %}
+    <button type="submit" class="btn">Mark all as read</button>
+  </form>
+  {% endif %}
+</div>
+
+{% if rows %}
+<div class="wrap">
+<table>
+  <thead><tr><th>Message</th><th>When</th><th></th></tr></thead>
+  <tbody>
+  {% for n in rows %}
+    <tr>
+      <td>
+        {% if n.is_read %}{{ n.title }}{% else %}<strong>{{ n.title }}</strong>{% endif %}
+        {% if n.body %}<div class="muted">{{ n.body }}</div>{% endif %}
+      </td>
+      <td class="muted">{{ n.created_at|date:"d M Y H:i" }}</td>
+      <td>
+        {% if n.url or not n.is_read %}
+        <form method="post" action="{% url 'notifications:open' n.pk %}">
+          {% csrf_token %}
+          <button type="submit" class="btn">{% if n.url %}Open{% else %}Mark as read{% endif %}</button>
+        </form>
+        {% endif %}
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+<p class="muted">Showing your latest 100 notifications.</p>
+{% else %}
+<div class="card"><p class="muted">You have no notifications.</p></div>
+{% endif %}
+{% endblock %}
