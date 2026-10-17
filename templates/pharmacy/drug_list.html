@@ -13,10 +13,11 @@
   {% if drugs %}
   <div class="wrap">
   <table>
-    <tr><th>Drug</th><th>Available</th><th>Level</th><th>Expired stock</th><th>Catalogue</th>{% if can_manage %}<th></th>{% endif %}</tr>
+    <tr><th>Drug</th><th>Class</th><th>Available</th><th>Level</th><th>Expired stock</th><th>Catalogue</th>{% if can_manage %}<th></th>{% endif %}</tr>
     {% for d in drugs %}
     <tr>
       <td>{{ d }}</td>
+      <td>{{ d.drug_class|default:"-" }}</td>
       <td>{{ d.available }} {{ d.unit }}</td>
       <td>{% if d.stock_state == "out" %}<strong>Out of stock</strong>{% elif d.stock_state == "low" %}<strong>Low</strong>{% else %}OK{% endif %}</td>
       <td>{% if d.expired_stock %}{{ d.expired_stock }} (write off){% else %}-{% endif %}</td>

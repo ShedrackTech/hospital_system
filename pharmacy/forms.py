@@ -9,7 +9,7 @@ from .models import Drug, StockAdjustment
 class DrugForm(forms.ModelForm):
     class Meta:
         model = Drug
-        fields = ("name", "strength", "form", "unit", "ingredients", "reorder_level", "is_active")
+        fields = ("name", "strength", "form", "unit", "ingredients", "drug_class", "reorder_level", "is_active")
 
 
 class PrescriptionItemForm(forms.Form):

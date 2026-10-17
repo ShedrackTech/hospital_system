@@ -27,6 +27,15 @@ class AllergyWarning(ValidationError):
 
 # ---- Allergy check -------------------------------------------------------------
 
+class Conflict(tuple):
+    """(drug, allergy), as before, plus .via_class: the drug class that linked them, or "" for a name match."""
+
+    def __new__(cls, drug, allergy, via_class=""):
+        conflict = super().__new__(cls, (drug, allergy))
+        conflict.via_class = via_class
+        return conflict
+
+
 def _terms(drug):
     terms = {drug.name.strip().lower()}
     for part in (drug.ingredients or "").split(","):
@@ -36,20 +45,49 @@ def _terms(drug):
     return {t for t in terms if len(t) >= 3}
 
 
+def _norm(text):
+    return " ".join((text or "").strip().lower().split())
+
+
+def _classes_for_allergy(allergy_name, catalogue):
+    """The drug classes an allergy points to: its own name (it may be a class such as "penicillin"),
+    plus the class of every catalogue drug whose name or ingredient matches it (allergy to "amoxicillin")."""
+    classes = {allergy_name} if len(allergy_name) >= 4 else set()
+    for drug in catalogue:
+        if any(allergy_name in term or term in allergy_name for term in _terms(drug)):
+            classes.add(_norm(drug.drug_class))
+    return {c for c in classes if len(c) >= 4}
+
+
 def allergy_conflicts(patient, drugs):
-    """Return [(drug, allergy), ...] where a recorded allergy matches a drug name or ingredient."""
+    """Return [(drug, allergy), ...] where a recorded allergy matches a drug by name, ingredient or drug class.
+
+    Each item is a Conflict: it unpacks as (drug, allergy) and has .via_class set when only the class matched."""
     allergies = [a for a in patient.allergies.all() if len((a.name or "").strip()) >= 3]
+    if not allergies:
+        return []
+    catalogue = list(Drug.objects.exclude(drug_class=""))
+    classes = {a.pk: _classes_for_allergy(_norm(a.name), catalogue) for a in allergies}
     found = []
     for drug in drugs:
+        drug_class = _norm(drug.drug_class)
         for allergy in allergies:
-            name = allergy.name.strip().lower()
+            name = _norm(allergy.name)
             if any(name in term or term in name for term in _terms(drug)):
-                found.append((drug, allergy))
+                found.append(Conflict(drug, allergy))
+            elif len(drug_class) >= 4 and any(
+                drug_class in c or c in drug_class for c in classes[allergy.pk]
+            ):
+                found.append(Conflict(drug, allergy, via_class=drug.drug_class.strip()))
     return found
 
 
 def _warning_text(conflicts):
-    lines = [f"{allergy.name} allergy is recorded for this patient: {drug}" for drug, allergy in conflicts]
+    lines = []
+    for conflict in conflicts:
+        drug, allergy = conflict
+        note = f" (same drug class: {conflict.via_class})" if conflict.via_class else ""
+        lines.append(f"{allergy.name} allergy is recorded for this patient: {drug}{note}")
     return "; ".join(lines)
 
 

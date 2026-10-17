@@ -21,9 +21,9 @@ class ReadOnlyAdmin(admin.ModelAdmin):
 
 @admin.register(Drug)
 class DrugAdmin(admin.ModelAdmin):
-    list_display = ("name", "strength", "form", "reorder_level", "is_active")
+    list_display = ("name", "strength", "form", "drug_class", "reorder_level", "is_active")
     list_filter = ("form", "is_active")
-    search_fields = ("name", "ingredients")
+    search_fields = ("name", "ingredients", "drug_class")
 
 
 @admin.register(StockBatch)

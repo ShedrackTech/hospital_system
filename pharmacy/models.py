@@ -26,6 +26,11 @@ class Drug(models.Model):
         max_length=200, blank=True,
         help_text="Active ingredients, separated by commas. Used to warn about patient allergies.",
     )
+    drug_class = models.CharField(
+        max_length=60, blank=True,
+        help_text="The drug family, e.g. Penicillins, Sulfonamides, NSAIDs. Used to warn about an allergy to "
+                  "another drug of the same family. Spell it the same way for every drug in the family.",
+    )
     reorder_level = models.PositiveIntegerField(
         default=0, help_text="Flag the drug as low when stock falls to this number. 0 means only flag when it runs out.",
     )
