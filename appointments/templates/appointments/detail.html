@@ -1,46 +1,61 @@
 {% extends "base.html" %}
 {% block title %}Appointment{% endblock %}
 {% block content %}
-<h1>Appointment</h1>
-<table>
-  <tr><th>When</th><td>{{ appt.starts_at|date:"l d M Y, H:i" }} to {{ appt.ends_at|date:"H:i" }}</td></tr>
-  <tr><th>Patient</th><td>{{ appt.patient.user.get_full_name|default:appt.patient.user.username }}</td></tr>
-  <tr><th>Doctor</th><td>{{ appt.doctor.get_full_name|default:appt.doctor.username }}</td></tr>
-  <tr><th>Department</th><td>{{ appt.department.name }}</td></tr>
-  <tr><th>Status</th><td>{{ appt.get_status_display }}</td></tr>
-  {% if show_reason %}<tr><th>Reason for the visit</th><td>{{ appt.reason|linebreaksbr }}</td></tr>{% endif %}
-  <tr><th>Booked by</th><td>{{ appt.booked_by.get_full_name|default:appt.booked_by.username }} on {{ appt.created_at|date:"d M Y, H:i" }}</td></tr>
-  {% if appt.closed_at %}
-  <tr><th>Closed</th><td>{{ appt.closed_at|date:"d M Y, H:i" }}</td></tr>
+  <div class="bar">
+    <h1>Appointment</h1>
+    <a href="{% if by_patient %}{% url 'appointments:mine' %}{% else %}{% url 'appointments:staff_list' %}{% endif %}">Back</a>
+  </div>
+
+  <div class="card">
+    <p><strong>Status:</strong> {{ appt.get_status_display }}</p>
+    <p><strong>When:</strong> {{ appt.starts_at|date:"D d M Y, H:i" }} to {{ appt.ends_at|date:"H:i" }}</p>
+    {% if not by_patient %}
+      <p><strong>Patient:</strong> {{ appt.patient.user.get_full_name|default:appt.patient.user.username }} ({{ appt.patient.user.login_id }})</p>
+    {% endif %}
+    <p><strong>Doctor:</strong> {{ appt.doctor.get_full_name|default:appt.doctor.username }}</p>
+    <p><strong>Department:</strong> {{ appt.department.name }}</p>
+    {% if show_reason %}
+      <p><strong>Reason for the visit:</strong> {{ appt.reason|linebreaksbr }}</p>
+    {% endif %}
+    {% if not by_patient %}
+      <p class="muted">Booked by {{ appt.booked_by.get_full_name|default:appt.booked_by.username }} on {{ appt.created_at|date:"d M Y H:i" }}</p>
+    {% endif %}
+    {% if appt.status == "cancelled" %}
+      <p class="muted">Cancelled{% if appt.closed_at %} on {{ appt.closed_at|date:"d M Y H:i" }}{% endif %}{% if appt.closed_by and not by_patient %} by {{ appt.closed_by.get_full_name|default:appt.closed_by.username }}{% endif %}.
+        {% if show_reason and appt.cancel_reason %}Reason: {{ appt.cancel_reason|linebreaksbr }}{% endif %}</p>
+    {% elif appt.status == "completed" or appt.status == "no_show" %}
+      <p class="muted">Recorded{% if appt.closed_at %} on {{ appt.closed_at|date:"d M Y H:i" }}{% endif %}{% if appt.closed_by and not by_patient %} by {{ appt.closed_by.get_full_name|default:appt.closed_by.username }}{% endif %}.</p>
+    {% endif %}
+  </div>
+
+  {% include "appointments/_case_link.html" %}
+
+  {% if can_close %}
+  <div class="card">
+    <h3>Record the outcome</h3>
+    <p class="muted">Choose what happened at this visit.</p>
+    <form method="post" action="{% url 'appointments:close' appt.pk %}">
+      {% csrf_token %}
+      <button class="btn" type="submit" name="status" value="completed">Completed</button>
+      <button class="btn" type="submit" name="status" value="no_show">Patient did not come</button>
+    </form>
+  </div>
   {% endif %}
-  {% if appt.cancel_reason and show_reason %}<tr><th>Cancellation reason</th><td>{{ appt.cancel_reason|linebreaksbr }}</td></tr>{% endif %}
-</table>
 
-{% if can_close %}
-<h2>Record the outcome</h2>
-<form method="post" action="{% url 'appointments:close' appt.pk %}">
-  {% csrf_token %}
-  <button type="submit" name="status" value="completed">Mark completed</button>
-  <button type="submit" name="status" value="no_show">Mark no-show</button>
-</form>
-{% endif %}
-
-{% if can_cancel %}
-<h2>Cancel this appointment</h2>
-<form method="post" action="{% url 'appointments:cancel' appt.pk %}">
-  {% csrf_token %}
-  {% if by_patient %}
-    <p><small>You can cancel up to {{ cancel_hours }} hours before the start.</small></p>
+  {% if can_cancel %}
+  <div class="card">
+    <h3>Cancel this appointment</h3>
+    {% if by_patient %}<p class="muted">You can cancel online up to {{ cancel_hours }} hours before the start.</p>{% endif %}
+    <form method="post" action="{% url 'appointments:cancel' appt.pk %}">
+      {% csrf_token %}
+      <p>
+        <label for="{{ cancel_form.reason.id_for_label }}">{% if by_patient %}Reason (optional){% else %}Reason (required){% endif %}</label>
+        {{ cancel_form.reason }}
+      </p>
+      <button class="btn" type="submit">Cancel appointment</button>
+    </form>
+  </div>
+  {% elif by_patient and appt.status == "scheduled" and cancel_blocked %}
+  <div class="card"><p class="muted">{{ cancel_blocked }}</p></div>
   {% endif %}
-  {{ cancel_form.as_p }}
-  <button type="submit">Cancel appointment</button>
-</form>
-{% elif appt.status == "scheduled" and by_patient and cancel_blocked %}
-<p><small>{{ cancel_blocked }}</small></p>
-{% endif %}
-
-<p>
-  {% if by_patient %}<a href="{% url 'appointments:mine' %}">Back to my appointments</a>
-  {% else %}<a href="{% url 'appointments:staff_list' %}">Back to the list</a>{% endif %}
-</p>
 {% endblock %}

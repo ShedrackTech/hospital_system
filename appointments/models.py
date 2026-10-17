@@ -78,6 +78,18 @@ class Appointment(models.Model):
     closed_at = models.DateTimeField(null=True, blank=True)
     cancel_reason = models.TextField(blank=True)
 
+    # Optional link to the case this visit became. Set by the doctor or the head (appointments/case_links.py).
+    case = models.ForeignKey(
+        "cases.Case", null=True, blank=True, on_delete=models.SET_NULL, related_name="appointments"
+    )
+    case_linked_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+    case_linked_at = models.DateTimeField(null=True, blank=True)
+
+    # Set by the send_appointment_reminders command, so each appointment is reminded once.
+    reminder_sent_at = models.DateTimeField(null=True, blank=True)
+
     class Meta:
         ordering = ["starts_at"]
         indexes = [

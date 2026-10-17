@@ -1,0 +1,21 @@
+{% if show %}
+<h3>Appointments</h3>
+{% if kind == "patient" %}
+  <div class="card">
+    {% if next %}
+      <p><strong>Next appointment:</strong> {{ next.starts_at|date:"D d M Y, H:i" }} with {{ next.doctor.get_full_name|default:next.doctor.username }}
+        &ndash; <a href="{% url 'appointments:detail' next.pk %}">View</a></p>
+    {% else %}
+      <p class="muted">You have no upcoming appointments.</p>
+    {% endif %}
+    <p><a class="btn" href="{% url 'appointments:book' %}">Book an appointment</a>
+       <a href="{% url 'appointments:mine' %}">My appointments</a></p>
+  </div>
+{% else %}
+  <div class="stats">
+    <div class="stat"><a href="{% url 'appointments:staff_list' %}?when=today"><div class="n">{{ today_count }}</div>Appointments today</a></div>
+    <div class="stat"><a href="{% url 'appointments:staff_list' %}?when=upcoming"><div class="n">{{ upcoming_count }}</div>Upcoming appointments</a></div>
+  </div>
+  {% if next %}<p class="muted">Next appointment: {{ next.starts_at|date:"D d M Y, H:i" }}</p>{% endif %}
+{% endif %}
+{% endif %}

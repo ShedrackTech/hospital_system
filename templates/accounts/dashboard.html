@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load appointment_tags %}
 {% block title %}Dashboard{% endblock %}
 {% block content %}
 <style>
@@ -183,6 +184,8 @@
 {% else %}
   <div class="card"><p>Your dashboard is not set up yet. Please contact the administrator.</p></div>
 {% endif %}
+
+{% appointment_tile %}
 
 {% if dash.attendance %}{% include "accounts/_attendance_panel.html" %}{% endif %}
 {% endblock %}

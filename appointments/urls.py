@@ -14,4 +14,6 @@ urlpatterns = [
     path("<int:pk>/", views.detail, name="detail"),
     path("<int:pk>/cancel/", views.cancel, name="cancel"),
     path("<int:pk>/close/", views.close, name="close"),
+    path("<int:pk>/link-case/", views.link_case, name="link_case"),
+    path("<int:pk>/unlink-case/", views.unlink_case, name="unlink_case"),
 ]

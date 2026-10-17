@@ -1,0 +1,31 @@
+{% if appt.case_id or can_link %}
+<div class="card">
+  <h3>Linked case</h3>
+  {% if appt.case_id %}
+    <p>
+      {% if case_viewable %}<a href="{% url 'cases:detail' appt.case_id %}">Case #{{ appt.case_id }}</a>{% else %}Case #{{ appt.case_id }}{% endif %}
+      <span class="muted">linked {{ appt.case_linked_at|date:"d M Y H:i" }}</span>
+    </p>
+    {% if can_link %}
+    <form method="post" action="{% url 'appointments:unlink_case' appt.pk %}">
+      {% csrf_token %}
+      <button class="btn" type="submit">Remove the link</button>
+    </form>
+    {% endif %}
+  {% else %}
+    <p class="muted">No case is linked to this appointment.</p>
+  {% endif %}
+
+  {% if link_form %}
+    {% if link_form.fields.case.queryset.exists %}
+    <form method="post" action="{% url 'appointments:link_case' appt.pk %}">
+      {% csrf_token %}
+      {{ link_form.as_p }}
+      <button class="btn" type="submit">{% if appt.case_id %}Link a different case{% else %}Link this case{% endif %}</button>
+    </form>
+    {% else %}
+    <p class="muted">This patient has no assigned or in-treatment case of yours that can be linked.</p>
+    {% endif %}
+  {% endif %}
+</div>
+{% endif %}

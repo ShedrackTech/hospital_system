@@ -3,6 +3,8 @@ from datetime import timedelta
 from django import forms
 from django.utils import timezone
 
+from cases.models import Case
+
 from . import permissions, rules
 from .models import Appointment, DoctorAvailability
 
@@ -74,3 +76,20 @@ class AvailabilityForm(forms.Form):
         choices=[(m, f"{m} minutes") for m in rules.SLOT_MINUTES_CHOICES], coerce=int, initial=30,
         label="Length of each visit",
     )
+
+
+class _CaseChoice(forms.ModelChoiceField):
+    def label_from_instance(self, case):
+        # No complaint text: the label must not reveal the reason for a visit.
+        return f"Case #{case.pk} ({case.get_status_display()}, opened {case.created_at:%d %b %Y})"
+
+
+class LinkCaseForm(forms.Form):
+    """Choose one of the cases that may be linked to this appointment."""
+
+    case = _CaseChoice(queryset=Case.objects.none(), label="Case", empty_label="Choose a case")
+
+    def __init__(self, *args, cases=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        if cases is not None:
+            self.fields["case"].queryset = cases

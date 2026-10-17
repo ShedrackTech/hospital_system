@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+{% load notification_tags appointment_tags %}<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -29,12 +29,15 @@
 <body>
   <nav>
     <a href="{% url 'accounts:dashboard' %}">Dashboard</a>
+    {% unread_notifications as unread_count %}
+    <a href="{% url 'notifications:list' %}">Notifications{% if unread_count %} ({{ unread_count }}){% endif %}</a>
     {% if user.role == "patient" %}
       <a href="{% url 'patients:my_profile' %}">My profile</a>
       <a href="{% url 'cases:mine' %}">My cases</a>
       <a href="{% url 'cases:new' %}">Report a problem</a>
       <a href="{% url 'laboratory:mine' %}">My results</a>
       <a href="{% url 'pharmacy:mine' %}">My prescriptions</a>
+      <a href="{% url 'appointments:home' %}">My appointments</a>
       <a href="{% url 'billing:mine' %}">My bills</a>
       <a href="{% url 'datarequests:mine' %}">Data requests</a>
     {% else %}
@@ -48,6 +51,10 @@
       {% endif %}
       {% if user.staff_profile.category != "support" %}
         <a href="{% url 'cases:home' %}">Cases</a>
+      {% endif %}
+      {% can_open_appointments as appointments_ok %}
+      {% if appointments_ok %}
+        <a href="{% url 'appointments:home' %}">Appointments</a>
       {% endif %}
       {% if user.staff_profile.records_officer and user.role != "main_admin" and user.role != "sub_admin" %}
         <a href="{% url 'datarequests:manage' %}">Data requests</a>

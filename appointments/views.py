@@ -9,12 +9,13 @@ from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
+from cases import permissions as case_perms
 from core import audit
 from core.mixins import is_front_desk
 from patients.models import Patient
 
-from . import permissions, rules, services
-from .forms import AvailabilityForm, BookingForm, BookingLookupForm, CancelForm
+from . import case_links, notices, permissions, rules, services
+from .forms import AvailabilityForm, BookingForm, BookingLookupForm, CancelForm, LinkCaseForm
 from .models import Appointment, DoctorAvailability
 
 
@@ -102,6 +103,7 @@ def book(request):
                 except ValidationError as exc:
                     form.add_error(None, exc)
                 else:
+                    notices.booked(appt, user)
                     messages.success(request, "The appointment has been booked.")
                     return redirect("appointments:detail", pk=appt.pk)
     elif "doctor" in request.GET:
@@ -165,7 +167,10 @@ def staff_list(request):
 
 def _get_visible(request, pk):
     appt = get_object_or_404(
-        Appointment.objects.select_related("patient__user", "doctor", "department", "booked_by", "closed_by"), pk=pk
+        Appointment.objects.select_related(
+            "patient__user", "doctor", "department", "booked_by", "closed_by", "case"
+        ),
+        pk=pk,
     )
     if not permissions.can_view(request.user, appt):
         raise Http404  # do not reveal that it exists
@@ -178,6 +183,7 @@ def detail(request, pk):
     user = request.user
     if not permissions.is_own_patient(user, appt):
         audit.log(user, "appointment_viewed", appt, patient=appt.patient, request=request)
+    can_link = case_links.can_link(user, appt)
     return render(request, "appointments/detail.html", {
         "appt": appt,
         "show_reason": permissions.can_see_reason(user, appt),
@@ -187,6 +193,9 @@ def detail(request, pk):
         "cancel_form": CancelForm(),
         "cancel_hours": rules.PATIENT_CANCEL_HOURS,
         "cancel_blocked": permissions.cancel_problem(user, appt),
+        "case_viewable": bool(appt.case_id and case_perms.can_view(user, appt.case)),
+        "can_link": can_link,
+        "link_form": LinkCaseForm(cases=case_links.linkable_cases(user, appt)) if can_link else None,
     })
 
 
@@ -201,6 +210,7 @@ def cancel(request, pk):
         except ValidationError as exc:
             _errors(request, exc)
         else:
+            notices.cancelled(appt, request.user)
             messages.success(request, "The appointment has been cancelled.")
     else:
         messages.error(request, "The reason is too long.")
@@ -217,6 +227,38 @@ def close(request, pk):
         _errors(request, exc)
     else:
         messages.success(request, "The outcome has been recorded.")
+    return redirect("appointments:detail", pk=appt.pk)
+
+
+@login_required
+@require_POST
+def link_case(request, pk):
+    appt = _get_visible(request, pk)
+    form = LinkCaseForm(request.POST, cases=case_links.linkable_cases(request.user, appt))
+    if form.is_valid():
+        try:
+            case_links.link_case(appt, form.cleaned_data["case"], request.user, request=request)
+        except ValidationError as exc:
+            _errors(request, exc)
+        else:
+            messages.success(request, "The case has been linked to this appointment.")
+    elif not case_links.can_link(request.user, appt):
+        raise PermissionDenied
+    else:
+        messages.error(request, "Choose one of the cases in the list.")
+    return redirect("appointments:detail", pk=appt.pk)
+
+
+@login_required
+@require_POST
+def unlink_case(request, pk):
+    appt = _get_visible(request, pk)
+    try:
+        case_links.unlink_case(appt, request.user, request=request)
+    except ValidationError as exc:
+        _errors(request, exc)
+    else:
+        messages.success(request, "The link to the case has been removed.")
     return redirect("appointments:detail", pk=appt.pk)
 
 
