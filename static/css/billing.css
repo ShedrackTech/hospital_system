@@ -1,0 +1,17 @@
+/* Billing pages. The shared theme (theme.css) styles tables, forms, buttons, cards, chips and status badges. */
+.num { text-align: right; white-space: nowrap; }
+
+/* A row of form fields that wraps on small screens */
+.field-row { display: flex; flex-wrap: wrap; gap: .8rem; align-items: flex-end; margin: .4rem 0; }
+.field-row > div { flex: 1 1 12rem; }
+.field-row label { display: block; font-size: .85rem; margin-bottom: .2rem; }
+
+/* Search box above the invoice list */
+.invoice-search { margin-bottom: .6rem; }
+
+/* The Void button is red like the other destructive buttons */
+.btn-void, button.btn-void { background: #c62828; color: #fff; border-color: #c62828; }
+.btn-void:hover { background: #a61e1e; border-color: #a61e1e; }
+
+/* Totals at the foot of an invoice */
+tfoot th { font-weight: bold; }

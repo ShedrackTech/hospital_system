@@ -14,6 +14,12 @@ def doctor_photo_path(instance, filename):
     return f"doctor_photos/{uuid.uuid4().hex}{extension}"
 
 
+def blog_image_path(instance, filename):
+    """Same idea for blog pictures: a random name, so the original file name is not exposed."""
+    extension = os.path.splitext(filename)[1].lower()
+    return f"blog_images/{uuid.uuid4().hex}{extension}"
+
+
 class SiteInfo(models.Model):
     """One row only: the hospital's public contact details and About text.
 
@@ -117,6 +123,12 @@ class BlogPost(models.Model):
     category = models.CharField(max_length=10, choices=Category.choices, default=Category.HEALTH)
     slug = models.SlugField(max_length=220, unique=True, editable=False)
     summary = models.CharField(max_length=300, blank=True, help_text="One or two lines shown in the blog list.")
+    image = models.ImageField(
+        upload_to=blog_image_path,
+        blank=True,
+        validators=[FileExtensionValidator(["jpg", "jpeg", "png", "webp"])],
+        help_text="Optional cover picture. JPG, PNG or WebP, up to 5 MB. It is cropped to a wide 16:9 shape automatically.",
+    )
     body = models.TextField()
     status = models.CharField(max_length=10, choices=Status.choices, default=Status.DRAFT)
     author = models.ForeignKey(

@@ -1,21 +1,23 @@
 {% extends "base.html" %}
+{% block title %}Contact messages{% endblock %}
 {% block content %}
 <h1>Contact messages</h1>
 {% include "website/manage/_nav.html" %}
-<p>
-  Type:
-  <a href="?{% if show_all %}show=all{% endif %}"{% if not reason_filter %} class="on"{% endif %}>All</a>
+<p class="muted">Type:</p>
+<div class="chips">
+  <a class="chip{% if not reason_filter %} is-active{% endif %}" href="?{% if show_all %}show=all{% endif %}">All</a>
   {% for value, label in reasons %}
-    | <a href="?reason={{ value }}{% if show_all %}&amp;show=all{% endif %}"{% if reason_filter == value %} style="font-weight:700"{% endif %}>{{ label }}</a>
+    <a class="chip{% if reason_filter == value %} is-active{% endif %}" href="?reason={{ value }}{% if show_all %}&amp;show=all{% endif %}">{{ label }}</a>
   {% endfor %}
-</p>
-<p>
+</div>
+<p class="muted">
   {% if show_all %}Showing all.
-    <a href="?{% if reason_filter %}reason={{ reason_filter }}{% endif %}">Show unanswered only</a>
+    <a class="btn btn-sm btn-ghost" href="?{% if reason_filter %}reason={{ reason_filter }}{% endif %}">Show unanswered only</a>
   {% else %}Showing unanswered.
-    <a href="?{% if reason_filter %}reason={{ reason_filter }}&amp;{% endif %}show=all">Show all</a>{% endif %}
+    <a class="btn btn-sm btn-ghost" href="?{% if reason_filter %}reason={{ reason_filter }}&amp;{% endif %}show=all">Show all</a>{% endif %}
 </p>
-<table class="ws">
+<div class="wrap">
+<table>
   <tr><th>Received</th><th>From</th><th>Type</th><th>Subject</th><th>Status</th><th></th></tr>
   {% for contact_message in contact_messages %}
   <tr>
@@ -24,11 +26,12 @@
     <td>{{ contact_message.get_reason_display }}</td>
     <td>{{ contact_message.subject }}</td>
     <td>{% if contact_message.is_handled %}Handled{% else %}Open{% endif %}</td>
-    <td><a href="{% url 'website:manage_message' contact_message.pk %}">Open</a></td>
+    <td><a class="btn btn-sm btn-ghost" href="{% url 'website:manage_message' contact_message.pk %}">Open</a></td>
   </tr>
   {% empty %}
-  <tr><td colspan="6" class="ws-muted">No messages.</td></tr>
+  <tr><td colspan="6" class="muted">No messages.</td></tr>
   {% endfor %}
 </table>
+</div>
 {% include "website/manage/_pager.html" %}
 {% endblock %}

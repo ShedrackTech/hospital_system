@@ -1,0 +1,15 @@
+/* laboratory: styles that belong only to the laboratory pages.
+   Loaded automatically on every laboratory page (base.html picks static/css/laboratory.css by the app's URL namespace). */
+
+:root{ /* indigo to sky */
+  --accent-a:#4f46e5; --accent-b:#6366f1; --accent-c:#0ea5e9;
+  --accent-d:#7c3aed; --accent-e:#4338ca;
+}
+
+/* ----- links that act as buttons ----- */
+/* the links at the top right of a page header, for example Worklist, Test catalogue */
+main .bar > span > a:not(.btn),main .bar > a:not(.btn){display:inline-flex;align-items:center;margin:0 .25rem .25rem 0;padding:.5rem 1rem;border-radius:12px;background:#fff;color:var(--link);font-weight:600;font-size:.92rem;box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--accent-b) 45%,transparent);transition:transform .2s var(--ease),box-shadow .25s,background .25s}
+main .bar > span > a:not(.btn):hover,main .bar > a:not(.btn):hover{transform:translateY(-2px);background:color-mix(in srgb,var(--accent-b) 9%,#fff);box-shadow:inset 0 0 0 1.5px var(--accent-b),0 8px 18px var(--glow);color:var(--ink-b)}
+/* the links inside tables, for example the request number, Enter result, View */
+main table td a:not(.btn){display:inline-flex;align-items:center;padding:.28rem .8rem;border-radius:10px;background:#fff;color:var(--link);font-weight:600;font-size:.84rem;box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--accent-b) 40%,transparent);transition:transform .2s var(--ease),box-shadow .25s,background .25s}
+main table td a:not(.btn):hover{transform:translateY(-2px);background:var(--grad);color:#fff;box-shadow:0 6px 14px var(--glow)}

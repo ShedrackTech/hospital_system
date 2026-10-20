@@ -1,0 +1,9 @@
+/* facilities: styles that belong only to the wards, beds and admissions.
+   Loaded automatically on every facilities page (base.html picks static/css/facilities.css by the app's URL namespace). */
+
+:root{ /* cyan to deep teal */
+  --accent-a:#0891b2; --accent-b:#0ea5e9; --accent-c:#0f766e;
+  --accent-d:#2563eb; --accent-e:#0e7490;
+}
+
+/* ----- facilities rules go below ----- */

@@ -1,105 +1,128 @@
-{% load notification_tags appointment_tags %}<!DOCTYPE html>
+{% load static notification_tags appointment_tags %}<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{% block title %}Hospital Portal{% endblock %}</title>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 0; background: #f2f6fa; color: #222; }
-    nav { background: #0b6e99; padding: .8rem 1.5rem; display: flex; gap: 1.2rem; align-items: center; }
-    nav a, nav button { color: #fff; text-decoration: none; background: none; border: 0;
-                        font-size: 1rem; cursor: pointer; padding: 0; }
-    nav form { margin: 0 0 0 auto; }
-    main { max-width: 900px; margin: 1.5rem auto; padding: 0 1rem; }
-    .bar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: .5rem; }
-    .btn { background: #0b6e99; color: #fff; padding: .5rem .9rem; border-radius: 4px;
-           text-decoration: none; border: 0; cursor: pointer; font-size: .95rem; }
-    table { width: 100%; border-collapse: collapse; background: #fff; margin-top: 1rem; }
-    th, td { text-align: left; padding: .6rem; border-bottom: 1px solid #e3e8ee; }
-    .wrap { overflow-x: auto; }
-    .card { background: #fff; padding: 1.2rem; border-radius: 8px; margin-top: 1rem; }
-    .messages { list-style: none; padding: 0; }
-    .messages li { background: #e6f4ea; padding: .6rem 1rem; border-radius: 4px; margin-top: 1rem; }
-    .errorlist { color: #b00020; padding-left: 1rem; }
-    form p { margin: .8rem 0; }
-    form input[type=text], form textarea, form select { width: 100%; padding: .5rem; box-sizing: border-box; }
-    .muted { color: #666; }
-  </style>
+  <meta name="theme-color" content="#0a5871">
+  <title>{% block title %}Welcome{% endblock %} | GOOD HEALTH HOSPITAL</title>
+  <link rel="icon" type="image/png" href="{% static 'img/favicon.png' %}">
+  <script src="{% static 'js/theme-boot.js' %}"></script>
+  <link rel="stylesheet" href="{% static 'css/theme.css' %}">
+  {% with app=request.resolver_match.app_name %}{% if app %}<link rel="stylesheet" href="{% static 'css/'|add:app|add:'.css' %}">{% endif %}{% endwith %}
+  {% block extra_css %}{% endblock %}
 </head>
 <body>
-  <nav>
-    <a href="{% url 'accounts:dashboard' %}">Dashboard</a>
+{% static 'img/icons.svg' as icons %}
+  <div class="bg-orbs" aria-hidden="true"><span></span><span></span><span></span></div>
+  <div class="load-bar" id="loadBar" aria-hidden="true"></div>
+
+  <div class="toasts" aria-live="polite">
+    {% for message in messages %}
+      <div class="toast {{ message.tags }}" role="status"><span class="toast-text">{{ message }}</span><button class="toast-x" type="button" aria-label="Dismiss">&times;</button></div>
+    {% endfor %}
+  </div>
+
+  <div class="shell{% if not user.is_authenticated %} no-sidebar{% endif %}">
+    {% if user.is_authenticated %}
+    <aside class="sidebar" id="sidebar" aria-label="Main menu">
+      <a class="brand" href="{% url 'accounts:dashboard' %}">
+        <span class="brand-mark"><img src="{% static 'img/logo-mark.png' %}" alt="" width="50" height="50"></span>
+        <span class="brand-text">GOOD HEALTH<small>HOSPITAL</small></span>
+      </a>
+      <nav class="nav">
+
+    <a class="nav-link" href="{% url 'accounts:dashboard' %}" title="Dashboard"><svg class="ic" aria-hidden="true"><use href="{{ icons }}#i-grid"/></svg><span>Dashboard</span></a>
     {% unread_notifications as unread_count %}
-    <a href="{% url 'notifications:list' %}">Notifications{% if unread_count %} ({{ unread_count }}){% endif %}</a>
+    <a class="nav-link" href="{% url 'notifications:list' %}" title="Notifications"><svg class="ic" aria-hidden="true"><use href="{{ icons }}#i-list"/></svg><span>Notifications{% if unread_count %} ({{ unread_count }}){% endif %}</span></a>
     {% if user.role == "patient" %}
-      <a href="{% url 'patients:my_profile' %}">My profile</a>
-      <a href="{% url 'cases:mine' %}">My cases</a>
-      <a href="{% url 'cases:new' %}">Report a problem</a>
-      <a href="{% url 'laboratory:mine' %}">My results</a>
-      <a href="{% url 'pharmacy:mine' %}">My prescriptions</a>
-      <a href="{% url 'appointments:home' %}">My appointments</a>
-      <a href="{% url 'billing:mine' %}">My bills</a>
-      <a href="{% url 'datarequests:mine' %}">Data requests</a>
+      <a class="nav-link" href="{% url 'patients:my_profile' %}" title="My profile"><svg class="ic" aria-hidden="true"><use href="{{ icons }}#i-user"/></svg><span>My profile</span></a>
+      <a class="nav-link" href="{% url 'cases:mine' %}" title="My cases"><svg class="ic" aria-hidden="true"><use href="{{ icons }}#i-folder"/></svg><span>My cases</span></a>
+      <a class="nav-link" href="{% url 'cases:new' %}" title="Report a problem"><svg class="ic" aria-hidden="true"><use href="{{ icons }}#i-alert"/></svg><span>Report a problem</span></a>
+      <a class="nav-link" href="{% url 'laboratory:mine' %}" title="My results"><svg class="ic" aria-hidden="true"><use href="{{ icons }}#i-flask"/></svg><span>My results</span></a>
+      <a class="nav-link" href="{% url 'pharmacy:mine' %}" title="My prescriptions"><svg class="ic" aria-hidden="true"><use href="{{ icons }}#i-pill"/></svg><span>My prescriptions</span></a>
+      <a class="nav-link" href="{% url 'appointments:home' %}" title="My appointments"><svg class="ic" aria-hidden="true"><use href="{{ icons }}#i-calendar"/></svg><span>My appointments</span></a>
+      <a class="nav-link" href="{% url 'billing:mine' %}" title="My bills"><svg class="ic" aria-hidden="true"><use href="{{ icons }}#i-receipt"/></svg><span>My bills</span></a>
+      <a class="nav-link" href="{% url 'datarequests:mine' %}" title="Data requests"><svg class="ic" aria-hidden="true"><use href="{{ icons }}#i-shield"/></svg><span>Data requests</span></a>
     {% else %}
-      <a href="{% url 'departments:list' %}">Departments</a>
+      <a class="nav-link" href="{% url 'departments:list' %}" title="Departments"><svg class="ic" aria-hidden="true"><use href="{{ icons }}#i-building"/></svg><span>Departments</span></a>
       {% if user.role == "main_admin" or user.role == "sub_admin" or user.staff_profile.category == "admin" %}
-        <a href="{% url 'patients:staff_register' %}">Register patient</a>
-        <a href="{% url 'billing:home' %}">Billing</a>
+        <a class="nav-link" href="{% url 'patients:staff_register' %}" title="Register patient"><svg class="ic" aria-hidden="true"><use href="{{ icons }}#i-userplus"/></svg><span>Register patient</span></a>
+        <a class="nav-link" href="{% url 'billing:home' %}" title="Billing"><svg class="ic" aria-hidden="true"><use href="{{ icons }}#i-receipt"/></svg><span>Billing</span></a>
       {% endif %}
       {% if user.staff_profile.category == "admin" and user.role != "main_admin" and user.role != "sub_admin" %}
-        <a href="{% url 'website:manage_posts' %}">Blog posts</a>
+        <a class="nav-link" href="{% url 'website:manage_posts' %}" title="Blog posts"><svg class="ic" aria-hidden="true"><use href="{{ icons }}#i-pen"/></svg><span>Blog posts</span></a>
       {% endif %}
       {% if user.staff_profile.category != "support" %}
-        <a href="{% url 'cases:home' %}">Cases</a>
+        <a class="nav-link" href="{% url 'cases:home' %}" title="Cases"><svg class="ic" aria-hidden="true"><use href="{{ icons }}#i-folder"/></svg><span>Cases</span></a>
       {% endif %}
       {% can_open_appointments as appointments_ok %}
       {% if appointments_ok %}
-        <a href="{% url 'appointments:home' %}">Appointments</a>
+        <a class="nav-link" href="{% url 'appointments:home' %}" title="Appointments"><svg class="ic" aria-hidden="true"><use href="{{ icons }}#i-calendar"/></svg><span>Appointments</span></a>
       {% endif %}
       {% if user.staff_profile.records_officer and user.role != "main_admin" and user.role != "sub_admin" %}
-        <a href="{% url 'datarequests:manage' %}">Data requests</a>
+        <a class="nav-link" href="{% url 'datarequests:manage' %}" title="Data requests"><svg class="ic" aria-hidden="true"><use href="{{ icons }}#i-shield"/></svg><span>Data requests</span></a>
       {% endif %}
       {% if user.ward_assignments.exists %}
-        <a href="{% url 'facilities:my_ward' %}">My ward</a>
+        <a class="nav-link" href="{% url 'facilities:my_ward' %}" title="My ward"><svg class="ic" aria-hidden="true"><use href="{{ icons }}#i-bed"/></svg><span>My ward</span></a>
       {% endif %}
       {% if user.staff_profile %}
-        <a href="{% url 'attendance:mine' %}">Attendance</a>
-        <a href="{% url 'attendance:roster_mine' %}">My roster</a>
+        <a class="nav-link" href="{% url 'attendance:mine' %}" title="Attendance"><svg class="ic" aria-hidden="true"><use href="{{ icons }}#i-clock"/></svg><span>Attendance</span></a>
+        <a class="nav-link" href="{% url 'attendance:roster_mine' %}" title="My roster"><svg class="ic" aria-hidden="true"><use href="{{ icons }}#i-calcheck"/></svg><span>My roster</span></a>
       {% endif %}
       {% if user.role == "main_admin" or user.role == "sub_admin" or user.headed_department or user.team.exists %}
-        <a href="{% url 'attendance:roster' %}">Duty roster</a>
+        <a class="nav-link" href="{% url 'attendance:roster' %}" title="Duty roster"><svg class="ic" aria-hidden="true"><use href="{{ icons }}#i-calgrid"/></svg><span>Duty roster</span></a>
       {% endif %}
       {% if user.role == "main_admin" or user.role == "sub_admin" or user.headed_department or user.staff_profile.attendance_officer %}
-        <a href="{% url 'attendance:team' %}">Team attendance</a>
+        <a class="nav-link" href="{% url 'attendance:team' %}" title="Team attendance"><svg class="ic" aria-hidden="true"><use href="{{ icons }}#i-users"/></svg><span>Team attendance</span></a>
       {% endif %}
       {% if user.staff_profile.department.is_laboratory or user.role == "main_admin" or user.role == "sub_admin" %}
-        <a href="{% url 'laboratory:worklist' %}">Laboratory</a>
+        <a class="nav-link" href="{% url 'laboratory:worklist' %}" title="Laboratory"><svg class="ic" aria-hidden="true"><use href="{{ icons }}#i-flask"/></svg><span>Laboratory</span></a>
       {% endif %}
       {% if user.staff_profile.department.is_pharmacy or user.headed_department.is_pharmacy or user.role == "main_admin" or user.role == "sub_admin" %}
-        <a href="{% url 'pharmacy:worklist' %}">Pharmacy</a>
+        <a class="nav-link" href="{% url 'pharmacy:worklist' %}" title="Pharmacy"><svg class="ic" aria-hidden="true"><use href="{{ icons }}#i-pill"/></svg><span>Pharmacy</span></a>
       {% endif %}
     {% endif %}
     {% if user.role == "main_admin" or user.role == "sub_admin" %}
-      <a href="{% url 'patients:list' %}">Patients</a>
-      <a href="{% url 'patients:family_list' %}">Families</a>
-      <a href="{% url 'facilities:overview' %}">Facilities</a>
-      <a href="{% url 'facilities:ward_staff' %}">Ward staff</a>
-      <a href="{% url 'facilities:admission_list' %}">Admissions</a>
-      <a href="{% url 'accounts:staff_list' %}">Staff</a>
-      <a href="{% url 'datarequests:manage' %}">Data requests</a>
-      <a href="{% url 'website:manage_home' %}">Website</a>
-      <a href="{% url 'core:audit_list' %}">Audit log</a>
+      <div class="nav-label">Administration</div>
+      <a class="nav-link" href="{% url 'patients:list' %}" title="Patients"><svg class="ic" aria-hidden="true"><use href="{{ icons }}#i-heart"/></svg><span>Patients</span></a>
+      <a class="nav-link" href="{% url 'patients:family_list' %}" title="Families"><svg class="ic" aria-hidden="true"><use href="{{ icons }}#i-home"/></svg><span>Families</span></a>
+      <a class="nav-link" href="{% url 'facilities:overview' %}" title="Facilities"><svg class="ic" aria-hidden="true"><use href="{{ icons }}#i-hospital"/></svg><span>Facilities</span></a>
+      <a class="nav-link" href="{% url 'facilities:ward_staff' %}" title="Ward staff"><svg class="ic" aria-hidden="true"><use href="{{ icons }}#i-users"/></svg><span>Ward staff</span></a>
+      <a class="nav-link" href="{% url 'facilities:admission_list' %}" title="Admissions"><svg class="ic" aria-hidden="true"><use href="{{ icons }}#i-door"/></svg><span>Admissions</span></a>
+      <a class="nav-link" href="{% url 'accounts:staff_list' %}" title="Staff"><svg class="ic" aria-hidden="true"><use href="{{ icons }}#i-badge"/></svg><span>Staff</span></a>
+      <a class="nav-link" href="{% url 'datarequests:manage' %}" title="Data requests"><svg class="ic" aria-hidden="true"><use href="{{ icons }}#i-shield"/></svg><span>Data requests</span></a>
+      <a class="nav-link" href="{% url 'website:manage_home' %}" title="Website"><svg class="ic" aria-hidden="true"><use href="{{ icons }}#i-globe"/></svg><span>Website</span></a>
+      <a class="nav-link" href="{% url 'core:audit_list' %}" title="Audit log"><svg class="ic" aria-hidden="true"><use href="{{ icons }}#i-list"/></svg><span>Audit log</span></a>
     {% endif %}
-    <form method="post" action="{% url 'accounts:logout' %}">
-      {% csrf_token %}
-      <button type="submit">Log out</button>
-    </form>
-  </nav>
-  <main>
-    {% if messages %}
-      <ul class="messages">{% for message in messages %}<li>{{ message }}</li>{% endfor %}</ul>
+      </nav>
+      <div class="side-foot">
+        <div class="user-chip">
+          <span class="avatar">{{ user.first_name|default:user.username|slice:":1"|upper }}</span>
+          <span class="user-meta"><strong>{{ user.get_full_name|default:user.username }}</strong><small>{{ user.get_role_display }}</small></span>
+        </div>
+        <div class="side-actions">
+          <form class="logout-form" method="post" action="{% url 'accounts:logout' %}">
+            {% csrf_token %}
+            <button class="logout-btn" type="submit" title="Log out"><svg class="ic" aria-hidden="true"><use href="{{ icons }}#i-logout"/></svg><span>Log out</span></button>
+          </form>
+          <button class="collapse-btn" id="collapseBtn" type="button" title="Collapse menu" aria-label="Collapse menu"><svg class="ic" aria-hidden="true"><use href="{{ icons }}#i-chevrons"/></svg></button>
+        </div>
+      </div>
+    </aside>
+    <div class="scrim" id="scrim"></div>
     {% endif %}
-    {% block content %}{% endblock %}
-  </main>
+
+    <div class="content">
+      <header class="topbar">
+        {% if user.is_authenticated %}<button class="icon-btn" id="navToggle" type="button" aria-label="Open menu"><svg class="ic" aria-hidden="true"><use href="{{ icons }}#i-menu"/></svg></button>{% endif %}
+        <span class="top-brand">GOOD HEALTH HOSPITAL</span>
+      </header>
+      <main id="main">
+        {% block content %}{% endblock %}
+      </main>
+    </div>
+  </div>
+
+  <script src="{% static 'js/theme.js' %}"></script>
 </body>
 </html>

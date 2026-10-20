@@ -3,7 +3,7 @@
 {% block content %}
   <div class="bar">
     <h1>Prescribe for case #{{ case.pk }}</h1>
-    <a href="{% url 'cases:detail' case.pk %}">Back to the case</a>
+    <a class="btn btn-ghost" href="{% url 'cases:detail' case.pk %}">Back to the case</a>
   </div>
   <div class="card">
     <p><strong>Patient:</strong> {{ case.patient.user.get_full_name }} ({{ case.patient.user.login_id }})</p>
@@ -18,7 +18,7 @@
   <form method="post">
     {% csrf_token %}
     {% if allergy_warning %}
-      <div class="card" style="border:2px solid #b00020;">
+      <div class="card allergy-warning">
         <p><strong>Allergy warning.</strong> {{ allergy_warning }}</p>
         <p>{{ note_form.acknowledge_allergy }} {{ note_form.acknowledge_allergy.label }}</p>
       </div>
@@ -45,8 +45,10 @@
       </div>
       <p class="muted">Leave unused rows empty.</p>
       <p>{{ note_form.note.label_tag }} {{ note_form.note }}{{ note_form.note.errors }}</p>
-      <button class="btn" type="submit">Send to the pharmacy</button>
-      <a href="{% url 'cases:detail' case.pk %}">Cancel</a>
+      <div class="btn-row">
+        <button class="btn" type="submit">Send to the pharmacy</button>
+        <a class="btn btn-ghost" href="{% url 'cases:detail' case.pk %}">Cancel</a>
+      </div>
     </div>
   </form>
   {% endif %}

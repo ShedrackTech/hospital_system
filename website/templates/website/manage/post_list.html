@@ -1,9 +1,13 @@
 {% extends "base.html" %}
+{% block title %}Blog posts{% endblock %}
 {% block content %}
-<h1>Blog posts</h1>
+<div class="bar">
+  <h1>Blog posts</h1>
+  <a class="btn" href="{% url 'website:manage_post_new' %}">+ New post</a>
+</div>
 {% include "website/manage/_nav.html" %}
-<p><a href="{% url 'website:manage_post_new' %}">+ New post</a></p>
-<table class="ws">
+<div class="wrap">
+<table>
   <tr><th>Title</th><th>Category</th><th>Status</th><th>Author</th><th>Published</th><th></th></tr>
   {% for post in posts %}
   <tr>
@@ -12,11 +16,12 @@
     <td>{{ post.get_status_display }}</td>
     <td>{% if post.author %}{{ post.author.get_full_name|default:post.author.get_username }}{% else %}-{% endif %}</td>
     <td>{% if post.published_at %}{{ post.published_at|date:"j M Y H:i" }}{% else %}-{% endif %}</td>
-    <td><a href="{% url 'website:manage_post_edit' post.pk %}">Edit</a>{% if post.is_public %} | <a href="{% url 'website:blog_detail' post.slug %}" target="_blank" rel="noopener">View</a>{% endif %}</td>
+    <td><a class="btn btn-sm btn-ghost" href="{% url 'website:manage_post_edit' post.pk %}">Edit</a>{% if post.is_public %} <a class="btn btn-sm btn-ghost" href="{% url 'website:blog_detail' post.slug %}" target="_blank" rel="noopener">View</a>{% endif %}</td>
   </tr>
   {% empty %}
-  <tr><td colspan="6" class="ws-muted">No posts yet.</td></tr>
+  <tr><td colspan="6" class="muted">No posts yet.</td></tr>
   {% endfor %}
 </table>
+</div>
 {% include "website/manage/_pager.html" %}
 {% endblock %}

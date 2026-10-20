@@ -26,7 +26,7 @@
   </div>
 
   {% if manageable %}
-  <div class="bar" style="justify-content:flex-start; gap:.6rem; margin-top:1rem;">
+  <div class="actions">
     <a class="btn" href="{% url 'accounts:staff_update' member.pk %}">Edit</a>
     <a class="btn" href="{% url 'accounts:staff_password' member.pk %}">Reset password</a>
     {% if member.is_active %}

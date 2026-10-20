@@ -1,0 +1,22 @@
+{# Include this on the case page. It needs: case, prescriptions, can_prescribe. #}
+<div class="card">
+  <div class="bar">
+    <h3>Prescriptions</h3>
+    {% if can_prescribe %}<a class="btn" href="{% url 'pharmacy:prescribe' case.pk %}">Prescribe medicine</a>{% endif %}
+  </div>
+  {% if prescriptions %}
+  <div class="wrap">
+  <table>
+    <tr><th>#</th><th>Medicines</th><th>Status</th><th>Prescribed</th></tr>
+    {% for p in prescriptions %}
+    <tr>
+      <td><a class="btn btn-sm btn-ghost" href="{% url 'pharmacy:prescription' p.pk %}">{{ p.pk }}</a></td>
+      <td>{% for item in p.items.all %}{{ item.drug }}{% if not forloop.last %}, {% endif %}{% endfor %}</td>
+      <td>{{ p.get_status_display }}</td>
+      <td>{{ p.prescribed_at|date:"d M Y H:i" }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  </div>
+  {% else %}<p class="muted">No prescriptions yet.</p>{% endif %}
+</div>

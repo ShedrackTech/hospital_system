@@ -1,19 +1,15 @@
 {% extends "base.html" %}
 {% block title %}{% if item %}Edit price{% else %}Add price{% endif %}{% endblock %}
 {% block content %}
-{% include "billing/_styles.html" %}
-<div class="billing">
-  <h1>{% if item %}Edit {{ item.name }}{% else %}Add to the price list{% endif %}</h1>
-  <p><a href="{% url 'billing:items' %}">Back to the price list</a></p>
-  <form method="post" class="box">
+  <div class="bar">
+    <h1>{% if item %}Edit {{ item.name }}{% else %}Add to the price list{% endif %}</h1>
+    <a class="btn btn-ghost" href="{% url 'billing:items' %}">Back to the price list</a>
+  </div>
+  <form method="post" class="card">
     {% csrf_token %}
     {{ form.non_field_errors }}
-    {% for field in form %}
-      <div class="row"><div>{{ field.label_tag }}{{ field }}{{ field.errors }}
-        {% if field.help_text %}<div class="muted">{{ field.help_text }}</div>{% endif %}</div></div>
-    {% endfor %}
+    {{ form.as_p }}
     <p class="muted">A price change applies to new invoices only. Existing invoices keep the price they were issued at.</p>
     <button type="submit">Save</button>
   </form>
-</div>
 {% endblock %}

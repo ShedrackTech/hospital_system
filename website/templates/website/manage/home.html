@@ -1,9 +1,12 @@
 {% extends "base.html" %}
+{% block title %}Public website{% endblock %}
 {% block content %}
 <h1>Public website</h1>
 {% include "website/manage/_nav.html" %}
-<ul>
-  <li>Blog posts: {{ published_count }} published, {{ draft_count }} draft(s). <a href="{% url 'website:manage_posts' %}">Manage</a></li>
-  <li>Unanswered contact messages: {{ open_message_count }}. <a href="{% url 'website:manage_messages' %}">Open</a></li>
-</ul>
+<div class="card">
+  <ul class="ws-summary">
+    <li>Blog posts: {{ published_count }} published, {{ draft_count }} draft(s). <a class="btn btn-sm btn-ghost" href="{% url 'website:manage_posts' %}">Manage</a></li>
+    <li>Unanswered contact messages: {{ open_message_count }}. <a class="btn btn-sm btn-ghost" href="{% url 'website:manage_messages' %}">Open</a></li>
+  </ul>
+</div>
 {% endblock %}

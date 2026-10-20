@@ -1,0 +1,124 @@
+/* website: styles that belong only to the website app.
+   Loaded on the public site (base_public.html) and on the website management pages in the portal
+   (base.html picks static/css/website.css by the app's URL namespace). */
+
+:root{ /* green to blue, like the logo */
+  --accent-a:#16a34a; --accent-b:#0ea5e9; --accent-c:#2563eb;
+  --accent-d:#14b8a6; --accent-e:#15803d;
+}
+
+/* =====================================================================
+   Website management pages (inside the portal)
+   ===================================================================== */
+.wsnav{display:flex;flex-wrap:wrap;gap:.5rem;margin:.4rem 0 1.4rem;padding-bottom:.9rem;border-bottom:1px solid var(--line)}
+main .wsnav a:not(.btn){display:inline-flex;align-items:center;padding:.42rem 1rem;border-radius:999px;background:#fff;color:var(--link);font-size:.9rem;font-weight:600;
+  box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--accent-b) 35%,transparent);transition:transform .2s var(--ease),box-shadow .25s,background .25s,color .2s}
+main .wsnav a:not(.btn):hover{transform:translateY(-2px);background:color-mix(in srgb,var(--accent-b) 9%,#fff);box-shadow:inset 0 0 0 1.5px var(--accent-b),0 6px 14px var(--glow)}
+main .wsnav a.on:not(.btn){background:var(--grad);color:#fff;box-shadow:0 6px 16px var(--glow)}
+.ws-muted{color:var(--muted);font-size:.9rem}
+
+/* =====================================================================
+   Public website
+   ===================================================================== */
+body.public{min-height:100vh;display:flex;flex-direction:column;overflow-x:clip}
+body.public main.page{flex:1;width:100%;max-width:none;margin:0;padding:0}
+.site-wrap{width:min(1120px,100% - 2.4rem);margin-inline:auto}
+body.public main.page>.site-wrap{padding:2rem 0 4rem}
+
+/* ----- header ----- */
+.site-header{position:sticky;top:0;z-index:60;background:rgba(255,255,255,.82);backdrop-filter:blur(14px);border-bottom:1px solid var(--line);transition:box-shadow .3s;animation:siteDrop .6s var(--ease) backwards}
+.site-header.scrolled{box-shadow:0 10px 30px rgba(15,42,61,.12)}
+.site-header .site-wrap{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:.65rem 0}
+.site-brand{display:flex;align-items:center;gap:.7rem;text-decoration:none}
+.site-logo{display:block;width:46px;height:46px;background:url("../img/logo-mark.png") center/contain no-repeat;filter:drop-shadow(0 4px 8px rgba(11,94,168,.3));transition:transform .4s var(--ease)}
+.site-brand:hover .site-logo{transform:rotate(-6deg) scale(1.08)}
+.site-name{font-weight:800;font-size:1.05rem;letter-spacing:.06em;white-space:nowrap;
+  background:linear-gradient(90deg,#0b5ea8,#0ea5e9,#14b8a6,#2e9e3a,#0ea5e9,#0b5ea8);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:siteFlow 7s linear infinite}
+.site-nav{display:flex;align-items:center;gap:.25rem}
+.site-nav a:not(.btn){padding:.5rem .85rem;border-radius:999px;color:var(--ink);font-weight:600;font-size:.94rem;text-decoration:none;transition:background .25s,color .25s}
+.site-nav a:not(.btn):hover{background:color-mix(in srgb,var(--accent-b) 12%,#fff);color:var(--ink-b)}
+.site-nav a.on:not(.btn){background:var(--grad);color:#fff}
+.site-nav .btn{margin-left:.5rem}
+.menu-btn{display:none;place-items:center;width:42px;height:42px;border:0;border-radius:12px;background:var(--grad);color:#fff;cursor:pointer;box-shadow:0 6px 16px var(--glow)}
+@keyframes siteDrop{from{opacity:0;transform:translateY(-100%)}to{opacity:1;transform:none}}
+@keyframes siteFlow{to{background-position:-300% 0}}
+
+/* ----- hero ----- */
+.hero{position:relative;overflow:hidden;margin:-2rem calc(50% - 50vw) 0;padding:4.5rem calc(50vw - 50%) 5.2rem;color:#fff;border-radius:0 0 44px 44px;
+  background:linear-gradient(120deg,#0b5ea8,#0ea5e9,#14b8a6,#2e9e3a,#0b5ea8);background-size:300% 300%;animation:heroFlow 16s ease-in-out infinite;box-shadow:0 20px 50px rgba(14,165,233,.28)}
+.hero::before,.hero::after{content:"";position:absolute;border-radius:50%;background:rgba(255,255,255,.12);pointer-events:none}
+.hero::before{width:420px;height:420px;right:-120px;top:-160px;animation:float 18s ease-in-out infinite}
+.hero::after{width:260px;height:260px;left:-80px;bottom:-120px;animation:float 22s ease-in-out infinite reverse}
+.hero>*{position:relative;z-index:1;max-width:620px}
+.hero .hero-kicker{margin:0 0 .6rem;font-size:.82rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.85)}
+.hero h1{margin:0 0 .8rem;font-size:clamp(2rem,1.2rem + 3vw,3.2rem);line-height:1.12;color:#fff;-webkit-text-fill-color:#fff;background:none;animation:none}
+.hero p{color:rgba(255,255,255,.92);font-size:1.1rem}
+.hero .btn-row{margin-top:1.4rem}
+.hero .btn{background:#fff;color:var(--ink-b);box-shadow:0 10px 24px rgba(6,47,63,.25)}
+.hero .btn:hover{color:var(--ink-b);box-shadow:0 16px 32px rgba(6,47,63,.32)}
+.hero .btn.btn-ghost{background:transparent;color:#fff;box-shadow:inset 0 0 0 2px rgba(255,255,255,.8)}
+.hero .btn.btn-ghost:hover{background:rgba(255,255,255,.16);color:#fff;box-shadow:inset 0 0 0 2px #fff}
+.hero .hero-logo{position:absolute;right:max(calc(50vw - 560px),2rem);top:50%;max-width:none;width:190px;height:186px;background:url("../img/logo-mark.png") center/contain no-repeat;translate:0 -50%;filter:drop-shadow(0 18px 28px rgba(6,47,63,.35));animation:heroBob 5s ease-in-out infinite}
+@keyframes heroFlow{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+@keyframes heroBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+
+/* ----- content blocks ----- */
+body.public .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1.1rem;margin:1rem 0 1.4rem}
+body.public .grid>*{animation:rise .6s var(--ease) backwards}
+body.public .grid>*:nth-child(2){animation-delay:.07s}body.public .grid>*:nth-child(3){animation-delay:.14s}
+body.public .grid>*:nth-child(4){animation-delay:.21s}body.public .grid>*:nth-child(5){animation-delay:.28s}
+body.public .grid>*:nth-child(n+6){animation-delay:.35s}
+body.public .grid>.card{margin-top:0;border-top:4px solid var(--accent-a);background-image:linear-gradient(180deg,color-mix(in srgb,var(--accent-b) 6%,#fff),#fff 60%)}
+.card h3 a{color:var(--ink);font-weight:700}
+.meta{color:var(--muted);font-size:.9rem}
+.article{max-width:780px;padding:1.6rem 1.8rem;border:1px solid var(--line);border-radius:var(--radius);background:#fff;box-shadow:var(--shadow);line-height:1.75}
+/* ----- pictures: every picture sits in a fixed frame, is cropped to fill it and is never stretched ----- */
+.doctor-photo{display:block;width:100%;aspect-ratio:4/5;object-fit:cover;object-position:50% 22%;border-radius:12px;margin-bottom:.9rem;background:var(--grad)}
+.doctor-photo-empty{display:grid;place-items:center;color:#fff;font-size:4rem;font-weight:800;letter-spacing:0}
+body.public .grid>.card.post-card{padding:0;overflow:hidden;border-top:0;background-image:none;background-color:#fff;display:flex;flex-direction:column}
+.post-cover-link{display:block;overflow:hidden}
+.post-cover{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;object-position:50% 35%;background:var(--grad);transition:transform .7s var(--ease)}
+.post-card:hover .post-cover{transform:scale(1.06)}
+.post-cover-empty{background:url("../img/logo-mark.png") center/30% no-repeat,linear-gradient(135deg,color-mix(in srgb,var(--accent-a) 20%,#fff),color-mix(in srgb,var(--accent-b) 26%,#fff))}
+.post-body{padding:1.1rem 1.3rem 1.4rem}
+.post-body h3{margin:.3rem 0 .5rem}
+.post-hero{margin:0 0 1.4rem;border-radius:14px;overflow:hidden;box-shadow:var(--shadow-lg)}
+.post-hero img{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;object-position:50% 35%}
+
+/* ----- contact page ----- */
+.contact-layout{display:grid;grid-template-columns:1.25fr 1fr;gap:1.6rem;align-items:start;margin-top:1rem}
+form.contact{padding:1.4rem 1.5rem;border:1px solid var(--line);border-radius:var(--radius);background:#fff;box-shadow:var(--shadow)}
+.contact-info{padding:1.2rem 1.4rem;border-radius:var(--radius);background:rgba(255,255,255,.7);border:1px solid var(--line)}
+.hp{position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden}   /* spam trap: must stay invisible */
+.msg{margin:0 0 1rem;padding:.7rem 1rem;border-radius:10px;background:#fff1f2;color:#be123c;border-left:4px solid var(--danger)}
+body.public .contact-info .emergency{display:inline-block;padding:.3rem .8rem;border-radius:999px;background:#fff1f2;color:#be123c;font-weight:700;border:1px solid #fecdd3}
+
+/* ----- other public forms (patient registration): a clean card ----- */
+body.public .page form:not(.contact){max-width:620px;margin-top:1rem;padding:1.6rem 1.7rem;border:1px solid var(--line);border-radius:var(--radius);background:#fff;box-shadow:var(--shadow)}
+body.public .page form:not(.contact) button[type=submit]{width:100%;margin-top:.4rem;padding:.8rem}
+
+/* ----- footer: always at the bottom, even on short pages ----- */
+.site-footer{margin-top:auto;color:#d9f3f7;background:linear-gradient(165deg,#062f3f,#0a5871 45%,#0b7e94 80%,#0a4f78);background-size:100% 220%;animation:drift 20s ease-in-out infinite}
+.footer-grid{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:2rem;padding:2.6rem 0 1.8rem}
+.site-footer strong{display:block;margin-bottom:.5rem;color:#fff;letter-spacing:.04em}
+.site-footer p{margin:.35rem 0;color:#cdeaf0;line-height:1.55}
+.site-footer .footer-tagline{font-style:italic;color:#9fe7ef}
+.site-footer a{color:#9fe7ef;text-decoration:underline;text-underline-offset:3px}
+.site-footer a:hover{color:#fff}
+.site-footer .emergency{display:inline-block;padding:.3rem .85rem;border-radius:999px;background:rgba(225,29,72,.25);color:#ffd9df;font-weight:700;border:1px solid rgba(255,140,160,.45)}
+.footer-bottom{padding:1rem 1.2rem;border-top:1px solid rgba(255,255,255,.14);text-align:center;font-size:.86rem;color:rgba(205,234,240,.8)}
+
+/* ----- phones and tablets ----- */
+@media (max-width:860px){
+  .menu-btn{display:grid}
+  .site-nav{position:absolute;left:0;right:0;top:100%;flex-direction:column;align-items:stretch;gap:.2rem;padding:.8rem 1.2rem 1rem;background:rgba(255,255,255,.97);border-bottom:1px solid var(--line);box-shadow:0 18px 30px rgba(15,42,61,.14);
+    opacity:0;transform:translateY(-8px);pointer-events:none;transition:opacity .25s,transform .3s var(--ease)}
+  body.site-nav-open .site-nav{opacity:1;transform:none;pointer-events:auto}
+  .site-nav .btn{margin:.4rem 0 0}
+  .hero{padding-top:3rem;padding-bottom:3.6rem;border-radius:0 0 30px 30px}
+  .hero .hero-logo{display:none}
+  .contact-layout{grid-template-columns:1fr}
+  .footer-grid{grid-template-columns:1fr;gap:1.4rem;padding-top:2rem}
+  .site-name{font-size:.92rem;letter-spacing:.04em}
+}
+@media print{.site-header,.site-footer,.menu-btn{display:none!important}.hero{background:none;color:#000;box-shadow:none}}

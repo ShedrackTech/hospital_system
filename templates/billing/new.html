@@ -1,37 +1,40 @@
 {% extends "base.html" %}
 {% block title %}New invoice{% endblock %}
 {% block content %}
-{% include "billing/_styles.html" %}
-<div class="billing">
-  <h1>New invoice</h1>
-  <p><a href="{% url 'billing:invoice_list' %}">Back to invoices</a></p>
+  <div class="bar">
+    <h1>New invoice</h1>
+    <a class="btn btn-ghost" href="{% url 'billing:invoice_list' %}">Back to invoices</a>
+  </div>
 
-  <form method="get" class="box">
-    <div class="row">
-      <div><label for="patient">Patient card number</label>
-      <input type="text" id="patient" name="patient" value="{{ patient_card }}" placeholder="PAT000001" maxlength="20"></div>
+  <form method="get" class="card">
+    <div class="field-row">
+      <div>
+        <label for="patient">Patient card number</label>
+        <input type="text" id="patient" name="patient" value="{{ patient_card }}" placeholder="PAT000001" maxlength="20">
+      </div>
       <div><button type="submit">Find patient</button></div>
     </div>
   </form>
 
   {% if not has_prices %}
-    <p class="box">The price list is empty. An administrator must add items under <a href="{% url 'billing:items' %}">Price list</a> first.</p>
+  <div class="card"><p>The price list is empty. An administrator must add items under <a href="{% url 'billing:items' %}">Price list</a> first.</p></div>
   {% endif %}
 
   {% if patient %}
-  <form method="post" class="box">
+  <form method="post" class="card">
     {% csrf_token %}
     <input type="hidden" name="patient" value="{{ patient_card }}">
     <p><strong>{{ patient.user.get_full_name|default:patient.user.username }}</strong> <span class="muted">{{ patient.user.login_id }}</span></p>
 
     {{ invoice_form.non_field_errors }}
-    <div class="row">
+    <div class="field-row">
       <div>{{ invoice_form.case.label_tag }}{{ invoice_form.case }}{{ invoice_form.case.errors }}</div>
       <div>{{ invoice_form.note.label_tag }}{{ invoice_form.note }}{{ invoice_form.note.errors }}</div>
     </div>
 
     {{ formset.management_form }}
     {{ formset.non_form_errors }}
+    <div class="wrap">
     <table>
       <thead><tr><th>Item</th><th>Quantity</th></tr></thead>
       <tbody>
@@ -43,9 +46,9 @@
       {% endfor %}
       </tbody>
     </table>
+    </div>
     <p class="muted">Leave unused rows empty. The same item twice is added together.</p>
     <button type="submit">Create invoice</button>
   </form>
   {% endif %}
-</div>
 {% endblock %}

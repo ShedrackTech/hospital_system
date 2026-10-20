@@ -1,0 +1,12 @@
+/* pharmacy: styles that belong only to the pharmacy pages.
+   Loaded automatically on every pharmacy page (base.html picks static/css/pharmacy.css by the app's URL namespace). */
+
+:root{ /* green to teal, like the logo */
+  --accent-a:#22c55e; --accent-b:#14b8a6; --accent-c:#0284c7;
+  --accent-d:#0ea5e9; --accent-e:#16a34a;
+}
+
+/* ----- allergy warning box (prescribe and prescription pages) ----- */
+.allergy-warning{border:2px solid var(--danger);background:#fff7f8;animation:warnPulse 2.6s ease-in-out infinite}
+.allergy-warning:hover{border-color:var(--danger)}
+@keyframes warnPulse{0%,100%{box-shadow:0 0 0 0 rgba(225,29,72,.0)}50%{box-shadow:0 0 0 6px rgba(225,29,72,.14)}}

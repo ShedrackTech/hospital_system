@@ -3,10 +3,10 @@
 {% block content %}
   <div class="bar">
     <h1>Stock batches</h1>
-    <span>
-      <a href="{% url 'pharmacy:drugs' %}">Drugs</a> &nbsp;
-      <a href="{% url 'pharmacy:worklist' %}">Prescriptions</a>
-      {% if can_receive %}&nbsp; <a class="btn" href="{% url 'pharmacy:receive' %}">Receive stock</a>{% endif %}
+    <span class="btn-row">
+      <a class="btn btn-ghost" href="{% url 'pharmacy:drugs' %}">Drugs</a>
+      <a class="btn btn-ghost" href="{% url 'pharmacy:worklist' %}">Prescriptions</a>
+      {% if can_receive %}<a class="btn" href="{% url 'pharmacy:receive' %}">Receive stock</a>{% endif %}
     </span>
   </div>
 
@@ -15,7 +15,7 @@
     <h3>Expired stock to write off</h3>
     <ul>
       {% for b in expired %}<li>{{ b.drug }}, batch {{ b.batch_number }}: {{ b.quantity_remaining }} left, expired {{ b.expiry_date|date:"d M Y" }}
-        {% if can_manage %}<a href="{% url 'pharmacy:adjust' b.pk %}">Write off</a>{% endif %}</li>{% endfor %}
+        {% if can_manage %}<a class="btn btn-sm danger" href="{% url 'pharmacy:adjust' b.pk %}">Write off</a>{% endif %}</li>{% endfor %}
     </ul>
   </div>
   {% endif %}
@@ -28,7 +28,9 @@
   </div>
   {% endif %}
 
-  <p>{% if show_all %}Showing all batches. <a href="?">Only batches with stock</a>{% else %}Showing batches with stock. <a href="?show=all">Show all</a>{% endif %}</p>
+  <div class="chips">
+    {% if show_all %}<span>Showing all batches.</span> <a class="chip" href="?">Only batches with stock</a>{% else %}<span>Showing batches with stock.</span> <a class="chip" href="?show=all">Show all</a>{% endif %}
+  </div>
   {% if batches %}
   <div class="wrap">
   <table>
@@ -37,17 +39,17 @@
     <tr>
       <td>{{ b.drug }}</td><td>{{ b.batch_number }}</td><td>{{ b.expiry_date|date:"d M Y" }}</td>
       <td>{{ b.quantity_received }}</td><td>{{ b.quantity_remaining }}</td>
-      {% if can_manage %}<td><a href="{% url 'pharmacy:adjust' b.pk %}">Adjust</a></td>{% endif %}
+      {% if can_manage %}<td><a class="btn btn-sm btn-ghost" href="{% url 'pharmacy:adjust' b.pk %}">Adjust</a></td>{% endif %}
     </tr>
     {% endfor %}
   </table>
   </div>
   {% if is_paginated %}
-  <p>
-    {% if page_obj.has_previous %}<a href="?{% if show_all %}show=all&{% endif %}page={{ page_obj.previous_page_number }}">Previous</a>{% endif %}
-    Page {{ page_obj.number }} of {{ paginator.num_pages }}
-    {% if page_obj.has_next %}<a href="?{% if show_all %}show=all&{% endif %}page={{ page_obj.next_page_number }}">Next</a>{% endif %}
-  </p>
+  <div class="pager">
+    {% if page_obj.has_previous %}<a class="btn btn-sm btn-ghost" href="?{% if show_all %}show=all&{% endif %}page={{ page_obj.previous_page_number }}">Previous</a>{% endif %}
+    <span>Page {{ page_obj.number }} of {{ paginator.num_pages }}</span>
+    {% if page_obj.has_next %}<a class="btn btn-sm btn-ghost" href="?{% if show_all %}show=all&{% endif %}page={{ page_obj.next_page_number }}">Next</a>{% endif %}
+  </div>
   {% endif %}
   {% else %}<p class="muted">No batches.</p>{% endif %}
 {% endblock %}

@@ -25,7 +25,7 @@
     <input type="hidden" name="date" value="{{ day|date:'Y-m-d' }}">
     {% if staff_booking %}<input type="hidden" name="patient" value="{{ patient_card }}">{% endif %}
     {{ form.non_field_errors }}
-    <fieldset>
+    <fieldset class="slot-picker">
       <legend>Free times</legend>
       {{ form.slot.errors }}
       {{ form.slot }}

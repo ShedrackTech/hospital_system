@@ -2,30 +2,22 @@
 {% load appointment_tags %}
 {% block title %}Dashboard{% endblock %}
 {% block content %}
-<style>
-  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: .8rem; margin-top: 1rem; }
-  .stat { background: #fff; border-radius: 8px; padding: 1rem; }
-  .stat a { color: inherit; text-decoration: none; display: block; }
-  .stat .n { font-size: 1.8rem; font-weight: bold; color: #0b6e99; }
-  .actions { display: flex; gap: .6rem; flex-wrap: wrap; margin-top: 1rem; }
-</style>
-
 <h1>Welcome, {{ user.get_full_name|default:user.username }}</h1>
 <p class="muted">{{ user.get_role_display }} &middot; ID {{ user.login_id }}</p>
 <h2>{{ dash.title }}</h2>
 
 {% if dash.kind == "admin" %}
-  <div class="stats">
-    <div class="stat"><a href="{% url 'cases:triage' %}"><div class="n">{{ dash.counts.awaiting_triage }}</div>Awaiting triage</a></div>
-    <div class="stat"><a href="{% url 'cases:all' %}?status=pending"><div class="n">{{ dash.counts.awaiting_assignment }}</div>Awaiting assignment</a></div>
-    <div class="stat"><a href="{% url 'cases:all' %}?status=in_treatment"><div class="n">{{ dash.counts.in_treatment }}</div>In treatment</a></div>
-    <div class="stat"><a href="{% url 'cases:all' %}"><div class="n">{{ dash.counts.total }}</div>Total cases</a></div>
-    <div class="stat"><a href="{% url 'facilities:admission_list' %}"><div class="n">{{ dash.admitted }}</div>Admitted now</a></div>
-    <div class="stat"><a href="{% url 'facilities:overview' %}"><div class="n">{{ dash.beds.free }} / {{ dash.beds.total }}</div>Beds free</a></div>
-    <div class="stat"><a href="{% url 'patients:list' %}"><div class="n">{{ dash.patients }}</div>Patients</a></div>
-    <div class="stat"><a href="{% url 'datarequests:manage' %}"><div class="n">{{ dash.open_requests }}</div>Data requests</a></div>
-    <div class="stat"><a href="{% url 'accounts:locked_list' %}"><div class="n">{{ dash.locked_accounts }}</div>Locked accounts</a></div>
-    <div class="stat"><div class="n">{{ dash.staff }}</div>Active staff</div>
+  <div class="stat-grid">
+    <div class="stat"><a href="{% url 'cases:triage' %}"><span class="stat-number">{{ dash.counts.awaiting_triage }}</span><span class="stat-label">Awaiting triage</span></a></div>
+    <div class="stat"><a href="{% url 'cases:all' %}?status=pending"><span class="stat-number">{{ dash.counts.awaiting_assignment }}</span><span class="stat-label">Awaiting assignment</span></a></div>
+    <div class="stat"><a href="{% url 'cases:all' %}?status=in_treatment"><span class="stat-number">{{ dash.counts.in_treatment }}</span><span class="stat-label">In treatment</span></a></div>
+    <div class="stat"><a href="{% url 'cases:all' %}"><span class="stat-number">{{ dash.counts.total }}</span><span class="stat-label">Total cases</span></a></div>
+    <div class="stat"><a href="{% url 'facilities:admission_list' %}"><span class="stat-number">{{ dash.admitted }}</span><span class="stat-label">Admitted now</span></a></div>
+    <div class="stat"><a href="{% url 'facilities:overview' %}"><span class="stat-number">{{ dash.beds.free }} / {{ dash.beds.total }}</span><span class="stat-label">Beds free</span></a></div>
+    <div class="stat"><a href="{% url 'patients:list' %}"><span class="stat-number">{{ dash.patients }}</span><span class="stat-label">Patients</span></a></div>
+    <div class="stat"><a href="{% url 'datarequests:manage' %}"><span class="stat-number">{{ dash.open_requests }}</span><span class="stat-label">Data requests</span></a></div>
+    <div class="stat"><a href="{% url 'accounts:locked_list' %}"><span class="stat-number">{{ dash.locked_accounts }}</span><span class="stat-label">Locked accounts</span></a></div>
+    <div class="stat"><span class="stat-number">{{ dash.staff }}</span><span class="stat-label">Active staff</span></div>
   </div>
   <div class="actions">
     <a class="btn" href="{% url 'cases:all' %}">All cases</a>
@@ -47,12 +39,12 @@
   </div>
 
 {% elif dash.kind == "head" %}
-  <div class="stats">
-    <div class="stat"><a href="{% url 'cases:department' %}?status=pending"><div class="n">{{ dash.counts.awaiting }}</div>Awaiting assignment</a></div>
-    <div class="stat"><a href="{% url 'cases:department' %}?status=assigned"><div class="n">{{ dash.counts.assigned }}</div>Assigned</a></div>
-    <div class="stat"><a href="{% url 'cases:department' %}?status=in_treatment"><div class="n">{{ dash.counts.in_treatment }}</div>In treatment</a></div>
-    <div class="stat"><div class="n">{{ dash.admitted }}</div>Admitted now</div>
-    <div class="stat"><div class="n">{{ dash.team }}</div>Team members</div>
+  <div class="stat-grid">
+    <div class="stat"><a href="{% url 'cases:department' %}?status=pending"><span class="stat-number">{{ dash.counts.awaiting }}</span><span class="stat-label">Awaiting assignment</span></a></div>
+    <div class="stat"><a href="{% url 'cases:department' %}?status=assigned"><span class="stat-number">{{ dash.counts.assigned }}</span><span class="stat-label">Assigned</span></a></div>
+    <div class="stat"><a href="{% url 'cases:department' %}?status=in_treatment"><span class="stat-number">{{ dash.counts.in_treatment }}</span><span class="stat-label">In treatment</span></a></div>
+    <div class="stat"><span class="stat-number">{{ dash.admitted }}</span><span class="stat-label">Admitted now</span></div>
+    <div class="stat"><span class="stat-number">{{ dash.team }}</span><span class="stat-label">Team members</span></div>
   </div>
   <div class="card">
     <h3>Waiting for you to assign</h3>
@@ -61,8 +53,8 @@
   </div>
 
 {% elif dash.kind == "general" %}
-  <div class="stats">
-    <div class="stat"><a href="{% url 'cases:triage' %}"><div class="n">{{ dash.waiting_count }}</div>Waiting to be routed</a></div>
+  <div class="stat-grid">
+    <div class="stat"><a href="{% url 'cases:triage' %}"><span class="stat-number">{{ dash.waiting_count }}</span><span class="stat-label">Waiting to be routed</span></a></div>
   </div>
   <div class="card">
     <h3>Oldest cases in the triage queue</h3>
@@ -71,14 +63,14 @@
   </div>
 
 {% elif dash.kind == "medical" %}
-  <div class="stats">
-    <div class="stat"><a href="{% url 'cases:assigned' %}?status=assigned"><div class="n">{{ dash.counts.assigned }}</div>Newly assigned</a></div>
-    <div class="stat"><a href="{% url 'cases:assigned' %}?status=in_treatment"><div class="n">{{ dash.counts.in_treatment }}</div>In treatment</a></div>
-    <div class="stat"><div class="n">{{ dash.admitted }}</div>Admitted now</div>
+  <div class="stat-grid">
+    <div class="stat"><a href="{% url 'cases:assigned' %}?status=assigned"><span class="stat-number">{{ dash.counts.assigned }}</span><span class="stat-label">Newly assigned</span></a></div>
+    <div class="stat"><a href="{% url 'cases:assigned' %}?status=in_treatment"><span class="stat-number">{{ dash.counts.in_treatment }}</span><span class="stat-label">In treatment</span></a></div>
+    <div class="stat"><span class="stat-number">{{ dash.admitted }}</span><span class="stat-label">Admitted now</span></div>
     {% if dash.has_wards %}
-    <div class="stat"><a href="{% url 'facilities:my_ward' %}"><div class="n">{{ dash.ward_patients }}</div>Patients in my ward</a></div>
+    <div class="stat"><a href="{% url 'facilities:my_ward' %}"><span class="stat-number">{{ dash.ward_patients }}</span><span class="stat-label">Patients in my ward</span></a></div>
     {% endif %}
-    <div class="stat"><a href="{% url 'cases:assigned' %}?status=completed"><div class="n">{{ dash.counts.completed }}</div>Completed</a></div>
+    <div class="stat"><a href="{% url 'cases:assigned' %}?status=completed"><span class="stat-number">{{ dash.counts.completed }}</span><span class="stat-label">Completed</span></a></div>
   </div>
   <div class="card">
     <h3>Your active patients</h3>
@@ -87,10 +79,10 @@
   </div>
 
 {% elif dash.kind == "lab" %}
-  <div class="stats">
-    <div class="stat"><a href="{% url 'laboratory:worklist' %}?status=ordered"><div class="n">{{ dash.counts.ordered }}</div>Waiting for a result</a></div>
-    <div class="stat"><a href="{% url 'laboratory:worklist' %}?status=resulted"><div class="n">{{ dash.counts.resulted }}</div>Awaiting release</a></div>
-    <div class="stat"><a href="{% url 'laboratory:worklist' %}?status=released"><div class="n">{{ dash.counts.released }}</div>Released</a></div>
+  <div class="stat-grid">
+    <div class="stat"><a href="{% url 'laboratory:worklist' %}?status=ordered"><span class="stat-number">{{ dash.counts.ordered }}</span><span class="stat-label">Waiting for a result</span></a></div>
+    <div class="stat"><a href="{% url 'laboratory:worklist' %}?status=resulted"><span class="stat-number">{{ dash.counts.resulted }}</span><span class="stat-label">Awaiting release</span></a></div>
+    <div class="stat"><a href="{% url 'laboratory:worklist' %}?status=released"><span class="stat-number">{{ dash.counts.released }}</span><span class="stat-label">Released</span></a></div>
   </div>
   <div class="actions">
     <a class="btn" href="{% url 'laboratory:worklist' %}">Worklist</a>
@@ -112,11 +104,11 @@
   </div>
 
 {% elif dash.kind == "pharmacy" %}
-  <div class="stats">
-    <div class="stat"><a href="{% url 'pharmacy:worklist' %}?status=prescribed"><div class="n">{{ dash.counts.waiting }}</div>Waiting to be dispensed</a></div>
-    <div class="stat"><a href="{% url 'pharmacy:worklist' %}?status=partly_dispensed"><div class="n">{{ dash.counts.partly }}</div>Partly dispensed</a></div>
-    <div class="stat"><a href="{% url 'pharmacy:drugs' %}"><div class="n">{{ dash.low_stock }}</div>Low or out of stock</a></div>
-    <div class="stat"><a href="{% url 'pharmacy:stock' %}"><div class="n">{{ dash.expiring }}</div>Batches expiring soon</a></div>
+  <div class="stat-grid">
+    <div class="stat"><a href="{% url 'pharmacy:worklist' %}?status=prescribed"><span class="stat-number">{{ dash.counts.waiting }}</span><span class="stat-label">Waiting to be dispensed</span></a></div>
+    <div class="stat"><a href="{% url 'pharmacy:worklist' %}?status=partly_dispensed"><span class="stat-number">{{ dash.counts.partly }}</span><span class="stat-label">Partly dispensed</span></a></div>
+    <div class="stat"><a href="{% url 'pharmacy:drugs' %}"><span class="stat-number">{{ dash.low_stock }}</span><span class="stat-label">Low or out of stock</span></a></div>
+    <div class="stat"><a href="{% url 'pharmacy:stock' %}"><span class="stat-number">{{ dash.expiring }}</span><span class="stat-label">Batches expiring soon</span></a></div>
   </div>
   <div class="actions">
     <a class="btn" href="{% url 'pharmacy:worklist' %}">Prescriptions</a>
@@ -140,8 +132,8 @@
 
 {% elif dash.kind == "front_desk" %}
   {% if "open_requests" in dash %}
-  <div class="stats">
-    <div class="stat"><a href="{% url 'datarequests:manage' %}"><div class="n">{{ dash.open_requests }}</div>Data requests waiting</a></div>
+  <div class="stat-grid">
+    <div class="stat"><a href="{% url 'datarequests:manage' %}"><span class="stat-number">{{ dash.open_requests }}</span><span class="stat-label">Data requests waiting</span></a></div>
   </div>
   {% endif %}
   <div class="actions">
@@ -163,10 +155,10 @@
     <p><strong>Card status:</strong> {{ dash.patient.card_status|title }}{% if dash.patient.card_expires_on %} (valid until {{ dash.patient.card_expires_on|date:"d M Y" }}){% endif %}</p>
   </div>
   {% endif %}
-  <div class="stats">
-    <div class="stat"><a href="{% url 'cases:mine' %}"><div class="n">{{ dash.open_count }}</div>Open cases</a></div>
-    <div class="stat"><a href="{% url 'laboratory:mine' %}"><div class="n">{{ dash.results_count }}</div>Lab results</a></div>
-    <div class="stat"><a href="{% url 'pharmacy:mine' %}"><div class="n">{{ dash.prescriptions_count }}</div>Prescriptions</a></div>
+  <div class="stat-grid">
+    <div class="stat"><a href="{% url 'cases:mine' %}"><span class="stat-number">{{ dash.open_count }}</span><span class="stat-label">Open cases</span></a></div>
+    <div class="stat"><a href="{% url 'laboratory:mine' %}"><span class="stat-number">{{ dash.results_count }}</span><span class="stat-label">Lab results</span></a></div>
+    <div class="stat"><a href="{% url 'pharmacy:mine' %}"><span class="stat-number">{{ dash.prescriptions_count }}</span><span class="stat-label">Prescriptions</span></a></div>
   </div>
   <div class="actions">
     <a class="btn" href="{% url 'cases:new' %}">Report a problem</a>

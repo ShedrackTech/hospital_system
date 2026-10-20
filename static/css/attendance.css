@@ -1,0 +1,9 @@
+/* attendance: styles that belong only to the attendance and duty roster pages.
+   Loaded automatically on every attendance page (base.html picks static/css/attendance.css by the app's URL namespace). */
+
+:root{ /* sky to royal blue */
+  --accent-a:#38bdf8; --accent-b:#2563eb; --accent-c:#1d4ed8;
+  --accent-d:#6366f1; --accent-e:#0284c7;
+}
+
+/* ----- attendance rules go below ----- */

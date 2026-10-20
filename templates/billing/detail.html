@@ -1,23 +1,24 @@
 {% extends "base.html" %}
 {% block title %}Invoice {{ invoice.number }}{% endblock %}
 {% block content %}
-{% include "billing/_styles.html" %}
-<div class="billing">
-  <h1>Invoice {{ invoice.number }} <span class="badge {{ invoice.status }}">{{ invoice.get_status_display }}</span></h1>
-  <p class="actions">
-    {% if by_patient %}<a href="{% url 'billing:mine' %}">Back to my bills</a>{% else %}<a href="{% url 'billing:invoice_list' %}">Back to invoices</a>{% endif %}
-    <a href="{% url 'billing:print' invoice.pk %}" target="_blank" rel="noopener">Print</a>
-  </p>
+  <div class="bar">
+    <h1>Invoice {{ invoice.number }}</h1>
+    <div class="btn-row">
+      <a class="btn btn-ghost" href="{% if by_patient %}{% url 'billing:mine' %}{% else %}{% url 'billing:invoice_list' %}{% endif %}">Back</a>
+      <a class="btn" href="{% url 'billing:print' invoice.pk %}" target="_blank" rel="noopener">Print</a>
+    </div>
+  </div>
 
-  <div class="box">
+  <div class="card">
+    <p><strong>Status:</strong> {{ invoice.get_status_display }}</p>
     <p>Patient: <strong>{{ invoice.patient.user.get_full_name|default:invoice.patient.user.username }}</strong>
        <span class="muted">{{ invoice.patient.user.login_id }}</span></p>
-    <p class="muted">Issued {{ invoice.issued_at|date:"d M Y H:i" }}{% if not by_patient %} by {{ invoice.issued_by.get_full_name|default:invoice.issued_by.username }}{% endif %}
-      {% if invoice.case_id %} &middot; Case #{{ invoice.case_id }}{% endif %}</p>
+    <p class="muted">Issued {{ invoice.issued_at|date:"d M Y H:i" }}{% if not by_patient %} by {{ invoice.issued_by.get_full_name|default:invoice.issued_by.username }}{% endif %}{% if invoice.case_id %} &middot; Case #{{ invoice.case_id }}{% endif %}</p>
     {% if invoice.note %}<p>{{ invoice.note }}</p>{% endif %}
     {% if invoice.status == "void" %}<p>Voided {{ invoice.voided_at|date:"d M Y H:i" }}. Reason: {{ invoice.void_reason }}</p>{% endif %}
   </div>
 
+  <div class="wrap">
   <table>
     <thead><tr><th>Item</th><th class="num">Quantity</th><th class="num">Unit price</th><th class="num">Amount</th></tr></thead>
     <tbody>
@@ -32,9 +33,11 @@
       <tr><th colspan="3" class="num">Balance</th><th class="num">&#8358;{{ invoice.balance|floatformat:"2g" }}</th></tr>
     </tfoot>
   </table>
+  </div>
 
   <h2>Payments</h2>
   {% if payments %}
+  <div class="wrap">
   <table>
     <thead><tr><th>Receipt</th><th>Date</th><th>Method</th><th>Reference</th><th class="num">Amount</th></tr></thead>
     <tbody>
@@ -45,33 +48,33 @@
     {% endfor %}
     </tbody>
   </table>
+  </div>
   {% else %}<p class="muted">No payments yet.</p>{% endif %}
 
   {% if can_pay %}
-  <form method="post" action="{% url 'billing:pay' invoice.pk %}" class="box">
+  <form method="post" action="{% url 'billing:pay' invoice.pk %}" class="card">
     {% csrf_token %}
     <h3>Record a payment</h3>
-    <div class="row">
+    <div class="field-row">
       <div>{{ payment_form.amount.label_tag }}{{ payment_form.amount }}</div>
       <div>{{ payment_form.method.label_tag }}{{ payment_form.method }}</div>
       <div>{{ payment_form.reference.label_tag }}{{ payment_form.reference }}</div>
       <div>{{ payment_form.note.label_tag }}{{ payment_form.note }}</div>
-      <div><button type="submit">Record payment</button></div>
     </div>
     <p class="muted">A reference is required for bank transfer and POS payments.</p>
+    <button type="submit">Record payment</button>
   </form>
   {% endif %}
 
   {% if can_void %}
-  <form method="post" action="{% url 'billing:void' invoice.pk %}" class="box">
+  <form method="post" action="{% url 'billing:void' invoice.pk %}" class="card">
     {% csrf_token %}
     <h3>Void this invoice</h3>
-    <div class="row">
+    <div class="field-row">
       <div>{{ void_form.reason.label_tag }}{{ void_form.reason }}</div>
-      <div><button type="submit">Void invoice</button></div>
     </div>
     <p class="muted">Only an invoice with no payments can be voided. This cannot be undone.</p>
+    <button type="submit" class="btn-void">Void invoice</button>
   </form>
   {% endif %}
-</div>
 {% endblock %}

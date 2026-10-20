@@ -1,19 +1,27 @@
 {% extends "base.html" %}
+{% block title %}{{ contact_message.subject }}{% endblock %}
 {% block content %}
 <h1>{{ contact_message.subject }}</h1>
 {% include "website/manage/_nav.html" %}
-<p class="ws-muted">From {{ contact_message.name }} &lt;{{ contact_message.email }}&gt;{% if contact_message.social_handle %}<br>Social handle: {{ contact_message.social_handle }}{% endif %}<br>
-Received {{ contact_message.created_at|date:"j M Y H:i" }}<br>
-Type: {{ contact_message.get_reason_display }}</p>
-<div>{{ contact_message.message|linebreaks }}</div>
-<form method="post" action="{% url 'website:manage_message_toggle' contact_message.pk %}">
+<div class="card">
+  <p class="muted">From {{ contact_message.name }} &lt;{{ contact_message.email }}&gt;{% if contact_message.social_handle %}<br>Social handle: {{ contact_message.social_handle }}{% endif %}<br>
+  Received {{ contact_message.created_at|date:"j M Y H:i" }}<br>
+  Type: {{ contact_message.get_reason_display }}</p>
+  <div>{{ contact_message.message|linebreaks }}</div>
+</div>
+<form method="post" action="{% url 'website:manage_message_toggle' contact_message.pk %}" class="card">
   {% csrf_token %}
   {% if contact_message.is_handled %}
-    <p class="ws-muted">Handled by {% if contact_message.handled_by %}{{ contact_message.handled_by.get_full_name|default:contact_message.handled_by.get_username }}{% else %}a staff member{% endif %} on {{ contact_message.handled_at|date:"j M Y H:i" }}.</p>
-    <button type="submit">Reopen</button>
+    <p class="muted">Handled by {% if contact_message.handled_by %}{{ contact_message.handled_by.get_full_name|default:contact_message.handled_by.get_username }}{% else %}a staff member{% endif %} on {{ contact_message.handled_at|date:"j M Y H:i" }}.</p>
+    <div class="btn-row">
+      <button type="submit">Reopen</button>
+      <a class="btn btn-ghost" href="{% url 'website:manage_messages' %}">Back to messages</a>
+    </div>
   {% else %}
-    <button type="submit">Mark as handled</button>
+    <div class="btn-row">
+      <button type="submit">Mark as handled</button>
+      <a class="btn btn-ghost" href="{% url 'website:manage_messages' %}">Back to messages</a>
+    </div>
   {% endif %}
-  <a href="{% url 'website:manage_messages' %}">Back to messages</a>
 </form>
 {% endblock %}

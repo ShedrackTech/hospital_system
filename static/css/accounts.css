@@ -1,0 +1,36 @@
+/* accounts: styles that belong only to the sign-in page, dashboard and staff pages.
+   Loaded automatically on every accounts page (base.html picks static/css/accounts.css by the app's URL namespace). */
+
+/* uses the default teal and blue from core/css/theme.css */
+
+/* ----- sign-in page ----- */
+body:has(.auth-wrap) .topbar{display:none}
+body:has(.auth-wrap) main{max-width:none;padding:0}
+.auth-wrap{min-height:100vh;display:grid;place-items:center;padding:1.5rem}
+
+/* the card: a spinning gradient shows through a 3px gap, which makes the animated border */
+.auth-card{position:relative;width:100%;max-width:420px;padding:3px;border-radius:26px;overflow:hidden;isolation:isolate;
+  animation:pop .7s var(--ease) backwards,authGlow 9s linear infinite}
+.auth-ring{position:absolute;left:50%;top:50%;width:900px;height:900px;translate:-50% -50%;z-index:-1;
+  background:conic-gradient(from 0deg,#0b5ea8,#0ea5e9,#14b8a6,#2e9e3a,#0ea5e9,#0b5ea8);animation:authSpin 5s linear infinite}
+.auth-inner{position:relative;padding:2.1rem 2rem 1.7rem;border-radius:23px;background:rgba(255,255,255,.96)}
+@keyframes authSpin{to{rotate:360deg}}
+@keyframes authGlow{
+  0%,100%{box-shadow:0 24px 60px rgba(11,94,168,.30)}
+  33%{box-shadow:0 24px 60px rgba(14,165,233,.32)}
+  66%{box-shadow:0 24px 60px rgba(46,158,58,.30)}}
+
+.auth-logo{display:block;width:104px;height:auto;margin:0 auto .8rem;filter:drop-shadow(0 10px 16px rgba(11,94,168,.35));animation:authBob 4.5s ease-in-out infinite}
+@keyframes authBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+
+/* the hospital name: a gradient that slowly flows from blue through teal to green */
+.auth-title{margin:0;text-align:center;font-size:1.32rem;line-height:1.25;letter-spacing:.06em;white-space:nowrap;
+  background:linear-gradient(90deg,#0b5ea8,#0ea5e9,#14b8a6,#2e9e3a,#0ea5e9,#0b5ea8);background-size:300% 100%;
+  -webkit-background-clip:text;background-clip:text;color:transparent;animation:authFlow 6s linear infinite}
+@keyframes authFlow{to{background-position:-300% 0}}
+.auth-tagline{margin:.35rem 0 1.5rem;text-align:center;font-style:italic;color:var(--muted);font-size:.92rem}
+
+.auth-inner button{width:100%;padding:.8rem}
+.auth-inner .errorlist{margin:0 0 1rem}
+.auth-foot{margin:1.3rem 0 0;text-align:center;font-size:.92rem}
+@media (max-width:900px){.auth-inner{padding:1.7rem 1.35rem 1.5rem}.auth-title{font-size:1.12rem;letter-spacing:.04em}}

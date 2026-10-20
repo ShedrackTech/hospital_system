@@ -1,11 +1,12 @@
 {% extends "base.html" %}
 {% block title %}My bills{% endblock %}
 {% block content %}
-{% include "billing/_styles.html" %}
-<div class="billing">
   <h1>My bills</h1>
-  {% if owing %}<p class="box">Amount still owed: <strong>&#8358;{{ owing|floatformat:"2g" }}</strong></p>{% endif %}
+  {% if owing %}
+  <div class="card"><p>Amount still owed: <strong>&#8358;{{ owing|floatformat:"2g" }}</strong></p></div>
+  {% endif %}
   {% if invoices %}
+  <div class="wrap">
   <table>
     <thead><tr><th>Invoice</th><th>Date</th><th class="num">Total</th><th class="num">Paid</th><th>Status</th></tr></thead>
     <tbody>
@@ -15,11 +16,11 @@
         <td>{{ invoice.issued_at|date:"d M Y" }}</td>
         <td class="num">&#8358;{{ invoice.total|floatformat:"2g" }}</td>
         <td class="num">&#8358;{{ invoice.amount_paid|floatformat:"2g" }}</td>
-        <td><span class="badge {{ invoice.status }}">{{ invoice.get_status_display }}</span></td>
+        <td>{{ invoice.get_status_display }}</td>
       </tr>
     {% endfor %}
     </tbody>
   </table>
+  </div>
   {% else %}<p class="muted">You have no bills.</p>{% endif %}
-</div>
 {% endblock %}

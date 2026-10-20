@@ -3,22 +3,22 @@
 {% block content %}
   <div class="bar">
     <h1>Pharmacy</h1>
-    <span>
-      <a href="{% url 'pharmacy:drugs' %}">Drugs</a> &nbsp;
-      <a href="{% url 'pharmacy:stock' %}">Stock</a>
+    <span class="btn-row">
+      <a class="btn btn-ghost" href="{% url 'pharmacy:drugs' %}">Drugs</a>
+      <a class="btn btn-ghost" href="{% url 'pharmacy:stock' %}">Stock</a>
     </span>
   </div>
-  <p>
-    <a href="?status=open">Waiting or partly dispensed</a>
-    {% for value, label in statuses %}| <a href="?status={{ value }}">{{ label }}</a> {% endfor %}
-  </p>
+  <div class="chips">
+    <a class="chip{% if status == 'open' %} is-active{% endif %}" href="?status=open">Waiting or partly dispensed</a>
+    {% for value, label in statuses %}<a class="chip{% if status == value %} is-active{% endif %}" href="?status={{ value }}">{{ label }}</a>{% endfor %}
+  </div>
   {% if prescriptions %}
   <div class="wrap">
   <table>
     <tr><th>#</th><th>Patient</th><th>Items</th><th>Status</th><th>Prescribed</th><th>By</th></tr>
     {% for p in prescriptions %}
     <tr>
-      <td><a href="{% url 'pharmacy:prescription' p.pk %}">{{ p.pk }}</a></td>
+      <td><a class="btn btn-sm btn-ghost" href="{% url 'pharmacy:prescription' p.pk %}">{{ p.pk }}</a></td>
       <td>{{ p.patient.user.get_full_name }} ({{ p.patient.user.login_id }})</td>
       <td>{{ p.items.all|length }}</td>
       <td>{{ p.get_status_display }}</td>
@@ -29,11 +29,11 @@
   </table>
   </div>
   {% if is_paginated %}
-  <p>
-    {% if page_obj.has_previous %}<a href="?status={{ status }}&page={{ page_obj.previous_page_number }}">Previous</a>{% endif %}
-    Page {{ page_obj.number }} of {{ paginator.num_pages }}
-    {% if page_obj.has_next %}<a href="?status={{ status }}&page={{ page_obj.next_page_number }}">Next</a>{% endif %}
-  </p>
+  <div class="pager">
+    {% if page_obj.has_previous %}<a class="btn btn-sm btn-ghost" href="?status={{ status }}&page={{ page_obj.previous_page_number }}">Previous</a>{% endif %}
+    <span>Page {{ page_obj.number }} of {{ paginator.num_pages }}</span>
+    {% if page_obj.has_next %}<a class="btn btn-sm btn-ghost" href="?status={{ status }}&page={{ page_obj.next_page_number }}">Next</a>{% endif %}
+  </div>
   {% endif %}
   {% else %}<p class="muted">Nothing here.</p>{% endif %}
 {% endblock %}

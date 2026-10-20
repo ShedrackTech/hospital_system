@@ -1,0 +1,6 @@
+/* core: styles that belong only to the audit log pages.
+   Loaded automatically on every core page (base.html picks static/css/core.css by the app's URL namespace). */
+
+/* uses the default teal and blue from core/css/theme.css */
+
+/* ----- core rules go below ----- */

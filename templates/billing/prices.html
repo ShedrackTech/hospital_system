@@ -1,14 +1,15 @@
 {% extends "base.html" %}
 {% block title %}Price list{% endblock %}
 {% block content %}
-{% include "billing/_styles.html" %}
-<div class="billing">
-  <h1>Price list</h1>
-  <p class="actions">
-    <a href="{% url 'billing:invoice_list' %}">Back to invoices</a>
-    {% if can_manage_prices %}<a href="{% url 'billing:item_new' %}">Add item</a>{% endif %}
-  </p>
+  <div class="bar">
+    <h1>Price list</h1>
+    <div class="btn-row">
+      <a class="btn btn-ghost" href="{% url 'billing:invoice_list' %}">Back to invoices</a>
+      {% if can_manage_prices %}<a class="btn" href="{% url 'billing:item_new' %}">Add item</a>{% endif %}
+    </div>
+  </div>
   {% if items %}
+  <div class="wrap">
   <table>
     <thead><tr><th>Item</th><th>Category</th><th class="num">Price</th><th>Status</th>{% if can_manage_prices %}<th></th>{% endif %}</tr></thead>
     <tbody>
@@ -16,12 +17,12 @@
       <tr>
         <td>{{ item.name }}</td><td>{{ item.get_category_display }}</td>
         <td class="num">&#8358;{{ item.unit_price|floatformat:"2g" }}</td>
-        <td>{% if item.is_active %}Active{% else %}<span class="muted">Inactive</span>{% endif %}</td>
-        {% if can_manage_prices %}<td><a href="{% url 'billing:item_edit' item.pk %}">Edit</a></td>{% endif %}
+        <td>{% if item.is_active %}Active{% else %}Inactive{% endif %}</td>
+        {% if can_manage_prices %}<td><a class="btn btn-sm btn-ghost" href="{% url 'billing:item_edit' item.pk %}">Edit</a></td>{% endif %}
       </tr>
     {% endfor %}
     </tbody>
   </table>
+  </div>
   {% else %}<p class="muted">The price list is empty.</p>{% endif %}
-</div>
 {% endblock %}

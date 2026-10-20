@@ -1,0 +1,15 @@
+/* appointments: styles that belong only to the appointment pages.
+   Loaded automatically on every appointments page (base.html picks static/css/appointments.css by the app's URL namespace). */
+
+:root{ /* sky to indigo */
+  --accent-a:#38bdf8; --accent-b:#0ea5e9; --accent-c:#4f46e5;
+  --accent-d:#2563eb; --accent-e:#0284c7;
+}
+
+/* ----- time picker: the free times become clickable pills (see book.html) ----- */
+.slot-picker div:has(>div>label>input[type=radio]),.slot-picker ul:has(>li>label>input[type=radio]){display:flex;flex-wrap:wrap;gap:.1rem;list-style:none;padding:0}
+.slot-picker label:has(>input[type=radio]){position:relative;display:inline-flex;align-items:center;margin:0 .5rem .5rem 0;padding:.55rem .95rem;border:1.5px solid #cfe2eb;border-radius:999px;background:#fff;font-weight:500;cursor:pointer;color:var(--ink);transition:transform .2s var(--ease),border-color .2s,background .25s,color .2s,box-shadow .25s}
+.slot-picker label:has(>input[type=radio]) input{position:absolute;opacity:0;pointer-events:none}
+.slot-picker label:has(>input[type=radio]):hover{border-color:var(--accent-b);transform:translateY(-2px)}
+.slot-picker label:has(>input[type=radio]:checked){border-color:transparent;color:#fff;background:var(--grad);box-shadow:0 8px 18px color-mix(in srgb,var(--accent-b) 35%,transparent);transform:translateY(-1px) scale(1.03)}
+.slot-picker label:has(>input[type=radio]:focus-visible){outline:3px solid color-mix(in srgb,var(--accent-b) 40%,transparent);outline-offset:2px}

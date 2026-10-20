@@ -1,0 +1,9 @@
+/* cases: styles that belong only to the case pages.
+   Loaded automatically on every cases page (base.html picks static/css/cases.css by the app's URL namespace). */
+
+:root{ /* teal to blue */
+  --accent-a:#14b8a6; --accent-b:#0ea5e9; --accent-c:#2563eb;
+  --accent-d:#6366f1; --accent-e:#0d9488;
+}
+
+/* ----- cases rules go below ----- */

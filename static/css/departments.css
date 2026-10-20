@@ -1,0 +1,9 @@
+/* departments: styles that belong only to the department pages.
+   Loaded automatically on every departments page (base.html picks static/css/departments.css by the app's URL namespace). */
+
+:root{ /* logo green to sky */
+  --accent-a:#16a34a; --accent-b:#14b8a6; --accent-c:#0ea5e9;
+  --accent-d:#2563eb; --accent-e:#15803d;
+}
+
+/* ----- departments rules go below ----- */

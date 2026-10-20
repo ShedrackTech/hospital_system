@@ -6,8 +6,10 @@
     <form method="post">
       {% csrf_token %}
       {{ form.as_p }}
-      <button class="btn" type="submit">{{ submit_label }}</button>
-      <a href="{{ cancel_url }}">Cancel</a>
+      <div class="btn-row">
+        <button class="btn" type="submit">{{ submit_label }}</button>
+        <a class="btn btn-ghost" href="{{ cancel_url }}">Cancel</a>
+      </div>
     </form>
   </div>
 {% endblock %}

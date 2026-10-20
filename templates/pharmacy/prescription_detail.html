@@ -3,11 +3,11 @@
 {% block content %}
   <div class="bar">
     <h1>Prescription #{{ prescription.pk }}</h1>
-    <a href="{{ back_url }}">Back</a>
+    <a class="btn btn-ghost" href="{{ back_url }}">Back</a>
   </div>
 
   {% if not is_patient_view and allergy_conflicts %}
-  <div class="card" style="border:2px solid #b00020;">
+  <div class="card allergy-warning">
     <p><strong>Allergy warning.</strong>
       {% for c in allergy_conflicts %}{{ c.1.name }} allergy is recorded for this patient: {{ c.0 }}{% if c.via_class %} (same drug class: {{ c.via_class }}){% endif %}.{% if not forloop.last %} {% endif %}{% endfor %}
     </p>

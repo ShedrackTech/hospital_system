@@ -1,13 +1,14 @@
 {% extends "website/base_public.html" %}
-{% block title %}Doctors | {{ HOSPITAL_NAME|default:"Hospital" }}{% endblock %}
+{% block title %}Doctors | {{ HOSPITAL_NAME|default:"GOOD HEALTH HOSPITAL" }}{% endblock %}
 {% block content %}
 <h1>Our doctors</h1>
 <div class="grid">
   {% for listing in listings %}
     <div class="card">
       {% if listing.photo %}
-        <img src="{{ listing.photo.url }}" alt="{{ listing.public_name }}" loading="lazy"
-             style="width:100%; height:220px; object-fit:cover; border-radius:6px; margin-bottom:10px;">
+        <img class="doctor-photo" src="{{ listing.photo.url }}" alt="{{ listing.public_name }}" loading="lazy">
+      {% else %}
+        <div class="doctor-photo doctor-photo-empty" aria-hidden="true">{{ listing.public_name|slice:":1"|upper }}</div>
       {% endif %}
       <h3>{{ listing.public_name }}</h3>
       <p class="meta">

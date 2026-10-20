@@ -1,9 +1,9 @@
 {% extends "website/base_public.html" %}
-{% block title %}Contact | {{ HOSPITAL_NAME|default:"Hospital" }}{% endblock %}
+{% block title %}Contact | {{ HOSPITAL_NAME|default:"GOOD HEALTH HOSPITAL" }}{% endblock %}
 {% block content %}
 <h1>Contact hospital management</h1>
 <p class="meta">Ask for help or information, or send us feedback. Our staff will reply by email. For an emergency, call the emergency number or come straight to the hospital; do not use this form.</p>
-<div class="grid" style="grid-template-columns:1fr 1fr; align-items:start;">
+<div class="contact-layout">
   <div>
     <form method="post" class="contact" novalidate>
       {% csrf_token %}
@@ -19,7 +19,7 @@
       <button class="btn" type="submit">Send</button>
     </form>
   </div>
-  <div>
+  <div class="contact-info">
     {% if site.address %}<p><strong>Address</strong><br>{{ site.address|linebreaksbr }}</p>{% endif %}
     {% if site.phone %}<p><strong>Phone</strong><br>{{ site.phone }}</p>{% endif %}
     {% if site.email %}<p><strong>Email</strong><br>{{ site.email }}</p>{% endif %}

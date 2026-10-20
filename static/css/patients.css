@@ -1,0 +1,9 @@
+/* patients: styles that belong only to the patient pages.
+   Loaded automatically on every patients page (base.html picks static/css/patients.css by the app's URL namespace). */
+
+:root{ /* blue to indigo */
+  --accent-a:#0ea5e9; --accent-b:#2563eb; --accent-c:#4f46e5;
+  --accent-d:#6366f1; --accent-e:#0284c7;
+}
+
+/* ----- patients rules go below ----- */

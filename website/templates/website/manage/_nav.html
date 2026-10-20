@@ -1,20 +1,15 @@
-<style>
-  .wsnav { display:flex; gap:6px 16px; flex-wrap:wrap; margin:0 0 16px; padding:0 0 10px; border-bottom:1px solid #ddd; }
-  .wsnav a.on { font-weight:700; }
-  table.ws { border-collapse:collapse; width:100%; margin:12px 0; }
-  table.ws th, table.ws td { text-align:left; padding:6px 10px; border-bottom:1px solid #e3e3e3; vertical-align:top; }
-  .ws-muted { color:#666; font-size:.9em; }
-</style>
-<div class="wsnav">
+{% with page=request.resolver_match.url_name %}
+<nav class="wsnav" aria-label="Website sections">
   {% if user.role == "main_admin" or user.role == "sub_admin" %}
-    <a href="{% url 'website:manage_home' %}">Website</a>
+    <a href="{% url 'website:manage_home' %}"{% if page == "manage_home" %} class="on"{% endif %}>Website</a>
   {% endif %}
-  <a href="{% url 'website:manage_posts' %}">Blog posts</a>
+  <a href="{% url 'website:manage_posts' %}"{% if page == "manage_posts" or page == "manage_post_new" or page == "manage_post_edit" %} class="on"{% endif %}>Blog posts</a>
   {% if user.role == "main_admin" or user.role == "sub_admin" %}
-    <a href="{% url 'website:manage_services' %}">Services</a>
-    <a href="{% url 'website:manage_doctors' %}">Doctors</a>
-    <a href="{% url 'website:manage_info' %}">About and contact details</a>
-    <a href="{% url 'website:manage_messages' %}">Messages</a>
+    <a href="{% url 'website:manage_services' %}"{% if page == "manage_services" or page == "manage_service_new" or page == "manage_service_edit" %} class="on"{% endif %}>Services</a>
+    <a href="{% url 'website:manage_doctors' %}"{% if page == "manage_doctors" or page == "manage_doctor_new" or page == "manage_doctor_edit" %} class="on"{% endif %}>Doctors</a>
+    <a href="{% url 'website:manage_info' %}"{% if page == "manage_info" %} class="on"{% endif %}>About and contact details</a>
+    <a href="{% url 'website:manage_messages' %}"{% if page == "manage_messages" or page == "manage_message" %} class="on"{% endif %}>Messages</a>
   {% endif %}
   <a href="{% url 'website:home' %}" target="_blank" rel="noopener">View public site</a>
-</div>
+</nav>
+{% endwith %}

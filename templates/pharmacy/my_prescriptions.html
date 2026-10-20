@@ -11,7 +11,7 @@
       <td>{{ p.prescribed_at|date:"d M Y" }}</td>
       <td>{% for item in p.items.all %}{{ item.drug }}{% if not forloop.last %}, {% endif %}{% endfor %}</td>
       <td>{{ p.get_status_display }}</td>
-      <td><a href="{% url 'pharmacy:prescription' p.pk %}">View</a></td>
+      <td><a class="btn btn-sm btn-ghost" href="{% url 'pharmacy:prescription' p.pk %}">View</a></td>
     </tr>
     {% endfor %}
   </table>

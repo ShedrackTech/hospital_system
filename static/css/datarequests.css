@@ -1,0 +1,9 @@
+/* datarequests: styles that belong only to the data request pages.
+   Loaded automatically on every datarequests page (base.html picks static/css/datarequests.css by the app's URL namespace). */
+
+:root{ /* slate to blue */
+  --accent-a:#64748b; --accent-b:#3b82f6; --accent-c:#1d4ed8;
+  --accent-d:#6366f1; --accent-e:#475569;
+}
+
+/* ----- datarequests rules go below ----- */

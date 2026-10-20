@@ -2,12 +2,14 @@ from django import forms
 from django.contrib.auth import get_user_model
 from django.db.models import Q
 
+from .images import BLOG_FRAME, DOCTOR_FRAME, fit_to_frame
 from .models import BlogPost, ContactMessage, DoctorListing, Service, SiteInfo
 
 User = get_user_model()
 
 DOCTOR_ROLES = ("doctor", "senior_doctor")
 MAX_PHOTO_BYTES = 2 * 1024 * 1024
+MAX_BLOG_IMAGE_BYTES = 5 * 1024 * 1024
 ALLOWED_PHOTO_FORMATS = ("JPEG", "PNG", "WEBP")
 
 
@@ -38,8 +40,19 @@ class ContactForm(forms.ModelForm):
 class BlogPostForm(forms.ModelForm):
     class Meta:
         model = BlogPost
-        fields = ["title", "category", "summary", "body", "status"]
+        fields = ["title", "category", "summary", "image", "body", "status"]
         widgets = {"body": forms.Textarea(attrs={"rows": 14})}
+
+    def clean_image(self):
+        image = self.cleaned_data.get("image")
+        # Only a newly uploaded file has an .image; an unchanged or cleared picture needs no checks.
+        if image and hasattr(image, "image"):
+            if image.size > MAX_BLOG_IMAGE_BYTES:
+                raise forms.ValidationError("The picture is too large. Please use a file under 5 MB.")
+            if image.image.format not in ALLOWED_PHOTO_FORMATS:
+                raise forms.ValidationError("Please upload a JPG, PNG or WebP picture.")
+            return fit_to_frame(image, BLOG_FRAME)
+        return image
 
 
 class ServiceForm(forms.ModelForm):
@@ -69,6 +82,7 @@ class DoctorListingForm(forms.ModelForm):
                 raise forms.ValidationError("The photo is too large. Please use a file under 2 MB.")
             if photo.image.format not in ALLOWED_PHOTO_FORMATS:
                 raise forms.ValidationError("Please upload a JPG, PNG or WebP photo.")
+            return fit_to_frame(photo, DOCTOR_FRAME)
         return photo
 
     def __init__(self, *args, **kwargs):
