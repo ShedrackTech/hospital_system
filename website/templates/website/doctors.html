@@ -1,23 +1,37 @@
 {% extends "website/base_public.html" %}
-{% block title %}Doctors | {{ HOSPITAL_NAME|default:"GOOD HEALTH HOSPITAL" }}{% endblock %}
+{% block title %}Our doctors | {{ HOSPITAL_NAME|default:"GOOD HEALTH HOSPITAL" }}{% endblock %}
+
 {% block content %}
-<h1>Our doctors</h1>
-<div class="grid">
-  {% for listing in listings %}
-    <div class="card">
-      {% if listing.photo %}
-        <img class="doctor-photo" src="{{ listing.photo.url }}" alt="{{ listing.public_name }}" loading="lazy">
+<section class="doc-hero">
+  <h1>Our doctors</h1>
+  <p>Meet our dedicated team of professionals committed to your health and well-being.</p>
+</section>
+
+<div class="doc-list">
+  {% for d in listings %}
+  <article class="doc-profile">
+    <div class="doc-photo">
+      {% if d.photo %}
+        <img src="{{ d.photo.url }}" alt="{{ d.user.get_full_name }}">
       {% else %}
-        <div class="doctor-photo doctor-photo-empty" aria-hidden="true">{{ listing.public_name|slice:":1"|upper }}</div>
+        <div class="doc-photo-empty" role="img" aria-label="No photo yet"></div>
       {% endif %}
-      <h3>{{ listing.public_name }}</h3>
-      <p class="meta">
-        {{ listing.user.staff_profile.job_title }}{% if listing.user.staff_profile.department %}{% if listing.user.staff_profile.job_title %}, {% endif %}{{ listing.user.staff_profile.department.name }}{% endif %}
-      </p>
-      {% if listing.bio %}<p>{{ listing.bio }}</p>{% endif %}
     </div>
+
+    <div class="doc-info">
+      {% if d.department %}<span class="doc-badge">{{ d.department.name }}</span>{% endif %}
+      <h2>Dr. {{ d.user.get_full_name }}</h2>
+      {% if d.bio %}<p class="doc-bio">{{ d.bio|linebreaksbr }}</p>{% endif %}
+
+      <a class="doc-book" href="{% url 'appointments:book' %}">
+        <svg class="doc-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
+        Book an Appointment
+        <svg class="doc-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </a>
+    </div>
+  </article>
   {% empty %}
-    <p>No doctors to show yet.</p>
+  <p class="muted">No doctors are listed yet.</p>
   {% endfor %}
 </div>
 {% endblock %}

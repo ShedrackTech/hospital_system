@@ -1,0 +1,59 @@
+{% extends "website/base_public.html" %}
+{% block title %}{{ HOSPITAL_NAME|default:"GOOD HEALTH HOSPITAL" }}{% endblock %}
+{% block content %}
+<section class="hero">
+  <div class="hero-logo" aria-hidden="true"></div>
+  <p class="hero-kicker">Better Care &middot; Healthier Tomorrow</p>
+  <h1>Caring for you and your family</h1>
+  <p>Book a visit, register as a patient, and follow your treatment from one secure place.</p>
+  <div class="btn-row">
+    {% if request.user.is_authenticated %}
+      <a class="btn" href="{% url 'accounts:dashboard' %}">Go to my portal</a>
+    {% else %}
+      <a class="btn" href="{% url 'accounts:login' %}">Login to the portal</a>
+      <a class="btn btn-ghost" href="{% url 'patients:register' %}">Register as a patient</a>
+    {% endif %}
+  </div>
+</section>
+
+{% if services %}
+<h2>Our services</h2>
+<div class="grid">
+  {% for service in services %}
+    <div class="card"><h3>{{ service.name }}</h3><p>{{ service.description|truncatewords:20 }}</p></div>
+  {% endfor %}
+</div>
+<p><a class="btn btn-sm btn-ghost" href="{% url 'website:services' %}">All services</a></p>
+{% endif %}
+
+{% if departments %}
+<h2>Departments</h2>
+<div class="grid">
+  {% for department in departments %}
+    <div class="card"><h3>{{ department.name }}</h3><p>{{ department.description|truncatewords:20 }}</p></div>
+  {% endfor %}
+</div>
+<p><a class="btn btn-sm btn-ghost" href="{% url 'website:departments' %}">All departments</a></p>
+{% endif %}
+
+{% if recent_posts %}
+<h2>Latest news</h2>
+<div class="grid">
+  {% for post in recent_posts %}
+    <div class="card post-card">
+      {% if post.image %}
+        <a class="post-cover-link" href="{% url 'website:blog_detail' post.slug %}" tabindex="-1" aria-hidden="true"><img class="post-cover" src="{{ post.image.url }}" alt="" loading="lazy"></a>
+      {% else %}
+        <div class="post-cover post-cover-empty" aria-hidden="true"></div>
+      {% endif %}
+      <div class="post-body">
+        <h3><a href="{% url 'website:blog_detail' post.slug %}">{{ post.title }}</a></h3>
+        <p class="meta">{{ post.get_category_display }} &middot; {{ post.published_at|date:"j F Y" }}</p>
+        <p>{{ post.summary }}</p>
+      </div>
+    </div>
+  {% endfor %}
+</div>
+<p><a class="btn btn-sm btn-ghost" href="{% url 'website:blog' %}">All posts</a></p>
+{% endif %}
+{% endblock %}

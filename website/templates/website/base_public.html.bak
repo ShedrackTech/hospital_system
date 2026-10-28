@@ -1,0 +1,79 @@
+{% load static %}<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0a5871">
+  <title>{% block title %}{{ HOSPITAL_NAME|default:"GOOD HEALTH HOSPITAL" }}{% endblock %}</title>
+  <link rel="icon" type="image/png" href="{% static 'img/favicon.png' %}">
+  <link rel="stylesheet" href="{% static 'css/theme.css' %}">
+  <link rel="stylesheet" href="{% static 'css/website.css' %}">
+</head>
+<body class="public">
+{% static 'img/icons.svg' as icons %}
+<div class="bg-orbs" aria-hidden="true"><span></span><span></span><span></span></div>
+<div class="load-bar" id="loadBar" aria-hidden="true"></div>
+
+<div class="toasts" aria-live="polite">
+  {% for message in messages %}
+    <div class="toast {{ message.tags }}" role="status"><span class="toast-text">{{ message }}</span><button class="toast-x" type="button" aria-label="Dismiss">&times;</button></div>
+  {% endfor %}
+</div>
+
+<header class="site-header">
+  <div class="site-wrap">
+    <a class="site-brand" href="{% url 'website:home' %}">
+      <span class="site-logo" aria-hidden="true"></span>
+      <span class="site-name">{{ HOSPITAL_NAME|default:"GOOD HEALTH HOSPITAL" }}</span>
+    </a>
+    <button class="menu-btn" id="siteNavToggle" type="button" aria-label="Open menu" aria-controls="siteNav"><svg class="ic" aria-hidden="true"><use href="{{ icons }}#i-menu"/></svg></button>
+    <nav class="site-nav" id="siteNav" aria-label="Main">
+      <a href="{% url 'website:about' %}">About</a>
+      <a href="{% url 'website:departments' %}">Departments</a>
+      <a href="{% url 'website:doctors' %}">Doctors</a>
+      <a href="{% url 'website:services' %}">Services</a>
+      <a href="{% url 'website:blog' %}">Blog</a>
+      <a href="{% url 'website:contact' %}">Contact</a>
+      {% if request.user.is_authenticated %}
+        <a class="btn" href="{% url 'accounts:dashboard' %}">My portal</a>
+      {% else %}
+        <a class="btn btn-ghost" href="{% url 'patients:register' %}">Register</a>
+        <a class="btn" href="{% url 'accounts:login' %}">Login</a>
+      {% endif %}
+    </nav>
+  </div>
+</header>
+
+<main class="page">
+  <div class="site-wrap">
+    {% block content %}{% endblock %}
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="site-wrap footer-grid">
+    <div>
+      <strong>{{ HOSPITAL_NAME|default:"GOOD HEALTH HOSPITAL" }}</strong>
+      <p class="footer-tagline">Better Care &middot; Healthier Tomorrow</p>
+      {% if site.address %}<p>{{ site.address|linebreaksbr }}</p>{% endif %}
+    </div>
+    <div>
+      <strong>Reach us</strong>
+      {% if site.phone %}<p>Phone: {{ site.phone }}</p>{% endif %}
+      {% if site.email %}<p>Email: {{ site.email }}</p>{% endif %}
+      {% if site.opening_hours %}<p>{{ site.opening_hours }}</p>{% endif %}
+    </div>
+    <div>
+      <strong>Need help?</strong>
+      {% if site.emergency_phone %}<p><span class="emergency">Emergency: {{ site.emergency_phone }}</span></p>{% endif %}
+      <p><a href="{% url 'website:contact' %}">Contact us</a></p>
+    </div>
+  </div>
+  <div class="footer-bottom">&copy; {% now "Y" %} {{ HOSPITAL_NAME|default:"GOOD HEALTH HOSPITAL" }}. All rights reserved.</div>
+</footer>
+
+<script src="{% static 'js/theme.js' %}"></script>
+<script src="{% static 'js/website.js' %}"></script>
+</body>
+</html>
+ 

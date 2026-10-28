@@ -6,14 +6,14 @@ from . import views
 app_name = "website"
 
 urlpatterns = [
-    # Public site
+    # Public site: one home page with sections. The old page addresses redirect to their section.
     path("", views.HomeView.as_view(), name="home"),
-    path("about/", views.AboutView.as_view(), name="about"),
+    path("about/", views.SectionRedirectView.as_view(anchor="about"), name="about"),
     # Not "departments/": the portal already owns that address (departments.urls) and it needs a login.
-    path("our-departments/", views.DepartmentListView.as_view(), name="departments"),
-    path("doctors/", views.DoctorListView.as_view(), name="doctors"),
-    path("services/", views.ServiceListView.as_view(), name="services"),
-    path("contact/", views.ContactView.as_view(), name="contact"),
+    path("our-departments/", views.SectionRedirectView.as_view(anchor="departments"), name="departments"),
+    path("doctors/", views.SectionRedirectView.as_view(anchor="doctors"), name="doctors"),
+    path("services/", views.SectionRedirectView.as_view(anchor="services"), name="services"),
+    path("contact/", views.ContactView.as_view(), name="contact"),  # the form on the home page posts here
     path("blog/", views.BlogListView.as_view(), name="blog"),
     path("blog/<slug:slug>/", views.BlogDetailView.as_view(), name="blog_detail"),
 

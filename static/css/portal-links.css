@@ -1,0 +1,30 @@
+/* ===== GOOD HEALTH HOSPITAL: portal links =====
+   Any plain link (no class) in these places looks like a button, so every staff page matches
+   without editing each template:
+     - the top bar of a page (Add, Back, ...)       - the last column of a table (View, Edit, ...)
+     - filter and page links that start with "?"    - links beside a form's Save button (Cancel)
+   A link that already has a class (btn, chip, nav-link, ...) is never touched. */
+main .bar a:not([class]),
+main table td:last-child a:not([class]),
+main form a:not([class]),
+main .actions a:not([class]),
+main a[href^="?"]:not([class]){
+  display:inline-flex;align-items:center;justify-content:center;gap:.4rem;
+  padding:.4rem .95rem;border-radius:10px;
+  border:1.5px solid color-mix(in srgb,var(--accent-b) 45%,transparent);
+  background:#fff;color:var(--link);
+  font-weight:600;font-size:.88rem;line-height:1.3;text-decoration:none;white-space:nowrap;
+  box-shadow:0 2px 6px color-mix(in srgb,var(--accent-b) 12%,transparent);
+  transition:transform .2s var(--ease),box-shadow .25s,background .25s,color .2s,border-color .2s;
+}
+main .bar a:not([class]):hover,
+main table td:last-child a:not([class]):hover,
+main form a:not([class]):hover,
+main .actions a:not([class]):hover,
+main a[href^="?"]:not([class]):hover{
+  background:var(--grad);color:#fff;border-color:transparent;transform:translateY(-2px);
+  box-shadow:0 10px 22px var(--glow);
+}
+main table td:last-child a:not([class]){padding:.3rem .8rem;font-size:.84rem}
+/* filter and page links read as small round chips */
+main a[href^="?"]:not([class]){border-radius:999px;padding:.3rem .9rem;margin:.15rem .2rem .15rem 0}

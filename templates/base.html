@@ -9,6 +9,7 @@
   <script src="{% static 'js/theme-boot.js' %}"></script>
   <link rel="stylesheet" href="{% static 'css/theme.css' %}">
   {% with app=request.resolver_match.app_name %}{% if app %}<link rel="stylesheet" href="{% static 'css/'|add:app|add:'.css' %}">{% endif %}{% endwith %}
+  <link rel="stylesheet" href="{% static 'css/portal-links.css' %}">
   {% block extra_css %}{% endblock %}
 </head>
 <body>

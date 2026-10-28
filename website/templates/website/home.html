@@ -16,44 +16,141 @@
   </div>
 </section>
 
-{% if services %}
-<h2>Our services</h2>
-<div class="grid">
-  {% for service in services %}
-    <div class="card"><h3>{{ service.name }}</h3><p>{{ service.description|truncatewords:20 }}</p></div>
-  {% endfor %}
+<div class="quick-bar" aria-label="Key information">
+  {% if site.emergency_phone %}<div class="quick-item quick-emergency"><span class="quick-label">Emergency</span><strong>{{ site.emergency_phone }}</strong></div>{% endif %}
+  {% if site.phone %}<div class="quick-item"><span class="quick-label">Phone</span><strong>{{ site.phone }}</strong></div>{% endif %}
+  {% if site.opening_hours %}<div class="quick-item"><span class="quick-label">Opening hours</span><strong>{{ site.opening_hours|truncatechars:48 }}</strong></div>{% endif %}
+  <a class="btn quick-book" href="{% url 'appointments:book' %}">Book an appointment</a>
 </div>
-<p><a class="btn btn-sm btn-ghost" href="{% url 'website:services' %}">All services</a></p>
-{% endif %}
 
-{% if departments %}
-<h2>Departments</h2>
-<div class="grid">
-  {% for department in departments %}
-    <div class="card"><h3>{{ department.name }}</h3><p>{{ department.description|truncatewords:20 }}</p></div>
-  {% endfor %}
-</div>
-<p><a class="btn btn-sm btn-ghost" href="{% url 'website:departments' %}">All departments</a></p>
-{% endif %}
+<section class="home-section" id="about">
+  <div class="section-head"><h2>About us</h2></div>
+  <div class="article">
+    {% if site.about_text %}{{ site.about_text|linebreaks }}{% else %}<p>Information about the hospital will be added soon.</p>{% endif %}
+  </div>
+</section>
 
-{% if recent_posts %}
-<h2>Latest news</h2>
-<div class="grid">
-  {% for post in recent_posts %}
-    <div class="card post-card">
-      {% if post.image %}
-        <a class="post-cover-link" href="{% url 'website:blog_detail' post.slug %}" tabindex="-1" aria-hidden="true"><img class="post-cover" src="{{ post.image.url }}" alt="" loading="lazy"></a>
-      {% else %}
-        <div class="post-cover post-cover-empty" aria-hidden="true"></div>
-      {% endif %}
-      <div class="post-body">
-        <h3><a href="{% url 'website:blog_detail' post.slug %}">{{ post.title }}</a></h3>
-        <p class="meta">{{ post.get_category_display }} &middot; {{ post.published_at|date:"j F Y" }}</p>
-        <p>{{ post.summary }}</p>
+<section class="home-section is-tint" id="departments">
+  <div class="section-head">
+    <h2>Departments</h2>
+    <p class="section-lead">The teams that look after your health, each led by experienced professionals.</p>
+  </div>
+  <div class="grid">
+    {% for department in departments %}
+      <div class="card">
+        <span class="card-icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg></span>
+        <h3>{{ department.name }}</h3><p>{{ department.description }}</p>
       </div>
+    {% empty %}
+      <p>No departments to show yet.</p>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="home-section" id="doctors">
+  <div class="section-head">
+    <h2>Our doctors</h2>
+    <p class="section-lead">Meet our dedicated team of professionals committed to your health and well-being.</p>
+  </div>
+  <div class="doc-list">
+    {% for d in listings %}
+    <article class="doc-profile">
+      <div class="doc-photo">
+        {% if d.photo %}
+          <img src="{{ d.photo.url }}" alt="{{ d.user.get_full_name }}">
+        {% else %}
+          <div class="doc-photo-empty" role="img" aria-label="No photo yet"></div>
+        {% endif %}
+      </div>
+      <div class="doc-info">
+        {% if d.department %}<span class="doc-badge">{{ d.department.name }}</span>{% endif %}
+        <h3>Dr. {{ d.user.get_full_name }}</h3>
+        {% if d.bio %}<p class="doc-bio">{{ d.bio|linebreaksbr }}</p>{% endif %}
+        <a class="doc-book" href="{% url 'appointments:book' %}">
+          <svg class="doc-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
+          Book an Appointment
+          <svg class="doc-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </a>
+      </div>
+    </article>
+    {% empty %}
+    <p class="muted">No doctors are listed yet.</p>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="home-section is-tint" id="services">
+  <div class="section-head">
+    <h2>Services</h2>
+    <p class="section-lead">What you can expect when you visit us.</p>
+  </div>
+  <div class="grid">
+    {% for service in services %}
+      <div class="card">
+        <span class="card-icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.7 2.7L16 9.5"/></svg></span>
+        <h3>{{ service.name }}</h3><p>{{ service.description }}</p>
+      </div>
+    {% empty %}
+      <p>No services to show yet.</p>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="home-section" id="blog">
+  <div class="section-head">
+    <h2>Latest news</h2>
+    <p class="section-lead">Health news and tips, and updates on the development of our hospital.</p>
+  </div>
+  <div class="grid">
+    {% for post in recent_posts %}
+      <div class="card post-card">
+        {% if post.image %}
+          <a class="post-cover-link" href="{% url 'website:blog_detail' post.slug %}" tabindex="-1" aria-hidden="true"><img class="post-cover" src="{{ post.image.url }}" alt="" loading="lazy"></a>
+        {% else %}
+          <div class="post-cover post-cover-empty" aria-hidden="true"></div>
+        {% endif %}
+        <div class="post-body">
+          <p class="meta">{{ post.get_category_display }} &middot; {{ post.published_at|date:"j F Y" }}</p>
+          <h3><a href="{% url 'website:blog_detail' post.slug %}">{{ post.title }}</a></h3>
+          <p>{{ post.summary }}</p>
+        </div>
+      </div>
+    {% empty %}
+      <p>No posts yet.</p>
+    {% endfor %}
+  </div>
+  {% if recent_posts %}<p class="section-more"><a class="btn btn-sm btn-ghost" href="{% url 'website:blog' %}">All posts</a></p>{% endif %}
+</section>
+
+<section class="home-section is-tint" id="contact">
+  <div class="section-head">
+    <h2>Contact hospital management</h2>
+    <p class="section-lead">Ask for help or information, or send us feedback. Our staff will reply by email. For an emergency, call the emergency number or come straight to the hospital; do not use this form.</p>
+  </div>
+  <div class="contact-layout">
+    <div>
+      <form method="post" action="{% url 'website:contact' %}#contact" class="contact" novalidate>
+        {% csrf_token %}
+        {% if form.non_field_errors %}<div class="msg error">{{ form.non_field_errors }}</div>{% endif %}
+        {% for field in form.visible_fields %}
+          {% if field.name == "company" %}
+            <div class="hp" aria-hidden="true">{{ field.label_tag }} {{ field }}</div>
+          {% else %}
+            <p>{{ field.label_tag }} {{ field }}{{ field.errors }}</p>
+          {% endif %}
+        {% endfor %}
+        <p class="meta">We use your details only to reply to you. Please do not send medical records or test results here.</p>
+        <button class="btn" type="submit">Send</button>
+      </form>
     </div>
-  {% endfor %}
-</div>
-<p><a class="btn btn-sm btn-ghost" href="{% url 'website:blog' %}">All posts</a></p>
-{% endif %}
+    <div class="contact-info">
+      <h3>Get in touch</h3>
+      {% if site.address %}<p><strong>Address</strong><br>{{ site.address|linebreaksbr }}</p>{% endif %}
+      {% if site.phone %}<p><strong>Phone</strong><br>{{ site.phone }}</p>{% endif %}
+      {% if site.email %}<p><strong>Email</strong><br>{{ site.email }}</p>{% endif %}
+      {% if site.opening_hours %}<p><strong>Hours</strong><br>{{ site.opening_hours }}</p>{% endif %}
+      {% if site.emergency_phone %}<p class="emergency">Emergency: {{ site.emergency_phone }}</p>{% endif %}
+    </div>
+  </div>
+</section>
 {% endblock %}

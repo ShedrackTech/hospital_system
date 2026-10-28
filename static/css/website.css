@@ -74,6 +74,13 @@ body.public .grid>.card{margin-top:0;border-top:4px solid var(--accent-a);backgr
 .article{max-width:780px;padding:1.6rem 1.8rem;border:1px solid var(--line);border-radius:var(--radius);background:#fff;box-shadow:var(--shadow);line-height:1.75}
 /* ----- pictures: every picture sits in a fixed frame, is cropped to fill it and is never stretched ----- */
 .doctor-photo{display:block;width:100%;aspect-ratio:4/5;object-fit:cover;object-position:50% 22%;border-radius:12px;margin-bottom:.9rem;background:var(--grad)}
+/* ----- doctors: a photo of fixed size beside the details, never a full-width picture ----- */
+.doctor-list{display:grid;gap:1.3rem;margin:1.2rem 0 1.6rem}
+.doctor-card{display:grid;grid-template-columns:210px 1fr;gap:1.6rem;align-items:start;padding:1.1rem;border:1px solid var(--line);border-radius:var(--radius);background:#fff;box-shadow:var(--shadow);animation:rise .6s var(--ease) backwards}
+.doctor-card .doctor-photo{width:210px;margin:0}
+.doctor-tag{display:inline-block;padding:.28rem .8rem;border-radius:999px;background:color-mix(in srgb,var(--accent-b) 14%,#fff);color:var(--ink-b);font-size:.85rem;font-weight:600}
+.doctor-info h3{margin:.6rem 0 .5rem;font-size:1.5rem;line-height:1.2}
+.doctor-info p{margin:.4rem 0;line-height:1.65}
 .doctor-photo-empty{display:grid;place-items:center;color:#fff;font-size:4rem;font-weight:800;letter-spacing:0}
 body.public .grid>.card.post-card{padding:0;overflow:hidden;border-top:0;background-image:none;background-color:#fff;display:flex;flex-direction:column}
 .post-cover-link{display:block;overflow:hidden}
@@ -120,5 +127,148 @@ body.public .page form:not(.contact) button[type=submit]{width:100%;margin-top:.
   .contact-layout{grid-template-columns:1fr}
   .footer-grid{grid-template-columns:1fr;gap:1.4rem;padding-top:2rem}
   .site-name{font-size:.92rem;letter-spacing:.04em}
+  .doctor-card{grid-template-columns:1fr}
+  .doctor-card .doctor-photo{width:100%;max-width:240px}
 }
 @media print{.site-header,.site-footer,.menu-btn{display:none!important}.hero{background:none;color:#000;box-shadow:none}}
+
+
+/* ===== Doctors page v2 ===== */
+/* full-width light band, same technique as .hero */
+body.public .doc-hero{
+  margin:-2rem calc(50% - 50vw) 0;
+  padding:2.2rem calc(50vw - 50%) 1.9rem;
+  background:#e6f1fd;
+}
+/* headings in the theme use gradient text, so the fill must be reset */
+body.public .doc-hero h1{
+  margin:0 0 .35rem;
+  font-size:clamp(2rem,4vw,2.9rem);
+  color:#0b3a82;-webkit-text-fill-color:#0b3a82;background:none;animation:none;
+}
+body.public .doc-hero p{margin:0;color:#5f7ea6;font-size:1.1rem}
+
+body.public .doc-list{display:grid;gap:2.5rem;padding:2.2rem 0 1rem}
+
+/* smaller photo on the left, details on the right */
+body.public .doc-profile{
+  display:grid;
+  grid-template-columns:minmax(200px,320px) 1fr;
+  gap:2rem 3rem;
+  align-items:start;
+}
+body.public .doc-photo{
+  width:100%;
+  aspect-ratio:4/5;          /* same 4:5 frame as DOCTOR_FRAME, never stretched */
+  border-radius:18px;
+  overflow:hidden;
+  background:#e6f1fd;
+  box-shadow:0 10px 28px rgba(11,58,130,.12);
+}
+body.public .doc-photo img{
+  display:block;width:100%;height:100%;
+  object-fit:cover;object-position:50% 22%;
+  margin:0;border-radius:0;
+}
+body.public .doc-photo-empty{width:100%;height:100%;background:linear-gradient(160deg,#cfe3fa,#e6f1fd)}
+
+body.public .doc-badge{
+  display:inline-block;padding:.3rem .8rem;border-radius:8px;
+  background:#d7e8fb;color:#0b4aa8;font-size:.95rem;font-weight:600;
+}
+body.public .doc-info h2{
+  margin:.6rem 0 .75rem;
+  font-size:clamp(1.7rem,3vw,2.4rem);line-height:1.15;
+  color:#0b3a82;-webkit-text-fill-color:#0b3a82;background:none;animation:none;
+}
+body.public .doc-info h2::before{display:none}
+body.public .doc-bio{max-width:60ch;margin:0 0 1.5rem;color:#3f5679;line-height:1.65;font-size:1.05rem}
+
+body.public a.doc-book{
+  display:inline-flex;align-items:center;gap:.6rem;
+  padding:.8rem 1.4rem;border-radius:999px;
+  background:#0b4aa8;color:#fff;font-weight:600;text-decoration:none;
+  box-shadow:0 8px 20px rgba(11,74,168,.28);
+  transition:background .2s,transform .2s;
+}
+body.public a.doc-book:hover{background:#093b88;color:#fff;transform:translateY(-2px)}
+body.public a.doc-book:focus-visible{outline:3px solid #7fb2f0;outline-offset:3px}
+body.public .doc-icon{width:1.15em;height:1.15em;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+@media (max-width:720px){
+  body.public .doc-profile{grid-template-columns:1fr}
+  body.public .doc-photo{max-width:280px}
+}
+
+/* ===== One-page home v1 ===== */
+body.public .home-section{padding:2.6rem 0 .4rem;scroll-margin-top:88px}
+body.public .home-section>h2{margin-top:0;font-size:1.6rem}
+body.public .home-section>.meta{margin:.2rem 0 1rem}
+body.public .home-section .doc-list{padding:1rem 0 0;gap:2.2rem}
+body.public .section-more{margin-top:1rem}
+/* inside the page the doctor name is a level-3 heading */
+body.public .doc-info h3{
+  margin:.6rem 0 .75rem;
+  font-size:clamp(1.5rem,2.6vw,2rem);line-height:1.15;
+  color:#0b3a82;-webkit-text-fill-color:#0b3a82;background:none;animation:none;
+}
+@media (max-width:860px){
+  body.public .home-section{scroll-margin-top:76px}
+}
+
+/* ===== One-page home v2 (polish) ===== */
+
+/* info bar under the hero */
+body.public .quick-bar{position:relative;z-index:2;display:flex;flex-wrap:wrap;align-items:stretch;max-width:1000px;margin:-2.5rem auto 0;background:#fff;border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow-lg);overflow:hidden}
+body.public .quick-item{flex:1 1 190px;display:flex;flex-direction:column;justify-content:center;gap:.1rem;padding:1rem 1.5rem;border-right:1px solid var(--line)}
+body.public .quick-label{font-size:.82rem;color:var(--muted)}
+body.public .quick-item strong{font-size:1.05rem;line-height:1.3;color:var(--ink)}
+body.public .quick-emergency strong{color:#be123c}
+body.public .quick-bar .quick-book{flex:0 0 auto;align-self:center;margin:.8rem 1rem}
+
+/* sections: rhythm through alternating tinted bands that run edge to edge */
+body.public .home-section{padding:3.4rem 0 1.4rem;scroll-margin-top:88px}
+body.public .home-section.is-tint{
+  margin-inline:calc(50% - 50vw);padding-inline:calc(50vw - 50%);padding-bottom:3.4rem;
+  background:linear-gradient(180deg,color-mix(in srgb,var(--accent-b) 8%,#fff),color-mix(in srgb,var(--accent-d) 7%,#fff))}
+body.public .home-section:last-child{margin-bottom:-4rem;padding-bottom:5rem}
+
+/* section headings */
+body.public .section-head{max-width:64ch;margin:0 0 1.6rem}
+body.public .section-head h2{margin:0 0 .5rem;font-size:clamp(1.7rem,1.2rem + 1.6vw,2.25rem);letter-spacing:-.02em;line-height:1.15;color:var(--ink)}
+body.public .section-head h2::before{display:none}
+body.public .section-head h2::after{content:"";display:block;width:56px;height:4px;margin-top:.7rem;border-radius:4px;background:var(--grad)}
+body.public .section-lead{margin:0;color:var(--muted);font-size:1.05rem;line-height:1.6}
+
+/* about */
+body.public #about .article{max-width:860px;padding:1.8rem 2rem;border-left:5px solid var(--accent-a);font-size:1.06rem}
+
+/* department and service cards */
+body.public .home-section .grid>.card:not(.post-card){padding:1.5rem 1.4rem;border-top:0;background:#fff}
+body.public .home-section .grid>.card:not(.post-card) h3{margin:0 0 .4rem;font-size:1.15rem;color:var(--ink)}
+body.public .home-section .grid>.card:not(.post-card) p{margin:0;color:var(--muted);line-height:1.6}
+body.public .card-icon{display:grid;place-items:center;width:46px;height:46px;margin-bottom:.95rem;border-radius:14px;background:var(--grad);color:#fff;box-shadow:0 8px 18px var(--glow)}
+body.public .card-icon svg{display:block}
+
+/* doctor profile card */
+body.public .doc-profile{grid-template-columns:minmax(180px,300px) 1fr;gap:1.6rem 2.4rem;padding:1.4rem;background:#fff;border:1px solid var(--line);border-radius:24px;box-shadow:var(--shadow)}
+body.public .doc-photo{border-radius:18px;box-shadow:none}
+body.public .home-section .doc-list{padding-top:.4rem}
+
+/* contact */
+body.public .contact-layout{grid-template-columns:1.4fr 1fr;gap:1.8rem}
+body.public form.contact{padding:1.8rem}
+body.public .contact-info{padding:1.8rem;border:0;color:#d9f3f7;background:linear-gradient(165deg,#062f3f,#0a5871 50%,#0b7e94);box-shadow:var(--shadow-lg)}
+body.public .contact-info h3{margin:0 0 1rem;font-size:1.25rem;color:#fff}
+body.public .contact-info p{color:#cdeaf0}
+body.public .contact-info strong{color:#fff}
+body.public .contact-info .emergency{background:rgba(225,29,72,.28);color:#ffe3e8;border-color:rgba(255,140,160,.5)}
+
+@media (max-width:860px){
+  body.public .quick-bar{margin-inline:0;border-radius:16px}
+  body.public .quick-item{border-right:0;border-bottom:1px solid var(--line)}
+  body.public .quick-bar .quick-book{flex:1 1 100%;margin:.9rem 1rem}
+  body.public .home-section{padding-top:2.6rem}
+  body.public #about .article{padding:1.4rem 1.3rem}
+  body.public .contact-layout{grid-template-columns:1fr}
+}
