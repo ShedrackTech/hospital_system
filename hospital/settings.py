@@ -7,6 +7,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = config("SECRET_KEY")
 DEBUG = config("DEBUG", default=False, cast=bool)
 ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="127.0.0.1,localhost", cast=Csv())
+CSRF_TRUSTED_ORIGINS = config("CSRF_TRUSTED_ORIGINS", default="", cast=Csv())
 
 # Shown on the public website and on printed results
 HOSPITAL_NAME = config("HOSPITAL_NAME", default="GOOD HEALTH HOSPITAL")
@@ -81,6 +82,8 @@ else:
             "PASSWORD": config("DB_PASSWORD"),
             "HOST": config("DB_HOST", default="localhost"),
             "PORT": config("DB_PORT", default="5432"),
+            # Needed when connecting through a pooler (Supabase)
+            "DISABLE_SERVER_SIDE_CURSORS": True,
         }
     }
 
@@ -138,6 +141,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # Extra security when running in production
 if not DEBUG:
     SECURE_SSL_REDIRECT = True
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
     SECURE_HSTS_SECONDS = 31536000
