@@ -7,7 +7,7 @@ class User(AbstractUser):
     class Role(models.TextChoices):
         MAIN_ADMIN = "main_admin", "Main Admin"
         SUB_ADMIN = "sub_admin", "Sub Admin"
-        DEPARTMENT_HEAD = "department_head", "Department Head"
+        HEAD_OF_DEPARTMENT = "head_of_department", "Head of Department"
         SENIOR_DOCTOR = "senior_doctor", "Senior Doctor"
         DOCTOR = "doctor", "Doctor"
         SENIOR_NURSE = "senior_nurse", "Senior Nurse"
